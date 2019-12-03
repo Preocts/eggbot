@@ -1,0 +1,5 @@
+.env
+egg.log
+base.egg
+*.pem
+*.ppk

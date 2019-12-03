@@ -1,0 +1,11 @@
+#Egg Bot Config file : Last save note - Sample Base File
+#RENAME THIS TO 'base.egg'
+
+@Preocts Place
+	&autowelcomeDM=Hi! You've told me to greet you so I am.  [MENTION] | [USERNAME] | [GUILDNAME] |
+	&autowelcomeDMImage=
+	&autowelcomeChat=Welcome [MENTION]!  This message is just for you :egg:
+	&autowelcomeChatImage=
+	&autowelcomeChannel=eggcarton
+	&announceConnect=true
+	&allowedChatRooms=eggcarton,bot_voice
