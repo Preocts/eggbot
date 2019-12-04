@@ -1,10 +1,11 @@
 # egg_bot 
 # Created by Preocts
-# Version 0.1.3
+# preocts@preocts.com | Preocts#8196 Discord
 # Permissions integer assumed: 502848
-# https://discordapp.com/api/oauth2/authorize?client_id=621083281156472845&permissions=502848&scope=bot
 
+#Addition imports
 import os #Where are we in the OS?
+from sys import argv # 
 import discord #Mother-load of Discord API stuff
 import datetime #Date/Time functions
 import re #regular expressions
@@ -26,6 +27,13 @@ class eggConfigFile:
             return True
         else:
             return False
+            
+    def addGuild(self, name):
+        #returns False if guild exists
+        if self.hasGuild(name):
+            return False
+        self.configFile[name] = []
+        return True
     
     def addConfig(self, guild, config):
         #returns True - adds guild if not found, no warn
@@ -122,7 +130,7 @@ dClient = discord.Client() #dClient becomes our instance of Discord
 TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
 eggConfig = eggConfigFile()
-botVersion = '0.1.3 : Tacky Egg'
+botVersion = '0.2.1 : Soft Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
@@ -130,36 +138,38 @@ botVersion = '0.1.3 : Tacky Egg'
 @dClient.event
 async def on_ready():
     #Added 0.1.1 - Preocts - Output connection details to log
-    logOutput('Egg Laid - Connection Established')
+    logOutput('egg.log', 'Egg hatched! Connection Established!')
+    print('Egg successfully hatched.\nConnection to Discord Established.')
+    print('Available Guilds:')
     for guild in dClient.guilds:
-        logOutput('Connected to ' + str(guild.name) + ' : ' + str(guild.id))
+        print(f'\t{guild}')
+        logOutput('egg.log', 'Connected to ' + str(guild.name) + ' : ' + str(guild.id))
+    print('All futher communication in log file.')
     return
 
 #ON DISCONNECT - connection closed or lost
 @dClient.event
 async def on_disconnect():
     #Added 0.1.1 - Preocts - Output discconects to log
-    logOutput('Egg Dropped - Connection Dropped')
-    #print(f'{dClient.user} has disconnected from Discord!')
+    logOutput('egg.log', 'Egg Dropped - Connection Dropped')
+    print(f'{dClient.user} has disconnected from Discord!')
     return
 
 #ON MESSAGE - Bot Commands
 @dClient.event
 async def on_message(message):
-    #Added 0.0.1 - Preocts - Listens for commands and takes action
-    #Added 0.1.1 - Preocts - Core commands listen for OWNER
-    #                      - Logging
-    #                      - Nay Alert
-    #Change 0.1.2 - Preocts - sendChatMessage()
-    #Change 0.1.2 - Preocts - Control flow by channel type
-    #Removed 0.1.2 - Preocts - Nay Alert (replaced)
-    #Added 0.1.2 - Preocts - Shoulder Bird calls
     
     if message.author == dClient.user: #Are we us? Ew, don't listen
         return
-    
+ 
     #Is this a TextChannel?
     if (str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>'):
+
+        #Set Alert if not configured
+        if not(eggConfig.hasGuild(str(message.guild))):
+            logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + str(message.guild))
+            eggConfig.addGuild(str(message.guild))
+            return
         
         #Shoulder Bird runs
         await shoulderBird(message, 'nay(|omii|o|nay|maii|omaise|onaise)', 'SquidToucher', 'Bleats\' Pasture')
@@ -201,13 +211,13 @@ async def on_message(message):
             
         #Output command log if we ran a command
         if bFoundCommand:
-            logOutput('Ran command: ' + str(message.content) + \
+            logOutput('egg.log', 'Ran command: ' + str(message.content) + \
                 ' | User: ' + str(message.author) + \
                 ' | Guild: ' + str(message.guild) + \
                 ' | Channel: ' + str(message.channel) + \
                 ' | Type: ' + str(message.type))
         else:
-            logOutput('Failed to find command: ' + str(message.content) + \
+            logOutput('egg.log', 'Failed to find command: ' + str(message.content) + \
                 ' | User: ' + str(message.author) + \
                 ' | Guild: ' + str(message.guild) + \
                 ' | Channel: ' + str(message.channel) + \
@@ -224,14 +234,17 @@ async def on_member_join(newMember):
     #Added 0.1.2 - Preocts - Added [MENTION]
     
     #Log action
-    logOutput('on_member_join: ' + str(newMember.display_name) + \
+    logOutput('egg.log', 'on_member_join: ' + str(newMember.display_name) + \
         ' | User: ' + str(newMember.id) + \
         ' | Account Created: ' + str(newMember.created_at) + \
         ' | Guild: ' + str(newMember.guild))
     
     #Exit if not guild is not configured
+        #Set Alert if not configured
+
     if not(eggConfig.hasGuild(str(newMember.guild))):
-        logOutput('ALERT, Guild not found: ' + str(newMember.guild))
+        logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + str(newMember.guild))
+        eggConfig.addGuild(str(message.guild))
         return
     
     #Gather the things
@@ -294,9 +307,10 @@ async def sendChatMessage(dChannel, sMessage, nTime):
     return False
 
 #Log File Output
-def logOutput(outLine):
+def logOutput(fileName, outLine):
     #Added 0.1.1 - Preocts - Writes outLine to egg.log, provides timestamp and new line
-    with open('egg.log','a') as f:
+    #Updated 0.2.1 - Preocts - fileName added
+    with open(fileName,'a') as f:
         f.write(f'{datetime.datetime.now()}  ::  {outLine}\n')
 
 #SHOULDER BIRD
@@ -324,13 +338,23 @@ async def shoulderBird(sMessage, sSearch, sTarget, sSource):
 # ###################################################### #
 #Run the instance of a Client (.run bundles the needed start, connect, and loop)
 
-print ('Attempting to load base config')
+if len(argv) >= 2: #were we given a file to load?
+    inputFile = argv[1]
+else: #no params given
+    inputFile = 'base.egg'
 
-if not(eggConfig.loadConfig('base.egg')):
-    print('Failed loading base.egg. Hatch aborted')
+print (f'Hatch cycle started.\nShell version: {botVersion}')
+print (f'Attempting to load configuration from: {inputFile}')
+if eggConfig.loadConfig(inputFile):
+    print(f'Successfull loaded: {inputFile} \n Continuing hatch cycle...')
+else:
+    print('Invalid or missing file. Hatch aborted!')
+    exit()
 
-print ('Configuration loaded')
-print ('Connecting to the Client now\n')
+print(eggConfig.configFile)
+
+#exit()
+print('Hatching onto Discord now.')
 dClient.run(TOKEN)
 
 #May Bartmoss have mercy on your data for running this bot.
