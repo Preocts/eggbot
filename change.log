@@ -1,5 +1,5 @@
 Change log 0.2.1
-- input parameter for configuration file created.
+- Input parameter for configuration file created.
     + egg_bot.py <filename>
     + if parameter is not provided default is 'base.egg'
 - More verbose console output on launch
@@ -7,7 +7,11 @@ Change log 0.2.1
 - logOutput now takes a fileName arguement - future scope work
 - Updates to eggConfig class
     + addGuild created
-
+- on_chat_message upgrades
+    + Separate handlers for DM chats
+- Tweaked many str(message.guild) to just message.guild.name since that makes more sense
+- sendChatMessage now only sends messages to chat rooms
+- sendDMMessage created to handle all DM traffic
 
 
 Change log 0.1.3

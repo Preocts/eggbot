@@ -162,28 +162,35 @@ async def on_message(message):
     if message.author == dClient.user: #Are we us? Ew, don't listen
         return
  
+    #Is this a DM?
+    #<class 'discord.channel.DMChannel/TextChannel/GroupChannel'>
+    if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
+        await handler_DMChannel(message)
+        return True
+ 
     #Is this a TextChannel?
-    if (str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>'):
+    if str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>':
 
         #Set Alert if not configured
-        if not(eggConfig.hasGuild(str(message.guild))):
-            logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + str(message.guild))
-            eggConfig.addGuild(str(message.guild))
-            return
+        if not(eggConfig.hasGuild(message.guild.name)):
+            logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + message.guild.name)
+            eggConfig.addGuild(message.guild.name)
         
         #Shoulder Bird runs
         await shoulderBird(message, 'nay(|omii|o|nay|maii|omaise|onaise)', 'SquidToucher', 'Bleats\' Pasture')
         await shoulderBird(message, '(pre(|oct|octs)|oct(|s)|egg)', 'Preocts', 'Preocts Place')
         await shoulderBird(message, '(pre(|oct|octs)|oct(|s)|egg)', 'Preocts', 'Bleats\' Pasture')
         
-        #Are we allowed to listen/respond in this room?
-        if not(eggConfig.isAllowedChat(message.guild.name, message.channel.name)):
-            return False
 
-    #COMMANDS
+
+    #COMMANDS - TO BE DELETED
     #This can get messy - idealy few of these or a way to import them
 
-    if message.content[0] == '!':
+    #Are we allowed to listen/respond in this room?
+    if not(eggConfig.isAllowedChat(message.guild.name, message.channel.name)):
+        return False
+
+    if (len(message.content) > 0) and (message.content[0] == '!'):
         bFoundCommand = False
 
         #Version command - Owner Only
@@ -213,13 +220,13 @@ async def on_message(message):
         if bFoundCommand:
             logOutput('egg.log', 'Ran command: ' + str(message.content) + \
                 ' | User: ' + str(message.author) + \
-                ' | Guild: ' + str(message.guild) + \
+                ' | Guild: ' + message.guild.name + \
                 ' | Channel: ' + str(message.channel) + \
                 ' | Type: ' + str(message.type))
         else:
             logOutput('egg.log', 'Failed to find command: ' + str(message.content) + \
                 ' | User: ' + str(message.author) + \
-                ' | Guild: ' + str(message.guild) + \
+                ' | Guild: ' + message.guild.name + \
                 ' | Channel: ' + str(message.channel) + \
                 ' | Type: ' + str(message.type))
         return True
@@ -244,7 +251,7 @@ async def on_member_join(newMember):
 
     if not(eggConfig.hasGuild(str(newMember.guild))):
         logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + str(newMember.guild))
-        eggConfig.addGuild(str(message.guild))
+        eggConfig.addGuild(message.guild.name)
         return
     
     #Gather the things
@@ -284,10 +291,9 @@ async def on_member_join(newMember):
 async def sendChatMessage(dChannel, sMessage, nTime):
     #Added 0.1.2 - Preocts - Handle all Chat Messages
     #Check config permissions
-    #[discord.channel.DMChannel/TextChannel/GroupChannel], [string], <delete after # second>
+    #[discord.channel.TextChannel], [string], <delete after # second>
     #Wrote this Thanksgiving day.  I'm thankful for my partner, Traveldog, who made this possible
     
-    #Text channels have different rules
     if (str(type(dChannel)) == '<class \'discord.channel.TextChannel\'>'):
         #Check to see that we are allowed
         if eggConfig.isAllowedChat(dChannel.guild.name, dChannel.name):
@@ -298,13 +304,19 @@ async def sendChatMessage(dChannel, sMessage, nTime):
             return True
         else:
             return False
-    else: #Private Message - Just do it
-        if nTime > 0:
-            await dChannel.send(sMessage, delete_after=nTime)
-        else:
-            await dChannel.send(sMessage)
-        return True    
     return False
+
+#Send DM Messages
+async def sendDMMessage(dUser, sMessage):
+    #Added 0.2.1 - Preocts - Handle all DM Messages
+    #Check optout List
+    #[discord.channel.DMChannel], [string]
+
+    #ADD Check to see that we are allowed
+    if not(dUser.dm_channel):
+        await dUser.create_dm
+    await dUser.dm_channel.send(str(sMessage))
+    return True
 
 #Log File Output
 def logOutput(fileName, outLine):
@@ -335,6 +347,40 @@ async def shoulderBird(sMessage, sSearch, sTarget, sSource):
         return False
     return False
 
+#Handler for DM Messages
+async def handler_DMChannel(message):
+    #Added 0.2.1 - Preocts - Handles DM commands/chat
+    
+    if len(message.content) <= 0: #Empty content
+        return False
+    
+    #Handle plain text messages
+    if message.content[0] != '!':
+        await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re looking for some social interaction you will need to DM someone else.' + \
+            '\n\nYou can type !help for a list of commands available to you.' + \
+            '\nYou can type !stop and I will only DM you again if you DM me first')
+        return True
+    
+    #Hardcoded Commands
+    contentList = message.content.split(' ')
+    if contentList[0] == '!disconnect' and \
+        str(message.author.id) == str(OWNER):
+        await dClient.close()
+        return
+    if contentList[0] == '!help':
+        await sendDMMessage(message.author, 'Preocts hasn\'t created this part of the program yet. "Soon"')
+        return
+    if contentList[0] == '!stop':
+        await sendDMMessage(message.author, 'Preocts hasn\'t created this part of the program yet. "Soon"' + \
+        '\nIf for some reason the bot is annoying you or you passionately don\'t ever want to see this ' + \
+        'name in your DM list again, contact Preocts#8196 with that request')
+        return
+    if contentList[0] == '!optin':
+        await sendDMMessage(message.author, 'Preocts hasn\'t created this part of the program yet. "Soon"')
+        return
+    await sendDMMessage(message.author, 'That command was not found.')
+    return
+
 # ###################################################### #
 #Run the instance of a Client (.run bundles the needed start, connect, and loop)
 
@@ -350,8 +396,6 @@ if eggConfig.loadConfig(inputFile):
 else:
     print('Invalid or missing file. Hatch aborted!')
     exit()
-
-print(eggConfig.configFile)
 
 #exit()
 print('Hatching onto Discord now.')
