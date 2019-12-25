@@ -10,6 +10,7 @@ import discord #Mother-load of Discord API stuff
 import datetime #Date/Time functions
 import re #regular expressions
 from dotenv import load_dotenv #Specifically to input secret token
+import json #JSON!
 
 #Get our secret token for OAuth
 load_dotenv()
@@ -18,69 +19,66 @@ load_dotenv()
 class eggConfigFile:
     def __init__(self):
         # Dict to hold [GuildName as string : Settings() as list]
-        self.configFile = dict()
+        # 0.2.1 Updated
+        self.guildConfig = {}
+        self.shoulderBird = {}
         self.activeConfig = ''
     
     def hasGuild(self, name):
         #return True if found, False if not
-        if name in self.configFile:
+        #0.2.1 Updated
+        if name in self.guildConfig:
             return True
         else:
             return False
-            
-    def addGuild(self, name):
-        #returns False if guild exists
-        if self.hasGuild(name):
-            return False
-        self.configFile[name] = []
-        return True
-    
-    def addConfig(self, guild, config):
-        #returns True - adds guild if not found, no warn
+
+    def addConfig(self, guild, name, config):
+        #adds config, creates guild if doesn't exist
+        #returns false if config already exists
+        #0.2.1 Updated
         if self.hasGuild(guild):
-            self.configFile[guild].append(config)
+            if name in self.guildConfig[guild]:
+                return False
         else:
-            self.configFile[guild] = [config]
+            self.guildConfig[guild] = {}
+        self.guildConfig[guild][name] = config
         return True
+
+    def editConfig(self, guild, name, config):
+        #edits existing config, true on success
+        #false on missing guild or config name
+        #0.2.1 Updated
+        if self.hasGuild(guild):
+            if name in self.guildConfig[guild]:
+                self.guildConfig[guild][name] = config
+                return True
+        return False
 
     def getConfig(self, guild, name):
-        #return String on success, False if config not set/found
+        #return String on success, False if config/guild not set/found
         if self.hasGuild(guild):
-            for outText in self.configFile[guild]:
-                if name in outText:
-                    return outText.replace(str(name) + '=', '')
-        return False
-        
-    def editConfig(self, guild, name, config):
-        #returns True on success, false on fail
-        if self.hasGuild(guild):
-            for outText in self.configFile[guild]:
-                if name in outText:
-                    self.configFile[guild].remove(outText)
-                    self.configFile[guild].append(str(name) + '=' + config)
-                    return True
+            if name in self.guildConfig[guild]:
+                return self.guildConfig[guild][name]
         return False
     
-    def isAllowedChat(self, guild, name):
-        #returns boolean
+    def isAllowedChat(self, guild, channel):
+        #returns True if we can chat in channel
         if self.hasGuild(guild):
-            if name in self.getConfig(guild, 'allowedChatRooms').split(','):
-                return True
-            else:
-                return False
+            if 'allowedChatRooms' in self.guildConfig[guild]:
+                if channel in self.guildConfig[guild]['allowedChatRooms'].split(','):
+                    return True
+        return False
 
-    def saveConfig(self, fileName, saveNote):
+    def saveConfig(self, fileName):
         #write to provided filename - returns false on all exceptions
         #Console error outputs are ON by default
+        #0.2.1 Updated
+        json_dict = {}
+        json_dict['guildConfig'] = self.guildConfig
+        json_dict['shoulderBird'] = self.shoulderBird
         try:
             with open(fileName, 'w') as f:
-                f.write(f'#Egg Bot Config file : Last save note - {saveNote}')
-                for guildname in self.configFile:
-                    #print(f'> {guildname}')
-                    f.write(f'\n@{guildname}\n')
-                    for config in self.configFile[guildname]:
-                        #print(f'>> {config}')
-                        f.write(f'\t&{config}\n')
+                f.write(json.dumps(json_dict, indent=5))
             return True
         except:
             print(f'[WARN] eggConfigFile.saveConfig - Errored attempting to write file: {fileName} with note: {saveNote}')
@@ -89,36 +87,41 @@ class eggConfigFile:
     def loadConfig(self, fileName):
         #read fileName into class - returns false on all execptions
         #Console outputs are ON by default
+        #0.2.1 Updated
         try:
             with open(fileName) as f:
-                for line in f:
-                    line = line.lstrip(' \t') #Remove leading space/tab               
-                    if len(line) == 0: break
-                    if line[0] == '@':
-                        guildName = line.strip('@\n') #Remove key and trailing CR
-                    elif (line[0] == '&') and ('=' in line): 
-                        fConfig = line.split('=', 1)
-                        fConfig[0] = fConfig[0].strip('& \n')
-                        fConfig[1] = fConfig[1].strip(' \n')
-                        commandSet = '='.join(fConfig)
-                        eggConfig.addConfig(guildName, commandSet)
-            self.activeConfig = fileName
-            return True
+                json_dict = json.load(f)
+                if 'shoulderBird' in json_dict:
+                    self.shoulderBird = json_dict['shoulderBird']
+                    if DEBUG: 
+                        print(f'shoulderBird Config Load:\n{self.shoulderBird}\n')
+                if 'guildConfig' in json_dict:
+                    self.guildConfig = json_dict['guildConfig']
+                    if DEBUG: 
+                        print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
+                self.activeConfig = fileName
+                return True
         except:
             print(f'[WARN] eggConfigFile.loadConfig - Errored attempting to read file: {fileName}')
             return False
 
     def listConfig(self, guild):
+        #returns dict of config for given server, False if none
+        #0.2.1 Updated
         if self.hasGuild(guild):
-            return self.configFile[guild]
+            return self.guildConfig[guild]
         return False
         
     def listActiveConfig(self):
+        #returns class global of loaded config filename
+        #0.2.1 Updated
         return self.activeConfig
         
     def listConfigFiles(self):
+        #returns list of .egg files in working directory
+        #0.2.1 Updated
         result = []
-        for (dirpath, dirnames, filenames) in walk('./'):
+        for (dirpath, dirnames, filenames) in os.walk('./'):
             for file in filenames:
                 if '.egg' in file:
                     result.append(file)
@@ -129,8 +132,9 @@ class eggConfigFile:
 dClient = discord.Client() #dClient becomes our instance of Discord
 TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
+DEBUG = False #console spam control
 eggConfig = eggConfigFile()
-botVersion = '0.2.1 : Soft Egg'
+botVersion = '0.2.1 : Gooey Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
@@ -174,14 +178,12 @@ async def on_message(message):
         #Set Alert if not configured
         if not(eggConfig.hasGuild(message.guild.name)):
             logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + message.guild.name)
-            eggConfig.addGuild(message.guild.name)
+            eggConfig.addConfig(message.guild.name, 'allowedChatRooms', '')
         
         #Shoulder Bird runs
-        await shoulderBird(message, 'nay(|omii|o|nay|maii|omaise|onaise)', 'SquidToucher', 'Bleats\' Pasture')
+        await shoulderBird(message, 'nay(|omii|o|nay|maii|omaise|onaise|may)', 'SquidToucher', 'Bleats\' Pasture')
         await shoulderBird(message, '(pre(|oct|octs)|oct(|s)|egg)', 'Preocts', 'Preocts Place')
         await shoulderBird(message, '(pre(|oct|octs)|oct(|s)|egg)', 'Preocts', 'Bleats\' Pasture')
-        
-
 
     #COMMANDS - TO BE DELETED
     #This can get messy - idealy few of these or a way to import them
@@ -251,7 +253,7 @@ async def on_member_join(newMember):
 
     if not(eggConfig.hasGuild(str(newMember.guild))):
         logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + str(newMember.guild))
-        eggConfig.addGuild(message.guild.name)
+        eggConfig.addConfig(newMember.guild.name, 'allowedChatRooms', '')
         return
     
     #Gather the things
@@ -398,6 +400,7 @@ else:
     exit()
 
 #exit()
+
 print('Hatching onto Discord now.')
 dClient.run(TOKEN)
 
