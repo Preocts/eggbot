@@ -1,0 +1,26 @@
+{
+    "shoulderBird": {
+        "Guild Name Here": {
+                "User name" : "regexSearch",
+                "Other name" : "regexSearch"
+        }
+    },
+    "guildConfig": {
+        "Guild Name Here": {
+            "autowelcomeDM" : "Hi! This is sent to your DM when you join [GUILDNAME]",
+            "autowelcomeDMImage" : "",
+            "autowelcomeChat" : "Welcome [MENTION], This is posted in the Welcome channel below when you join :egg:",
+            "autowelcomeChatImage" : "",
+            "autowelcomeChannel" : "general",
+            "allowedChatRooms" : "general"
+        },
+        "Another Guild Here": {
+            "autowelcomeDM" : "Hi! This is sent to your DM when you join [GUILDNAME]",
+            "autowelcomeDMImage" : "",
+            "autowelcomeChat" : "Welcome [MENTION], This is posted in the Welcome channel below when you join :egg:",
+            "autowelcomeChatImage" : "",
+            "autowelcomeChannel" : "general",
+            "allowedChatRooms" : "general"
+        }
+    }
+}

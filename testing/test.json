@@ -1,0 +1,17 @@
+{
+    "shoulderBird":[
+        {
+            "Bleat's Pasture":[
+                {
+                    "Preocts" : "(pre(|oct|octs)|oct(|s)|egg)",
+                    "SquidToucher" : "nay(|omii|o|nay|maii|omaise|onaise|may)"
+                }
+            ],
+            "Preocts Place":[
+                {
+                    "Preocts" : "(pre(|oct|octs)|oct(|s)|egg)"
+                }
+            ]
+        }
+    ]
+}

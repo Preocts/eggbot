@@ -1,5 +1,5 @@
 .env
 egg.log
-base.egg
+preocts.*
 *.pem
 *.ppk

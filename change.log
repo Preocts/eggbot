@@ -1,3 +1,28 @@
+Change log 0.2.1
+- Input parameter for configuration file created.
+    + egg_bot.py <filename>
+    + if parameter is not provided default is 'base.egg'
+- More verbose console output on launch
+- More egg references
+- logOutput now takes a fileName arguement - future scope work
+- Updates to eggConfig class
+    + addGuild created
+- on_chat_message upgrades
+    + Separate handlers for DM chats
+- Tweaked many str(message.guild) to just message.guild.name since that makes more sense
+- sendChatMessage now only sends messages to chat rooms
+- sendDMMessage created to handle all DM traffic
+- Config file refactor
+    + using JSON now to store configs
+    + implimented configs: Guild Configs, Shoulder Bird
+    + planned configs: Sass Back, Custom !commands, OptOut List
+- Class changes
+    + addGuild removed (didn't last long)
+    + Refactor to use JSON
+    + addConfig parameter change
+- Code Changes:
+    + instances of .addGuild changed to .addConfig
+
 Change log 0.1.3
 - renamed class eggINI to eggConfig
     - renamed dict iniFile to configFile
@@ -6,6 +31,8 @@ Change log 0.1.3
     + loadConfig, saveConfig, listConfig, listActiveFile, listConfigFiles : created
     + Smarter return values for error handling
 - Bot now attempts to load 'base.egg' and fails if not found
+- Known bug - Bots don't like greeting other bots (sending DMs)
+- Known bug - setting an image file for greetings and not having the image causes an ungraceful exception
 
 Change log 0.1.2
 - Added support for Keyword to config file
