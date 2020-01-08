@@ -1,3 +1,29 @@
+Change log 0.2.2
+- torn apart on_message
+    + Shoulder Bird gets its own def
+    + Commands go to their own def
+    + Chat messages and DM message breifly had their own def
+    + Handles Chat and DM messages differently
+- handler_Commands def created
+- "botCommands" section added to json config
+    + botCommands{} -> GuildName{} -> CommandName{} -> CommandConfigs{}
+- created handler_ChatMessage and handler_DMMessage
+- deleted handler_ChatMessage and handler_DMMessage
+- Questioned my sanity
+- Class addtions
+    + botCommands dict
+    + getCommand(GuildName, CommandName) - returns dict of configs. returns False if not found
+    + putCommand(GuildName, FullChatLine) 
+        - sets command, does all the parsing needed (send discord.py message.content)
+        - will override existing commands - allows for update/editing easier
+        - e!command [commandname] < | option = option value | option2 = option2 value >
+    + delCommand(GuildName, CommandName) - deletes given command
+
+- Completely rewrote on_message def, again.  This time it's solid
+    - Missing shoulder bird call
+
+
+
 Change log 0.2.1
 - Input parameter for configuration file created.
     + egg_bot.py <filename>
