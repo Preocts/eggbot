@@ -1,19 +1,22 @@
-# egg_bot 
-# Created by Preocts
-# preocts@preocts.com | Preocts#8196 Discord
-# Permissions integer assumed: 502848
+"""
+Egg Bot, Discord Util Bot
 
-#Addition imports
+Created by Preocts
+preocts@preocts.com | Preocts#8196 Discord
+Permissions integer assumed: 502848
+
+https://github.com/Preocts/Egg_Bot
+
+"""
+
+#Additional imports
 import os #Where are we in the OS?
-from sys import argv # 
+from sys import argv #command line import
 import discord #Mother-load of Discord API stuff
 import datetime #Date/Time functions
 import re #regular expressions
 from dotenv import load_dotenv #Specifically to input secret token
 import json #JSON!
-
-#Get our secret token for OAuth
-load_dotenv()
 
 #Class Def
 class eggConfigFile:
@@ -171,27 +174,27 @@ class eggConfigFile:
                 json_dict = json.load(f)
                 if 'shoulderBird' in json_dict:
                     self.shoulderBird = json_dict['shoulderBird']
-                    if DEBUG: 
-                        print(f'shoulderBird Config Load:\n{self.shoulderBird}\n')
+                    if DEBUG: print(f'shoulderBird Config Load:\n{self.shoulderBird}\n')
                 if 'guildConfig' in json_dict:
                     self.guildConfig = json_dict['guildConfig']
-                    if DEBUG: 
-                        print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
+                    if DEBUG: print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
                 if 'botCommands' in json_dict:
                     self.botCommands = json_dict['botCommands']
-                    if DEBUG: 
-                        print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
+                    if DEBUG: print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
                 self.activeConfig = fileName
                 return True
         except:
             print(f'[WARN] eggConfigFile.loadConfig - Errored attempting to read file: {fileName}')
             return False
 
+#Get our secret token for OAuth
+load_dotenv()
+
 #Globals
 dClient = discord.Client() #dClient becomes our instance of Discord
 TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
-DEBUG = False #console spam control
+DEBUG = True #console spam control
 eggConfig = eggConfigFile()
 botVersion = '0.2.2 : Gooey Egg'
 
@@ -239,6 +242,7 @@ async def on_message(message):
             logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + message.guild.name)
             #Set Guild into loaded config to stop multiple alerts
             eggConfig.addConfig(message.guild.name, 'allowedChatRooms', '')
+            
         cmdDict = eggConfig.getCommand(message.guild.name, message.content.split()[0].strip(' '))
         #SHOULDER BIRD CALL HERE
 
@@ -254,7 +258,7 @@ async def on_message(message):
         if str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>':
             
             if ('channels' in cmdDict) and (not(message.channel.name in cmdDict['channels']) and (len(cmdDict['channels']) > 0)):
-                print('Failed Channel')
+                if DEBUG: print('Failed Channel')
                 return False
             
             #Roles live in a discord.py formated list so we need to step through it
@@ -262,15 +266,18 @@ async def on_message(message):
                 roleList = []
                 for roles in message.author.roles:
                     roleList.append(roles.name)
+                
                 #set math. Set1 - Set2 = Set3. If Set1 = Set3 we didn't remove anything so no matching roles found
-                if (list(set(roleList) - set(cmdDict['roles'].split(', '))) == roleList) and (len(cmdDict['roles']) > 0):
-                    print('Failed Roles')
+                #set() arranges the list differently! Compare set to set, don't convert back to list
+                if (set(roleList) - set(cmdDict['roles'].split(', ')) == set(roleList)) and (len(cmdDict['roles']) > 0):
+                    if DEBUG: print('Failed Roles')
                     return False
 
-        #Checks Users (both chat and DM)
+        #Checks Users (both chat and DM) THIS DOESN'T WORK!
+        
         if ('users' in cmdDict) and (not(message.author.name in cmdDict['users']) and (len(cmdDict['users']) > 0)):
-            print(f'User can run this: {message.author.name}')
-            #return False
+            if DEBUG: print(f'User can run this: {message.author.name}')
+            return False
         
         #content = output to discord client - do this first
         if ('content' in cmdDict) and (len(cmdDict['content']) > 0):
@@ -281,22 +288,25 @@ async def on_message(message):
 
         #Action = pre-defined actions to take in code - do this last
         if ('action' in cmdDict) and (len(cmdDict['action']) > 0):
+            
+            #Set cmdGuild to avoid object has no attribute for 'name' in DM channels
             if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
                 cmdGuild = ''
             else:
                 cmdGuild = message.guild.name
                 
+            #Disconnect the bot
             if cmdDict['action'] == 'disconnect':
                 await dClient.close()
+            
+            #Create a new command
             if cmdDict['action'] == 'edit-command':
                 if eggConfig.putCommand(cmdGuild, message.content):
-                    print('Command created')
+                    if DEBUG: print('Command created')
                     eggConfig.saveConfig('test.egg')
                 else:
-                    print('Command not created')
-                
-                
-        
+                    if DEBUG: print('Command not created')
+
         return True
 
     #DM only condition - prompt user they are speaking to a bot
@@ -418,6 +428,7 @@ async def shoulderBird(sMessage, sSearch, sTarget, sSource):
         return False
     return False
 
+"""
 #Handler for DM Messages
 async def handler_Commands(message):
     #Added 0.2.2 - Preocts - Custom Commands
@@ -462,6 +473,7 @@ async def handler_Commands(message):
     return True
  
     return False
+"""
 
 # ###################################################### #
 #Run the instance of a Client (.run bundles the needed start, connect, and loop)

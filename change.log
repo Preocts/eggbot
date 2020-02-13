@@ -4,7 +4,6 @@ Change log 0.2.2
     + Commands go to their own def
     + Chat messages and DM message breifly had their own def
     + Handles Chat and DM messages differently
-- handler_Commands def created
 - "botCommands" section added to json config
     + botCommands{} -> GuildName{} -> CommandName{} -> CommandConfigs{}
 - created handler_ChatMessage and handler_DMMessage
@@ -18,8 +17,7 @@ Change log 0.2.2
         - will override existing commands - allows for update/editing easier
         - e!command [commandname] < | option = option value | option2 = option2 value >
     + delCommand(GuildName, CommandName) - deletes given command
-
-- Completely rewrote on_message def, again.  This time it's solid
+- Completely refactored on_message def, again.  This time it's solid (er)
     - Missing shoulder bird call
 
 
