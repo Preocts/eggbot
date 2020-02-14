@@ -11,7 +11,8 @@ Change log 0.2.2
 - Questioned my sanity
 - Class addtions
     + botCommands dict
-    + getCommand(GuildName, CommandName) - returns dict of configs. returns False if not found
+    + listCommand(GuildName) - returns list of command names set in Guild
+    + getCommand(GuildName, CommandName) - returns dict of specific command
     + putCommand(GuildName, FullChatLine) 
         - sets command, does all the parsing needed (send discord.py message.content)
         - will override existing commands - allows for update/editing easier
@@ -19,7 +20,11 @@ Change log 0.2.2
     + delCommand(GuildName, CommandName) - deletes given command
 - Completely refactored on_message def, again.  This time it's solid (er)
     - Missing shoulder bird call
-
+- Command actions defined:
+    + 'edit-command' : used for create/edit of commands
+    + 'show-command' : used to return the same string used to config a command
+    + 'delete-command' : used to delete a command from the guild/DM
+    + 'list-command' : used to return a list of all commands in guild/DM
 
 
 Change log 0.2.1

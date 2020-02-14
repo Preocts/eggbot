@@ -95,7 +95,19 @@ class eggConfigFile:
                     result.append(file)
             break
         return result
+
     #   botCommands
+    def listCommand(self, cmdGuild):
+        #Returns list of command names for Guild
+        if len(cmdGuild) <= 0: return False
+        
+        if cmdGuild in self.botCommands:
+            cmdList = []
+            for c in self.botCommands[cmdGuild]:
+                cmdList.append(c)
+            return str(cmdList)
+        return False        
+
     def getCommand(self, cmdGuild, cmdName):
         #Returns dict of command if found
         if len(cmdName) <= 0:
@@ -273,10 +285,10 @@ async def on_message(message):
                     if DEBUG: print('Failed Roles')
                     return False
 
-        #Checks Users (both chat and DM) THIS DOESN'T WORK!
+        #Checks Users (both chat and DM)
         
-        if ('users' in cmdDict) and (not(message.author.name in cmdDict['users']) and (len(cmdDict['users']) > 0)):
-            if DEBUG: print(f'User can run this: {message.author.name}')
+        if ('users' in cmdDict) and (not(message.author.name in cmdDict['users'].split(', ')) and (len(cmdDict['users']) > 0)):
+            if DEBUG: print(f'User can not run this: {message.author.name}')
             return False
         
         #content = output to discord client - do this first
@@ -306,6 +318,41 @@ async def on_message(message):
                     eggConfig.saveConfig('test.egg')
                 else:
                     if DEBUG: print('Command not created')
+            
+            #Delete a command
+            if cmdDict['action'] == 'delete-command':
+                if eggConfig.delCommand(cmdGuild, message.content.split()[1]):
+                    if DEBUG: print('Command deleted')
+                    eggConfig.saveConfig('test.egg')
+                else:
+                    if DEBUG: print('Command not deleted')
+
+            #Spit out a command into chat (full config)
+            if cmdDict['action'] == 'get-command':
+                if eggConfig.getCommand(cmdGuild, message.content.split()[1]):
+                    if DEBUG: print('Showing command')
+                    outMessage = message.content.split()[1]
+                    for o in eggConfig.getCommand(cmdGuild, message.content.split()[1]):
+                        outMessage += ' | ' + o + ' = ' + eggConfig.getCommand(cmdGuild, message.content.split()[1])[o]
+                        
+                    if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
+                        await sendDMMessage(message.author, outMessage)
+                    else:
+                        await sendChatMessage(message.channel, outMessage, 0)
+                else:
+                    if DEBUG: print('Command not found')
+
+            #Spit out all commands for guild
+            if cmdDict['action'] == 'list-command':
+                if eggConfig.listCommand(cmdGuild):
+                    if DEBUG: print('Showing all commands')
+                    if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
+                        await sendDMMessage(message.author, eggConfig.listCommand(cmdGuild))
+                    else:
+                        await sendChatMessage(message.channel, eggConfig.listCommand(cmdGuild), 0)
+                else:
+                    if DEBUG: print('Command not found')
+            
 
         return True
 
@@ -478,23 +525,25 @@ async def handler_Commands(message):
 # ###################################################### #
 #Run the instance of a Client (.run bundles the needed start, connect, and loop)
 
-if len(argv) >= 2: #were we given a file to load?
-    inputFile = argv[1]
-else: #no params given
-    inputFile = 'base.egg'
+if __name__ == '__main__':
 
-print (f'Hatch cycle started.\nShell version: {botVersion}')
-print (f'Attempting to load configuration from: {inputFile}')
-if eggConfig.loadConfig(inputFile):
-    print(f'Successfull loaded: {inputFile} \n Continuing hatch cycle...')
-else:
-    print('Invalid or missing file. Hatch aborted!')
-    exit()
+    if len(argv) >= 2: #were we given a file to load?
+        inputFile = argv[1]
+    else: #no params given
+        inputFile = 'base.egg'
 
-#exit()
+    print (f'Hatch cycle started.\nShell version: {botVersion}')
+    print (f'Attempting to load configuration from: {inputFile}')
+    if eggConfig.loadConfig(inputFile):
+        print(f'Successfull loaded: {inputFile} \n Continuing hatch cycle...')
+    else:
+        print('Invalid or missing file. Hatch aborted!')
+        exit()
 
-print('Hatching onto Discord now.')
-dClient.run(TOKEN)
+    #exit()
+
+    print('Hatching onto Discord now.')
+    dClient.run(TOKEN)
 
 #May Bartmoss have mercy on your data for running this bot.
 #We are all only eggs
