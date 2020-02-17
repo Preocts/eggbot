@@ -95,6 +95,53 @@ class eggConfigFile:
                     result.append(file)
             break
         return result
+    
+    #   ShoulderBird
+    def getBirds(self, guildname):
+        """
+        Guild specifc
+        Returns a dict of user configs for ShoulderBird by guildname
+        Returns false if not found
+        """
+        #Do we have this guild setup and is there anything there?
+        if (guildname in self.shoulderBird) and len(self.shoulderBird[guildname]):
+            return self.shoulderBird[guildname]
+
+        return False 
+    
+    def getBird(self, guildname, username):
+        """
+        User specific
+        Returns a dict of user config for ShoulderBird by guildname
+        Returns false if not found
+        """
+        #Do we have this guild setup and is there anything there?
+        if (guildname in self.shoulderBird) and len(self.shoulderBird[guildname]):
+            if username in self.shoulderBird[guildname]:
+                return self.shoulderBird[guildname][username]
+
+        return False
+
+    def putBird(self, guildname, username, regex):
+        """
+        Creates or replaces a user's settings for a given guild
+        Will create the guild listing if unset
+        """
+        #Literally just assign is. No gaurdrails at this time
+        self.shoulderBird[guildname] = {username : regex}
+
+        return True
+
+    def delBird(self, guildname, username):
+        """
+        Deletes an entry.
+        Returns false if not found
+        """
+        if guildname in self.shoulderBird:
+            if username in self.shoulderBird[guildname]:
+                del self.shoulderBird[guildname][username]
+                return True
+        return False
 
     #   botCommands
     def listCommand(self, cmdGuild):
@@ -256,41 +303,22 @@ async def on_message(message):
             eggConfig.addConfig(message.guild.name, 'allowedChatRooms', '')
             
         cmdDict = eggConfig.getCommand(message.guild.name, message.content.split()[0].strip(' '))
-        #SHOULDER BIRD CALL HERE
+        
+        #Does ShoulderBird have a listing for this guild?
+        nest = eggConfig.getBirds(message.guild.name)
+        if nest:
+            #Send this to the bird!
+            for bird in nest:
+                await shoulderBird(message, nest[bird], bird)
 
-    #exit on GroupChannels
-    elif str(type(message.channel)) == '<class \'discord.channel.GroupChannel\'>':
+    #exit on GroupChannels or anything unexpected
+    else:
         return False
 
-    #Finish anything with on_message above this line. Command handling STOPS on a failed check.
     #If we found a command, handle it
-    if cmdDict:
+    #Check permissions to confirm this command can be run
+    if cmdDict and commandPermsCheck(message, cmdDict):
 
-        #Checks exclusive for Chat: Channels and Roles
-        if str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>':
-            
-            if ('channels' in cmdDict) and (not(message.channel.name in cmdDict['channels']) and (len(cmdDict['channels']) > 0)):
-                if DEBUG: print('Failed Channel')
-                return False
-            
-            #Roles live in a discord.py formated list so we need to step through it
-            if ('roles' in cmdDict):
-                roleList = []
-                for roles in message.author.roles:
-                    roleList.append(roles.name)
-                
-                #set math. Set1 - Set2 = Set3. If Set1 = Set3 we didn't remove anything so no matching roles found
-                #set() arranges the list differently! Compare set to set, don't convert back to list
-                if (set(roleList) - set(cmdDict['roles'].split(', ')) == set(roleList)) and (len(cmdDict['roles']) > 0):
-                    if DEBUG: print('Failed Roles')
-                    return False
-
-        #Checks Users (both chat and DM)
-        
-        if ('users' in cmdDict) and (not(message.author.name in cmdDict['users'].split(', ')) and (len(cmdDict['users']) > 0)):
-            if DEBUG: print(f'User can not run this: {message.author.name}')
-            return False
-        
         #content = output to discord client - do this first
         if ('content' in cmdDict) and (len(cmdDict['content']) > 0):
             if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
@@ -352,8 +380,6 @@ async def on_message(message):
                         await sendChatMessage(message.channel, eggConfig.listCommand(cmdGuild), 0)
                 else:
                     if DEBUG: print('Command not found')
-            
-
         return True
 
     #DM only condition - prompt user they are speaking to a bot
@@ -454,73 +480,54 @@ def logOutput(fileName, outLine):
         f.write(f'{datetime.datetime.now()}  ::  {outLine}\n')
 
 #SHOULDER BIRD
-async def shoulderBird(sMessage, sSearch, sTarget, sSource):
+async def shoulderBird(sMessage, sSearch, sTarget):
     #Added 0.1.2 - Preocts - Start to create flexible bird
-    #Searches sMessage for regEx(sSearch) and alerts sTarget if found from sSource
+    #Searches sMessage for regEx(sSearch) and alerts sTarget if found
 
-    if (sMessage.guild.name == sSource):
-        findRg = re.compile(r'{}\b'.format(sSearch), re.I)
-        found = findRg.search(sMessage.content)
-        if found:
-            BIRD = discord.utils.get(sMessage.guild.members, name=sTarget)
-            #Only a few know why this is called BIRD. <3 
-            if not(BIRD):
-                return False
-            await BIRD.create_dm()
-            await BIRD.dm_channel.send('Mention alert: **' + \
-                str(sMessage.author.display_name) + \
-                '** mentioned you in **' + str(sMessage.channel) + \
-                '** saying: \n`' + sMessage.content + '`')
-            return True
-        return False
+    findRg = re.compile(r'{}\b'.format(sSearch), re.I)
+    found = findRg.search(sMessage.content)
+    if found:
+        BIRD = discord.utils.get(sMessage.guild.members, name=sTarget)
+        #Only a few know why this is called BIRD. <3 
+        if not(BIRD):
+            return False
+        await BIRD.create_dm()
+        await BIRD.dm_channel.send('Mention alert: **' + \
+            str(sMessage.author.display_name) + \
+            '** mentioned you in **' + str(sMessage.channel) + \
+            '** saying: \n`' + sMessage.content + '`')
+        return True
     return False
 
-"""
-#Handler for DM Messages
-async def handler_Commands(message):
-    #Added 0.2.2 - Preocts - Custom Commands
-    #Returns Fales if not found, Returns output value if found
-    
-    contentList = message.content.split(' ')
-    
-    #Owener Only Commands
-    if contentList[0] == '!disconnect' and \
-        str(message.author.id) == str(OWNER):
-        await dClient.close()
-        return
+
+def commandPermsCheck(message, cmdDict):
+    #Checks exclusive for Chat: Channels and Roles
+    if str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>':
         
-    #DM Global Commands
-    if contentList[0] == '!stop':
-        await sendDMMessage(message.author, 'Preocts hasn\'t created this part of the program yet. "Soon"' + \
-        '\nIf for some reason the bot is annoying you or you passionately don\'t ever want to see this ' + \
-        'name in your DM list again, contact Preocts#8196 with that request')
-        return
-    if contentList[0] == '!optin':
-        await sendDMMessage(message.author, 'Preocts hasn\'t created this part of the program yet. "Soon"')
-        return
-    if contentList[0] == '!help':
-        await sendDMMessage(message.author, 'Preocts hasn\'t created this part of the program yet. "Soon"')
-        return
+        #If the channel is not in 'channels' then fail. Blank/unset 'channels' means any are allowed
+        if ('channels' in cmdDict) and (not(message.channel.name in cmdDict['channels']) and (len(cmdDict['channels']) > 0)):
+            if DEBUG: print('Failed Channel')
+            return False
+        
+        #If the user role is not in 'roles' then fail. Blank/unset 'roles' means any are allowed
+        #Roles live in a discord.py formated list so we need to step through it
+        if ('roles' in cmdDict):
+            roleList = []
+            for roles in message.author.roles:
+                roleList.append(roles.name)
+            
+            #Use a set to compare since a user can have many roles and many roles can be defined in the config
+            #set math. Set1 - Set2 = Set3. If Set1 = Set3 we didn't remove anything so no matching roles found
+            #set() arranges the list differently! Compare set to set, don't convert back to list
+            if (set(roleList) - set(cmdDict['roles'].split(', ')) == set(roleList)) and (len(cmdDict['roles']) > 0):
+                if DEBUG: print('Failed Roles')
+                return False
 
-    await sendDMMessage(message.author, 'That command was not found.')
-  
-    #Output command log if we ran a command
-    if bFoundCommand:
-        logOutput('egg.log', 'Ran command: ' + str(message.content) + \
-            ' | User: ' + str(message.author) + \
-            ' | Guild: ' + message.guild.name + \
-            ' | Channel: ' + str(message.channel) + \
-            ' | Type: ' + str(message.type))
-    else:
-        logOutput('egg.log', 'Failed to find command: ' + str(message.content) + \
-            ' | User: ' + str(message.author) + \
-            ' | Guild: ' + message.guild.name + \
-            ' | Channel: ' + str(message.channel) + \
-            ' | Type: ' + str(message.type))
+    #If the user is not listed in 'users' (case-sensitive) then fail. Blank/unset 'users' means any are allowed
+    if ('users' in cmdDict) and (not(message.author.name in cmdDict['users'].split(', ')) and (len(cmdDict['users']) > 0)):
+        if DEBUG: print(f'User can not run this: {message.author.name}')
+        return False
     return True
- 
-    return False
-"""
 
 # ###################################################### #
 #Run the instance of a Client (.run bundles the needed start, connect, and loop)

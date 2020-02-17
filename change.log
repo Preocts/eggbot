@@ -1,5 +1,5 @@
 Change log 0.2.2
-- torn apart on_message
+- tore apart (refactored) on_message
     + Shoulder Bird gets its own def
     + Commands go to their own def
     + Chat messages and DM message breifly had their own def
@@ -18,6 +18,7 @@ Change log 0.2.2
         - will override existing commands - allows for update/editing easier
         - e!command [commandname] < | option = option value | option2 = option2 value >
     + delCommand(GuildName, CommandName) - deletes given command
+- TWO MONTHS LATER
 - Completely refactored on_message def, again.  This time it's solid (er)
     - Missing shoulder bird call
 - Command actions defined:
@@ -25,7 +26,16 @@ Change log 0.2.2
     + 'show-command' : used to return the same string used to config a command
     + 'delete-command' : used to delete a command from the guild/DM
     + 'list-command' : used to return a list of all commands in guild/DM
-
+- Class updates:
+    + 'getBird' : returns a specifc user's ShoulderBird search
+    + 'getBirds' : returns a guild's dict of ShoulderBird searches
+    + 'putBird' : create/update a user's search (adds guild if missing)
+    + 'delBird' : deletes a user's entry.  Why would you do this?
+- Command permissions (users/channels/roles) now work
+- No way to remove a permission once set, this will be backlogged
+    + Work-around now is to delete the command and recreate it
+- Command have no guardrails. You can delete the only command allowing edits/creates
+    + No work-around. Backlogged for enhancements
 
 Change log 0.2.1
 - Input parameter for configuration file created.
