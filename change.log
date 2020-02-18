@@ -1,3 +1,44 @@
+Change log 0.2.2
+- tore apart (refactored) on_message
+    + Shoulder Bird gets its own def
+    + Commands go to their own def
+    + Chat messages and DM message breifly had their own def
+    + Handles Chat and DM messages differently
+- "botCommands" section added to json config
+    + botCommands{} -> GuildName{} -> CommandName{} -> CommandConfigs{}
+- created handler_ChatMessage and handler_DMMessage
+- deleted handler_ChatMessage and handler_DMMessage
+- Questioned my sanity
+- Class addtions
+    + botCommands dict
+    + listCommand(GuildName) - returns list of command names set in Guild
+    + getCommand(GuildName, CommandName) - returns dict of specific command
+    + putCommand(GuildName, FullChatLine) 
+        - sets command, does all the parsing needed (send discord.py message.content)
+        - will override existing commands - allows for update/editing easier
+        - e!command [commandname] < | option = option value | option2 = option2 value >
+    + delCommand(GuildName, CommandName) - deletes given command
+- TWO MONTHS LATER
+- Completely refactored on_message def, again.  This time it's solid (er)
+    - Missing shoulder bird call
+- Command actions defined:
+    + 'edit-command' : used for create/edit of commands
+    + 'show-command' : used to return the same string used to config a command
+    + 'delete-command' : used to delete a command from the guild/DM
+    + 'list-command' : used to return a list of all commands in guild/DM
+- Class updates:
+    + 'getBird' : returns a specifc user's ShoulderBird search
+    + 'getBirds' : returns a guild's dict of ShoulderBird searches
+    + 'putBird' : create/update a user's search (adds guild if missing)
+    + 'delBird' : deletes a user's entry.  Why would you do this?
+- Command permissions (users/channels/roles) now work
+- No way to remove a permission once set, this will be backlogged
+    + Work-around now is to delete the command and recreate it
+- Command have no guardrails. You can delete the only command allowing edits/creates
+    + No work-around. Backlogged for enhancements
+- Updated base.egg to show some default commands
+- Updated README.md - the struggle is real
+
 Change log 0.2.1
 - Input parameter for configuration file created.
     + egg_bot.py <filename>
