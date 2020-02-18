@@ -16,8 +16,10 @@ Contact **Preocts#8196** on Discord for more info
 ## .env
 Running this program requires you to create and define your own .env file with two keys.
 
-    DISCORD_TOKEN={API Secret Here}
-    BOT_OWNER={Your Discord ID here}
+```
+DISCORD_TOKEN={API Secret Here}
+BOT_OWNER={Your Discord ID here}
+```
 
 ----
 ## base.egg
@@ -65,16 +67,16 @@ Options that do things in botCommands:
 
 **Actions**
 - disconnect : Shuts connection down
- - *Can **only** be run by userID that matches BOT_OWNER in .env file regardless of options*
+  - *Can **only** be run by userID that matches BOT_OWNER in .env file regardless of options*
 
 - edit-command : Creates or updates given command
- - *!trigger {Command Name} | {option1 = value} | {option2 = value} | {optionN = value}*
+  - *!trigger {Command Name} | {option1 = value} | {option2 = value} | {optionN = value}*
 
 - delete-command : Deletes given command
- - *!trigger {Command Name}*
+  - *!trigger {Command Name}*
 
 - get-command : Outputs the command in the same format it was created. Use this for copy/pasting commands or remembering how to format them
- - *!trigger {Command Name}*
+  - *!trigger {Command Name}*
 
 - list-command : Lists all commands in guild.
- - *!trigger {Command Name}*
+  - *!trigger {Command Name}*
