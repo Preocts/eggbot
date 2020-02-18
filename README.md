@@ -47,8 +47,9 @@ Options that do things in guildConfig:
 - This will search all incoming chats that the bot can see and look for the Regex expression
 - If Regex finds a match, the chat is DM'ed to the User Name defined
 
-    Mention alert: AuthorName mentioned you in ChannelName saying:
-    I don't want to @ Preocts
+>Mention alert: AuthorName mentioned you in ChannelName saying:
+
+>I don't want to @ Preocts
 
 ###botCommands { "Guild name" : { "Trigger": { "Options" } } }
 
