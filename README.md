@@ -1,4 +1,4 @@
-#Egg Bot
+# Egg Bot
 
 ----
 ## Custom Discord Chat Bot
