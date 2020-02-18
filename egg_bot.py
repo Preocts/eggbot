@@ -253,7 +253,7 @@ load_dotenv()
 dClient = discord.Client() #dClient becomes our instance of Discord
 TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
-DEBUG = True #console spam control
+DEBUG = False #console spam control
 eggConfig = eggConfigFile()
 botVersion = '0.2.2 : Gooey Egg'
 
