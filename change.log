@@ -36,6 +36,8 @@ Change log 0.2.2
     + Work-around now is to delete the command and recreate it
 - Command have no guardrails. You can delete the only command allowing edits/creates
     + No work-around. Backlogged for enhancements
+- Updated base.egg to show some default commands
+- Updated README.md - the struggle is real
 
 Change log 0.2.1
 - Input parameter for configuration file created.

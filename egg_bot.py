@@ -218,7 +218,7 @@ class eggConfigFile:
         json_dict['botCommands'] = self.botCommands
         try:
             with open(fileName, 'w') as f:
-                f.write(json.dumps(json_dict, indent=5))
+                f.write(json.dumps(json_dict, indent=4))
             return True
         except:
             print(f'[WARN] eggConfigFile.saveConfig - Errored attempting to write file: {fileName} with note: {saveNote}')
@@ -335,9 +335,10 @@ async def on_message(message):
             else:
                 cmdGuild = message.guild.name
                 
-            #Disconnect the bot
+            #Disconnect the bot - Cannot be run by anyone but OWNER
             if cmdDict['action'] == 'disconnect':
-                await dClient.close()
+                if str(message.author.id) == str(OWNER):
+                    await dClient.close()
             
             #Create a new command
             if cmdDict['action'] == 'edit-command':
@@ -382,12 +383,13 @@ async def on_message(message):
                     if DEBUG: print('Command not found')
         return True
 
+    """
     #DM only condition - prompt user they are speaking to a bot
     elif str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
         await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re looking for some social interaction you will need to DM someone else.' + \
             '\n\nYou can type **help** for a list of commands available to you.' + \
             '\nYou can type !stop and I will only DM you again if you DM me first')
-    
+    """
     return False
 
 #ON JOIN - Welcome the new user
