@@ -344,7 +344,7 @@ async def on_message(message):
             if cmdDict['action'] == 'edit-command':
                 if eggConfig.putCommand(cmdGuild, message.content):
                     if DEBUG: print('Command created')
-                    eggConfig.saveConfig('test.egg')
+                    eggConfig.saveConfig(eggConfig.activeConfig)
                 else:
                     if DEBUG: print('Command not created')
             
@@ -352,7 +352,7 @@ async def on_message(message):
             if cmdDict['action'] == 'delete-command':
                 if eggConfig.delCommand(cmdGuild, message.content.split()[1]):
                     if DEBUG: print('Command deleted')
-                    eggConfig.saveConfig('test.egg')
+                    eggConfig.saveConfig(eggConfig.activeConfig)
                 else:
                     if DEBUG: print('Command not deleted')
 
@@ -548,8 +548,6 @@ if __name__ == '__main__':
     else:
         print('Invalid or missing file. Hatch aborted!')
         exit()
-
-    #exit()
 
     print('Hatching onto Discord now.')
     dClient.run(TOKEN)
