@@ -29,7 +29,7 @@ Configuration is done is JSON format with a base.egg file provided to get you st
 **Version 0.2.2** - Sticky Egg configuration keys:
 
 
-###guildConfig { "Guild Name": { "Options" } }
+### guildConfig { "Guild Name": { "Options" } }
 
 Options that do things in guildConfig:
 
@@ -40,18 +40,14 @@ Options that do things in guildConfig:
 - autowelcomeChannel - Where the bot is allowed to post welcome message. If blank the bot will not post to any channel.
 - allowedChatRooms - Depreciated
 
-*\*image path starts in the same directory the code is running from*
+*\*Image path starts in the same directory the code is running from*
 
-###shoulderBird { "Guild name": { "User Name" : "Regex Search" } }
+### shoulderBird { "Guild name": { "User Name" : "Regex Search" } }
 
 - This will search all incoming chats that the bot can see and look for the Regex expression
 - If Regex finds a match, the chat is DM'ed to the User Name defined
 
->Mention alert: AuthorName mentioned you in ChannelName saying:
-
->I don't want to @ Preocts
-
-###botCommands { "Guild name" : { "Trigger": { "Options" } } }
+### botCommands { "Guild name" : { "Trigger": { "Options" } } }
 
 Options that do things in botCommands:
 
@@ -67,18 +63,18 @@ Options that do things in botCommands:
 
 *Example: "users" : "Preocts, NotPreocts, EggMan"*
 
-#####Actions
-* disconnect : Shuts connection down
- * *Can **only** be run by userID that matches BOT_OWNER in .env file regardless of options*
+**Actions**
+- disconnect : Shuts connection down
+ - *Can **only** be run by userID that matches BOT_OWNER in .env file regardless of options*
 
-* edit-command : Creates or updates given command
- * *!trigger {Command Name} | {option1 = value} | {option2 = value} | {optionN = value}*
+- edit-command : Creates or updates given command
+ - *!trigger {Command Name} | {option1 = value} | {option2 = value} | {optionN = value}*
 
-* delete-command : Deletes given command
- * *!trigger {Command Name}*
+- delete-command : Deletes given command
+ - *!trigger {Command Name}*
 
-* get-command : Outputs the command in the same format it was created. Use this for copy/pasting commands or remembering how to format them
- * *!trigger {Command Name}*
+- get-command : Outputs the command in the same format it was created. Use this for copy/pasting commands or remembering how to format them
+ - *!trigger {Command Name}*
 
-* list-command : Lists all commands in guild.
- * *!trigger {Command Name}*
+- list-command : Lists all commands in guild.
+ - *!trigger {Command Name}*
