@@ -1,3 +1,9 @@
+Change log 0.2.3
+- Formatting changes.
+- on_member_join updated to use the proper DM and Chat calls
+    - It was previously using its' own call, how arrogant
+    - Also removed image support - this was only half-baked at best
+
 Change log 0.2.2
 - tore apart (refactored) on_message
     + Shoulder Bird gets its own def
@@ -13,7 +19,7 @@ Change log 0.2.2
     + botCommands dict
     + listCommand(GuildName) - returns list of command names set in Guild
     + getCommand(GuildName, CommandName) - returns dict of specific command
-    + putCommand(GuildName, FullChatLine) 
+    + putCommand(GuildName, FullChatLine)
         - sets command, does all the parsing needed (send discord.py message.content)
         - will override existing commands - allows for update/editing easier
         - e!command [commandname] < | option = option value | option2 = option2 value >
@@ -92,7 +98,7 @@ Change log 0.1.2
 - on_message now conditions according to the channel type (Chat/DM/Group)
 
 Change log 0.1.1
-- Logging for connection added 
+- Logging for connection added
 - Logging for disconnect added
 - Removed event for status changes
 - On Join event added
