@@ -128,8 +128,8 @@ class eggConfigFile:
         Creates or replaces a user's settings for a given guild
         Will create the guild listing if unset
         """
-        #Literally just assign is. No gaurdrails at this time
-        self.shoulderBird[guildname] = {username : regex}
+        #Literally just assign it. No gaurdrails at this time
+        self.shoulderBird[guildname][username] = regex
 
         return True
 
@@ -276,7 +276,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
 DEBUG = False #console spam control
 eggConfig = eggConfigFile()
-botVersion = '0.2.3 : Gooey Egg'
+botVersion = '0.2.4 : Gooey Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
