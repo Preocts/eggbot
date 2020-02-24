@@ -6,10 +6,10 @@ Change log 0.2.3
 - Removed check for empty guildname input for command methods. We're using an empty guild for DM Commands
 - ShoulderBird method created: toggleBird {username}
 - ShoulderBird specific commands created:
-    + sb_toggle : Toggle ShoulderBird on and off
-    + sb_set {guildname} = {regEx}: Replace existing (or create) regEx ShoulderBird search
-    + sb_show : Output current regEx ShoulderBird search for all guilds
-    + sb_delete {guildname} : Delete search from provided guild
+    + sb-toggle : Toggle ShoulderBird on and off
+    + sb-set {guildname} = {regEx}: Replace existing (or create) regEx ShoulderBird search
+    + sb-show : Output current regEx ShoulderBird search for all guilds
+    + sb-delete {guildname} : Delete search from provided guild
 
 Change log 0.2.2
 - tore apart (refactored) on_message
