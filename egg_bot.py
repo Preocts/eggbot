@@ -1,5 +1,5 @@
 """
-Egg Bot, Discord Util Bot
+Egg Bot, Discord Utility Bot
 
 Created by Preocts
 preocts@preocts.com | Preocts#8196 Discord
@@ -27,7 +27,7 @@ class eggConfigFile:
         self.shoulderBird = {}
         self.botCommands = {}
         self.activeConfig = ''
-    
+
     def hasGuild(self, name):
         #return True if found, False if not
         #0.2.1 Updated
@@ -64,7 +64,7 @@ class eggConfigFile:
             if name in self.guildConfig[guild]:
                 return self.guildConfig[guild][name]
         return False
-    
+
     def isAllowedChat(self, guild, channel):
         #returns True if we can chat in channel
         if self.hasGuild(guild):
@@ -79,12 +79,12 @@ class eggConfigFile:
         if self.hasGuild(guild):
             return self.guildConfig[guild]
         return False
-        
+
     def listActiveConfig(self):
         #returns class global of loaded config filename
         #0.2.1 Updated
         return self.activeConfig
-        
+
     def listConfigFiles(self):
         #returns list of .egg files in working directory
         #0.2.1 Updated
@@ -95,7 +95,7 @@ class eggConfigFile:
                     result.append(file)
             break
         return result
-    
+
     #   ShoulderBird
     def getBirds(self, guildname):
         """
@@ -107,14 +107,15 @@ class eggConfigFile:
         if (guildname in self.shoulderBird) and len(self.shoulderBird[guildname]):
             return self.shoulderBird[guildname]
 
-        return False 
-    
+        return False
+
     def getBird(self, guildname, username):
         """
         User specific
         Returns a dict of user config for ShoulderBird by guildname
         Returns false if not found
         """
+
         #Do we have this guild setup and is there anything there?
         if (guildname in self.shoulderBird) and len(self.shoulderBird[guildname]):
             if username in self.shoulderBird[guildname]:
@@ -143,39 +144,61 @@ class eggConfigFile:
                 return True
         return False
 
+    def toggleBird(self, username, update=False):
+        """
+        If {update} is provided then ShoulderBird is toggled for user
+        Always returns current value of toggle:
+            Returns True for queit (off)
+            Returns False for noise (on)
+        """
+        #Catch case someone didn't setup correctly
+        if not('ToggleSet31337' in self.shoulderBird):
+            self.shoulderBird['ToggleSet31337'] = {}
+
+        #User not set: Default to noise
+        if not(username in self.shoulderBird['ToggleSet31337']):
+            self.shoulderBird['ToggleSet31337'][username] = False
+            return False
+        else:
+            #User is set: Flip the setting
+            if self.shoulderBird['ToggleSet31337'][username]:
+                if update: self.shoulderBird['ToggleSet31337'][username] = False
+            else:
+                if update: self.shoulderBird['ToggleSet31337'][username] = True
+
+        return self.shoulderBird['ToggleSet31337'][username]
+
     #   botCommands
     def listCommand(self, cmdGuild):
         #Returns list of command names for Guild
-        if len(cmdGuild) <= 0: return False
-        
+
         if cmdGuild in self.botCommands:
             cmdList = []
             for c in self.botCommands[cmdGuild]:
                 cmdList.append(c)
             return str(cmdList)
-        return False        
+        return False
 
     def getCommand(self, cmdGuild, cmdName):
         #Returns dict of command if found
-        if len(cmdName) <= 0:
-            return False
-        
+
         if cmdGuild in self.botCommands:
             if cmdName.lower() in self.botCommands[cmdGuild]:
                 return self.botCommands[cmdGuild][cmdName.lower()]
         return False
-    
+
     def putCommand(self, cmdGuild, cmdInput):
         #Sets a command, returns false if exists (use editCommand)
-        #testing/parse.py has a VERY detailed view of what we're doing here
-        if len(cmdGuild) <= 0 or len(cmdInput) <= 0:
+        #./testing/parse.py has a VERY detailed view of what we're doing here
+        if len(cmdInput) <= 0:
             return False
 
         inputPieces = cmdInput.split(' | ')
         #Pop and split in one line
         cmdLine = inputPieces.pop(0).split(' ')
 
-        #Validation check: Do we have any commands for this guild? If not, make the guild in the config
+        #Validation check: Do we have any commands for this guild?
+        #If not, make the guild in the config
         if not(cmdGuild in self.botCommands):
             #Create an empty dictionary for this mock guild
             self.botCommands[cmdGuild] = {}
@@ -184,14 +207,15 @@ class eggConfigFile:
         if not(cmdLine[1] in self.botCommands[cmdGuild]):
             self.botCommands[cmdGuild][cmdLine[1].lower()] = {}
 
-        #Do we have any options? If we don't, nothing more to do. The command is created even though it would be empty
+        #Do we have any options? If we don't, nothing more to do.
+        #The command is created even though it would be empty
         if len(inputPieces) > 0:
             for piece in inputPieces:
-                #split our small piece into two pieces at the = sign - only once, at the first "="
+                #split our small piece into two pieces at the = sign - only once,
                 piece = piece.split(' = ', 1)
-               
-                #We check for a lenght of 2. If our split has less than or more than two pieces we assume
-                #the input was bad and ignore the piece.
+
+                #We check for a lenght of 2. If our split has less than or more
+                #than two pieces we assume the input was bad and ignore the piece.
                 if len(piece) == 2:
                     self.botCommands[cmdGuild][cmdLine[1].lower()][piece[0].lower()] = piece[1]
         return True
@@ -200,7 +224,7 @@ class eggConfigFile:
         #Deletes a command, returns True on success, False on fail
         if len(cmdName) <= 0:
             return False
-        
+
         if cmdGuild in self.botCommands:
             if cmdName.lower() in self.botCommands[cmdGuild]:
                 del self.botCommands[cmdGuild][cmdName.lower()]
@@ -223,7 +247,7 @@ class eggConfigFile:
         except:
             print(f'[WARN] eggConfigFile.saveConfig - Errored attempting to write file: {fileName} with note: {saveNote}')
             return False
-    
+
     def loadConfig(self, fileName):
         #read fileName into class - returns false on all execptions
         #Console outputs are ON by default
@@ -233,13 +257,10 @@ class eggConfigFile:
                 json_dict = json.load(f)
                 if 'shoulderBird' in json_dict:
                     self.shoulderBird = json_dict['shoulderBird']
-                    if DEBUG: print(f'shoulderBird Config Load:\n{self.shoulderBird}\n')
                 if 'guildConfig' in json_dict:
                     self.guildConfig = json_dict['guildConfig']
-                    if DEBUG: print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
                 if 'botCommands' in json_dict:
                     self.botCommands = json_dict['botCommands']
-                    if DEBUG: print(f'guildConfig Congif Load:\n{self.guildConfig}\n')
                 self.activeConfig = fileName
                 return True
         except:
@@ -255,7 +276,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
 DEBUG = False #console spam control
 eggConfig = eggConfigFile()
-botVersion = '0.2.2 : Gooey Egg'
+botVersion = '0.2.3 : Gooey Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
@@ -283,17 +304,26 @@ async def on_disconnect():
 #ON MESSAGE - Bot Commands
 @dClient.event
 async def on_message(message):
-    
+
     if len(message.content) <= 0: #Catch for empty content
         return False
 
     #Are we us? Ew, don't listen
-    if message.author == dClient.user: 
+    if message.author == dClient.user:
         return False
- 
+
+    #Strip just the trigger out for reference later
+    cmdTrigger = message.content.split()[0].strip(' ')
+
+    #Set cmdGuild to avoid object has no attribute for 'name' in DM channels
+    if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
+        cmdGuild = ''
+    else:
+        cmdGuild = message.guild.name
+
     #DM channel command search
     if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
-        cmdDict = eggConfig.getCommand('', message.content.split()[0].strip(' '))
+        cmdDict = eggConfig.getCommand(cmdGuild, message.content.split()[0].strip(' '))
 
     #Chat channel command search
     elif str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>':
@@ -301,15 +331,16 @@ async def on_message(message):
             logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + message.guild.name)
             #Set Guild into loaded config to stop multiple alerts
             eggConfig.addConfig(message.guild.name, 'allowedChatRooms', '')
-            
-        cmdDict = eggConfig.getCommand(message.guild.name, message.content.split()[0].strip(' '))
-        
+
+        cmdDict = eggConfig.getCommand(cmdGuild, message.content.split()[0].strip(' '))
+
         #Does ShoulderBird have a listing for this guild?
-        nest = eggConfig.getBirds(message.guild.name)
+        nest = eggConfig.getBirds(cmdGuild)
         if nest:
             #Send this to the bird!
             for bird in nest:
-                await shoulderBird(message, nest[bird], bird)
+                if eggConfig.getBird(cmdGuild, bird):
+                    await shoulderBird(message, nest[bird], bird)
 
     #exit on GroupChannels or anything unexpected
     else:
@@ -328,18 +359,12 @@ async def on_message(message):
 
         #Action = pre-defined actions to take in code - do this last
         if ('action' in cmdDict) and (len(cmdDict['action']) > 0):
-            
-            #Set cmdGuild to avoid object has no attribute for 'name' in DM channels
-            if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
-                cmdGuild = ''
-            else:
-                cmdGuild = message.guild.name
-                
+
             #Disconnect the bot - Cannot be run by anyone but OWNER
             if cmdDict['action'] == 'disconnect':
                 if str(message.author.id) == str(OWNER):
                     await dClient.close()
-            
+
             #Create a new command
             if cmdDict['action'] == 'edit-command':
                 if eggConfig.putCommand(cmdGuild, message.content):
@@ -347,7 +372,7 @@ async def on_message(message):
                     eggConfig.saveConfig(eggConfig.activeConfig)
                 else:
                     if DEBUG: print('Command not created')
-            
+
             #Delete a command
             if cmdDict['action'] == 'delete-command':
                 if eggConfig.delCommand(cmdGuild, message.content.split()[1]):
@@ -358,12 +383,13 @@ async def on_message(message):
 
             #Spit out a command into chat (full config)
             if cmdDict['action'] == 'get-command':
+
                 if eggConfig.getCommand(cmdGuild, message.content.split()[1]):
                     if DEBUG: print('Showing command')
                     outMessage = message.content.split()[1]
                     for o in eggConfig.getCommand(cmdGuild, message.content.split()[1]):
                         outMessage += ' | ' + o + ' = ' + eggConfig.getCommand(cmdGuild, message.content.split()[1])[o]
-                        
+
                     if str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
                         await sendDMMessage(message.author, outMessage)
                     else:
@@ -381,69 +407,106 @@ async def on_message(message):
                         await sendChatMessage(message.channel, eggConfig.listCommand(cmdGuild), 0)
                 else:
                     if DEBUG: print('Command not found')
+
+            #SHOULDERBIRD Commands (must be called from DMs)
+            #Show all existing searches (from guilds the bot has joined)
+            if cmdDict['action'] == 'sb-show' and cmdGuild == '':
+                for guildname in dClient.guilds:
+                    result = eggConfig.getBird(str(guildname), message.author.name)
+                    if result:
+                        await sendDMMessage(message.author, 'Guild: ' + str(guildname) + ' | Search: ' + result)
+
+            #Toggle the ShoulderBird on and off
+            if cmdDict['action'] == 'sb-toggle' and cmdGuild == '':
+                if eggConfig.toggleBird(message.author.name, True):
+                    await sendDMMessage(message.author, 'ShoulderBird will now be quiet.')
+                else:
+                    await sendDMMessage(message.author, 'ShoulderBird will now be noisy.')
+                eggConfig.saveConfig(eggConfig.activeConfig)
+
+            #Set the ShoulderBird search for a guild
+            #!trigger {guildname} = {search string}
+            if cmdDict['action'] == 'sb-set' and cmdGuild == '':
+
+                result = message.content.lstrip(cmdTrigger).lstrip(' ').split (' = ')
+
+                #Check that the bot is in this guild
+                for g in dClient.guilds:
+                    if g.name == result[0]:
+                        result.append(True)
+
+                if len(result) == 3:
+                    #ADD - Check to ensure this guild is one the bot is in
+                    eggConfig.putBird(result[0], message.author.name, result[1])
+                    eggConfig.saveConfig(eggConfig.activeConfig)
+                    await sendDMMessage(message.author, 'ShoulderBird saved for: ' + result[0])
+                else:
+                    await sendDMMessage(message.author, 'Error: Guild not found or missing information')
+
+            #Delete a ShoulderBird search for a guild
+            #!trigger {guildname}
+            if cmdDict['action'] == 'sb-delete' and cmdGuild == '':
+
+                result = message.content.lstrip(cmdTrigger).lstrip(' ')
+
+                if eggConfig.delBird(result, message.author.name):
+                    await sendDMMessage(message.author, 'Deleted search for guild: ' + result)
+                else:
+                    await sendDMMessage(message.author, 'Could not find any searches to delete for: ' + result)
+                eggConfig.saveConfig(eggConfig.activeConfig)
+
         return True
 
-    """
+
     #DM only condition - prompt user they are speaking to a bot
     elif str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
-        await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re looking for some social interaction you will need to DM someone else.' + \
-            '\n\nYou can type **help** for a list of commands available to you.' + \
-            '\nYou can type !stop and I will only DM you again if you DM me first')
-    """
+        await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re' + \
+            'looking for some social interaction you will need to DM someone else.' + \
+            '\n\nYou can type **help** for a list of commands available to you.')
+
     return False
 
 #ON JOIN - Welcome the new user
 @dClient.event
 async def on_member_join(newMember):
-    #Added 0.1.1 - Preocts - Sends message to new joins
-    #Added 0.1.2 - Preocts - Added [MENTION]
-    
+    """
+    on_member_join {disord.member}
+    0.2.3 - Precots - update to properly use DM/Chat calls
+    """
+
     #Log action
     logOutput('egg.log', 'on_member_join: ' + str(newMember.display_name) + \
         ' | User: ' + str(newMember.id) + \
         ' | Account Created: ' + str(newMember.created_at) + \
         ' | Guild: ' + str(newMember.guild))
-    
-    #Exit if not guild is not configured
-        #Set Alert if not configured
 
+    #Exit if not guild is not configured
     if not(eggConfig.hasGuild(str(newMember.guild))):
         logOutput('egg.log', 'ALERT, Guild not found but bot is active : ' + str(newMember.guild))
         eggConfig.addConfig(newMember.guild.name, 'allowedChatRooms', '')
-        return
-    
-    #Gather the things
+        return False
+
+    #Gather the configuations
     DM = eggConfig.getConfig(str(newMember.guild), 'autowelcomeDM')
-    DMI = eggConfig.getConfig(str(newMember.guild), 'autowelcomeDMImage')
     CHAT = eggConfig.getConfig(str(newMember.guild), 'autowelcomeChat')
-    CHATI = eggConfig.getConfig(str(newMember.guild), 'autowelcomeChatImage')
     CHANNEL = eggConfig.getConfig(str(newMember.guild), 'autowelcomeChannel')
 
-    #print(f'{DM} | {DMI} | {CHAT} | {CHATI} | {CHANNEL}')
-    
     lsHolders = ['[MENTION]', '[USERNAME]', '[GUILDNAME]', '\\n']
     lsMember = [newMember.mention, str(newMember.display_name), str(newMember.guild), '\n']
 
     if DM: #Send DM Greeting
         for rp in lsHolders:
             DM = DM.replace(rp, lsMember[lsHolders.index(rp)])
-        #print(DM)
-        await newMember.create_dm()
-        if DMI:
-            await newMember.dm_channel.send(file=discord.File(str(DMI)))
-        await newMember.dm_channel.send(str(DM))
-    
+        sendDMMessage(newMember.name, DM)
+
     if CHAT and CHANNEL: #Send Channel Greeting to specific room
         chatRoom = discord.utils.get(dClient.get_all_channels(), \
             guild__name=str(newMember.guild), name=CHANNEL)
         if chatRoom:
             for rp in lsHolders:
                 CHAT = CHAT.replace(rp, lsMember[lsHolders.index(rp)])
-            #print(CHAT)
-            if CHATI:
-                await chatRoom.send(file=discord.File(str(CHATI)))
-            await chatRoom.send(CHAT)
-    return
+            sendChatMessage(chatRoom, CHAT, 0)
+    return True
 
 #Send Chat Messages
 async def sendChatMessage(dChannel, sMessage, nTime):
@@ -451,7 +514,7 @@ async def sendChatMessage(dChannel, sMessage, nTime):
     #Check config permissions
     #[discord.channel.TextChannel], [string], <delete after # second>
     #Wrote this Thanksgiving day.  I'm thankful for my partner, Traveldog, who made this possible
-    
+
     #Check to see that we are allowed
     if nTime > 0:
         await dChannel.send(sMessage, delete_after=nTime)
@@ -484,13 +547,16 @@ def logOutput(fileName, outLine):
 #SHOULDER BIRD
 async def shoulderBird(sMessage, sSearch, sTarget):
     #Added 0.1.2 - Preocts - Start to create flexible bird
-    #Searches sMessage for regEx(sSearch) and alerts sTarget if found
 
+    #Are we toggled off?
+    if eggConfig.toggleBird(sTarget): return False
+
+    #Searches sMessage for regEx(sSearch) and alerts sTarget if found
     findRg = re.compile(r'{}\b'.format(sSearch), re.I)
     found = findRg.search(sMessage.content)
     if found:
         BIRD = discord.utils.get(sMessage.guild.members, name=sTarget)
-        #Only a few know why this is called BIRD. <3 
+        #Only a few know why this is called BIRD. <3
         if not(BIRD):
             return False
         await BIRD.create_dm()
@@ -505,28 +571,36 @@ async def shoulderBird(sMessage, sSearch, sTarget):
 def commandPermsCheck(message, cmdDict):
     #Checks exclusive for Chat: Channels and Roles
     if str(type(message.channel)) == '<class \'discord.channel.TextChannel\'>':
-        
+
         #If the channel is not in 'channels' then fail. Blank/unset 'channels' means any are allowed
-        if ('channels' in cmdDict) and (not(message.channel.name in cmdDict['channels']) and (len(cmdDict['channels']) > 0)):
+        if ('channels' in cmdDict) \
+            and (not(message.channel.name in cmdDict['channels']) \
+            and (len(cmdDict['channels']) > 0)):
+
             if DEBUG: print('Failed Channel')
             return False
-        
+
         #If the user role is not in 'roles' then fail. Blank/unset 'roles' means any are allowed
         #Roles live in a discord.py formated list so we need to step through it
         if ('roles' in cmdDict):
             roleList = []
             for roles in message.author.roles:
                 roleList.append(roles.name)
-            
+
             #Use a set to compare since a user can have many roles and many roles can be defined in the config
             #set math. Set1 - Set2 = Set3. If Set1 = Set3 we didn't remove anything so no matching roles found
             #set() arranges the list differently! Compare set to set, don't convert back to list
-            if (set(roleList) - set(cmdDict['roles'].split(', ')) == set(roleList)) and (len(cmdDict['roles']) > 0):
+            if (set(roleList) - set(cmdDict['roles'].split(', ')) == set(roleList)) \
+            and (len(cmdDict['roles']) > 0):
+
                 if DEBUG: print('Failed Roles')
                 return False
 
     #If the user is not listed in 'users' (case-sensitive) then fail. Blank/unset 'users' means any are allowed
-    if ('users' in cmdDict) and (not(message.author.name in cmdDict['users'].split(', ')) and (len(cmdDict['users']) > 0)):
+    if ('users' in cmdDict) \
+        and (not(message.author.name in cmdDict['users'].split(', ')) \
+        and (len(cmdDict['users']) > 0)):
+
         if DEBUG: print(f'User can not run this: {message.author.name}')
         return False
     return True
@@ -548,6 +622,8 @@ if __name__ == '__main__':
     else:
         print('Invalid or missing file. Hatch aborted!')
         exit()
+
+    # exit()
 
     print('Hatching onto Discord now.')
     dClient.run(TOKEN)

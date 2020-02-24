@@ -36,9 +36,7 @@ Configuration is done is JSON format with a base.egg file provided to get you st
 Options that do things in guildConfig:
 
 - autowelcomeDM - Chat that is sent to a new join via DM
-- autowelcomeDMImage - Optional image that will be posted to the DM **before** the chat*
 - autowelcomeChat - Chat that is sent to the welcome channel listed below on new join
-- autowelcomeChatImage - Optional image that will be posted to the channel **before** the chat*
 - autowelcomeChannel - Where the bot is allowed to post welcome message. If blank the bot will not post to any channel.
 - allowedChatRooms - Depreciated
 
@@ -65,7 +63,7 @@ Options that do things in botCommands:
 
 *Example: "users" : "Preocts, NotPreocts, EggMan"*
 
-**Actions**
+**Chat and DM Actions**
 - disconnect : Shuts connection down
   - *Can **only** be run by userID that matches BOT_OWNER in .env file regardless of options*
 
@@ -80,3 +78,17 @@ Options that do things in botCommands:
 
 - list-command : Lists all commands in guild.
   - *!trigger {Command Name}*
+
+**ShoulderBird Actions - DM Only**
+
+- sb-toggle : Toggle ShoulderBird on and off
+  - *!trigger*
+
+- sb-show : Output current regEx ShoulderBird searches for all guilds
+  - *!trigger*
+
+- sb-set : Replace existing, or create, ShoulderBird search
+  - *!trigger {guildname} = {regEx}*
+
+- sb-delete : Delete search from provided guild
+  - *!trigger {guildname}*
