@@ -26,6 +26,7 @@ class eggConfigFile:
         self.guildConfig = {}
         self.shoulderBird = {}
         self.botCommands = {}
+        self.optoutToggle = {}
         self.activeConfig = ''
 
     def hasGuild(self, name):
@@ -231,15 +232,39 @@ class eggConfigFile:
                 return True
         return False
 
+    # OPTOUT TOGGLE
+    def toggleOptout(self, username, update = False):
+        """
+        If {update} is provided then user is toggled
+        Always returns current value of toggle:
+            Returns True for opted out
+            Returns False for opted in
+        """
+        #If we don't have a flag, assume opted in
+        if not(username in self.optoutToggle):
+            self.optoutToggle[username] = False
+        else:
+            #User is set: Flip the setting if we have update
+            if self.optoutToggle[username]:
+                if update: self.optoutToggle[username] = False
+            else:
+                if update: self.optoutToggle[username] = True
+
+        return self.optoutToggle[username]
+
+
     #   SAVE / LOAD CONFIG FILE
     def saveConfig(self, fileName):
-        #write to provided filename - returns false on all exceptions
-        #Console error outputs are ON by default
-        #0.2.1 Updated
+        """
+        write to provided filename - returns false on all exceptions
+        Console error outputs are ON by default
+        """
         json_dict = {}
         json_dict['guildConfig'] = self.guildConfig
         json_dict['shoulderBird'] = self.shoulderBird
         json_dict['botCommands'] = self.botCommands
+        json_dict['optoutToggle'] = self.optoutToggle
+
         try:
             with open(fileName, 'w') as f:
                 f.write(json.dumps(json_dict, indent=4))
@@ -249,9 +274,10 @@ class eggConfigFile:
             return False
 
     def loadConfig(self, fileName):
-        #read fileName into class - returns false on all execptions
-        #Console outputs are ON by default
-        #0.2.1 Updated
+        """
+        read fileName into class - returns false on all execptions
+        Console outputs are ON by default
+        """
         try:
             with open(fileName) as f:
                 json_dict = json.load(f)
@@ -261,6 +287,8 @@ class eggConfigFile:
                     self.guildConfig = json_dict['guildConfig']
                 if 'botCommands' in json_dict:
                     self.botCommands = json_dict['botCommands']
+                if 'optoutToggle' in json_dict:
+                    self.optoutToggle = json_dict['optoutToggle']
                 self.activeConfig = fileName
                 return True
         except:
@@ -276,7 +304,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
 DEBUG = False #console spam control
 eggConfig = eggConfigFile()
-botVersion = '0.2.4 : Gooey Egg'
+botVersion = '0.2.5 : Gooey Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
@@ -455,14 +483,27 @@ async def on_message(message):
                     await sendDMMessage(message.author, 'Could not find any searches to delete for: ' + result)
                 eggConfig.saveConfig(eggConfig.activeConfig)
 
+            #Optout Toggle - DM Only
+            if cmdDict['action'] == 'optout-toggle' and cmdGuild == '':
+
+                if eggConfig.toggleOptout(message.author.name, True):
+                    await sendDMMessage(message.author, 'You are now opted out. The bot will not DM you again unless you run a command. Running a command does not opt you back in. Type **optin** to opt back in.')
+                else:
+                    await sendDMMessage(message.author, 'You are now opted in.')
+                eggConfig.saveConfig(eggConfig.activeConfig)
+
         return True
 
 
     #DM only condition - prompt user they are speaking to a bot
     elif str(type(message.channel)) == '<class \'discord.channel.DMChannel\'>':
-        await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re' + \
-            'looking for some social interaction you will need to DM someone else.' + \
-            '\n\nYou can type **help** for a list of commands available to you.')
+        if eggConfig.toggleOptout(message.author.name):
+            await sendDMMessage(message.author, 'You are opted out. type **!optin** to change that.\nEnd of Line.')
+        else:
+            await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re' + \
+                'looking for some social interaction you will need to DM someone else.' + \
+                '\n\nYou can type **!help** for a list of commands available to you.' + \
+                '\nYou can type **!optout** and I won\'t DM you again unless you DM me first.')
 
     return False
 
@@ -473,7 +514,6 @@ async def on_member_join(newMember):
     on_member_join {disord.member}
     0.2.3 - Precots - update to properly use DM/Chat calls
     """
-
     #Log action
     logOutput('egg.log', 'on_member_join: ' + str(newMember.display_name) + \
         ' | User: ' + str(newMember.id) + \
@@ -494,10 +534,12 @@ async def on_member_join(newMember):
     lsHolders = ['[MENTION]', '[USERNAME]', '[GUILDNAME]', '\\n']
     lsMember = [newMember.mention, str(newMember.display_name), str(newMember.guild), '\n']
 
-    if DM: #Send DM Greeting
+    if DM and not(eggConfig.toggleOptout(newMember.name)): #Send DM Greeting
+        await newMember.create_dm()
         for rp in lsHolders:
             DM = DM.replace(rp, lsMember[lsHolders.index(rp)])
-        sendDMMessage(newMember.name, DM)
+        # await sendDMMessage(newMember, DM)
+        await newMember.dm_channel.send(str(DM))
 
     if CHAT and CHANNEL: #Send Channel Greeting to specific room
         chatRoom = discord.utils.get(dClient.get_all_channels(), \
@@ -505,7 +547,7 @@ async def on_member_join(newMember):
         if chatRoom:
             for rp in lsHolders:
                 CHAT = CHAT.replace(rp, lsMember[lsHolders.index(rp)])
-            sendChatMessage(chatRoom, CHAT, 0)
+            await sendChatMessage(chatRoom, CHAT, 0)
     return True
 
 #Send Chat Messages
@@ -531,9 +573,11 @@ async def sendDMMessage(dUser, sMessage):
     #Check optout List
     #[discord.channel.DMChannel], [string]
 
-    #ADD Check to see that we are allowed
+    # if eggConfig.toggleOptout(dUser.name):
+        # return False
+
     if not(dUser.dm_channel):
-        await dUser.create_dm
+        dUser.create_dm()
     await dUser.dm_channel.send(str(sMessage))
     return True
 

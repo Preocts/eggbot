@@ -92,3 +92,8 @@ Options that do things in botCommands:
 
 - sb-delete : Delete search from provided guild
   - *!trigger {guildname}*
+
+**DM Only Actions**
+
+- optout-toggle : Toggles the user's optout status which doesn't do much right now
+  - *!trigger*

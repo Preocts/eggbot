@@ -1,4 +1,19 @@
-Change log 0.2.3
+Change log 0.2.5 - OptOut Options
+- Hotfix: missed 'await' in on_member_join updates. I am full of cocoa
+- Hotfix: discord.member class behaving weirdly in on_member_join - rolled back to the old code (kinda)
+- EggConfig additions
+    + optoutFlag = {'UserID': 'Boolean'}
+    + def optoutToggle(discord.member.id)
+- New DM command actions
+    + optout-toggle : Toggles the optout flag for any given user.
+- New config key {optoutToggle} : stores boolean flags against discord.member.id
+    + Added config load to eggConfigFile.loadConfig() and eggConfigFile.saveConfig()
+- on_member_join now checks for optoutToggle status
+
+Change log 0.2.4 - Hotfix
+- Corrected sb-set action so that it no longer removes all one entry in ShoulderBird searches
+
+Change log 0.2.3 - ShoulderBird
 - Formatting changes.
 - on_member_join updated to use the proper DM and Chat calls
     + It was previously using its' own call, how arrogant
