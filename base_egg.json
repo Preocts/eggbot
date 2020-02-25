@@ -25,10 +25,35 @@
     },
     "botCommands": {
         "": {
+            "!help": {
+                "content": "Commands available (does not reflect permissions, you can see things you can't run):",
+                "action": "list-command"
+            },
             "!bye": {
-                "help": "This action can only ever be run by OWNER .env ID. See ReadMe",
                 "action": "disconnect",
-                "content": "Dropping connection now."
+            },
+            "!optout": {
+                "action": "optout-toggle"
+            },
+            "!optin": {
+                "action": "optout-toggle"
+            },
+            "sb!toggle": {
+                "action": "sb-toggle",
+                "help": "Use this to turn ShoulderBird pings on and off."
+            },
+            "sb!show": {
+                "content": "Your search string is:",
+                "action": "sb-show",
+                "help": "Shows you what ShoulderBird is looking for. This is a regEx expression."
+            },
+            "sb!set": {
+                "action": "sb-set",
+                "help": "Allows you to set a ShoulderBird search.\nsb!set {guildname} {regEx Expression}"
+            },
+            "sb!remove": {
+                "action": "sb-delete",
+                "help": "Deletes your ShoulderBird search for provided guild."
             }
         },
         "Guild Name Here": {
