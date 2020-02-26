@@ -304,7 +304,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
 DEBUG = False #console spam control
 eggConfig = eggConfigFile()
-botVersion = '0.2.5 : Gooey Egg'
+botVersion = '0.2.6 : Gooey Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
@@ -597,7 +597,7 @@ async def shoulderBird(sMessage, sSearch, sTarget):
 
     #Searches sMessage for regEx(sSearch) and alerts sTarget if found
     findRg = re.compile(r'{}\b'.format(sSearch), re.I)
-    found = findRg.search(sMessage.content)
+    found = findRg.search(sMessage.clean_content)
     if found:
         BIRD = discord.utils.get(sMessage.guild.members, name=sTarget)
         #Only a few know why this is called BIRD. <3
@@ -607,7 +607,7 @@ async def shoulderBird(sMessage, sSearch, sTarget):
         await BIRD.dm_channel.send('Mention alert: **' + \
             str(sMessage.author.display_name) + \
             '** mentioned you in **' + str(sMessage.channel) + \
-            '** saying: \n`' + sMessage.content + '`')
+            '** saying: \n`' + sMessage.clean_content + '`')
         return True
     return False
 
