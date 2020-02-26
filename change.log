@@ -1,3 +1,6 @@
+Change log 0.2.6 - ShoulderBird patch
+- ShoulderBird now uses message.clean_content for better output. (remove @123456789 with mentions)
+
 Change log 0.2.5 - OptOut Options
 - Hotfix: missed 'await' in on_member_join updates. I am full of cocoa
 - Hotfix: discord.member class behaving weirdly in on_member_join - rolled back to the old code (kinda)
