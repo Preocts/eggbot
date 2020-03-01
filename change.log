@@ -1,3 +1,7 @@
+Change log 0.2.7 - ShoulderBird patch
+- Fixed the regEx search to include proper word boundaries
+- Secret command actions for funs
+
 Change log 0.2.6 - ShoulderBird patch
 - ShoulderBird now uses message.clean_content for better output. (remove @123456789 with mentions)
 

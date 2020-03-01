@@ -17,6 +17,7 @@ import datetime #Date/Time functions
 import re #regular expressions
 from dotenv import load_dotenv #Specifically to input secret token
 import json #JSON!
+import time
 
 #Class Def
 class eggConfigFile:
@@ -304,7 +305,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 OWNER = os.getenv('BOT_OWNER')
 DEBUG = False #console spam control
 eggConfig = eggConfigFile()
-botVersion = '0.2.6 : Gooey Egg'
+botVersion = '0.2.7 : Gooey Egg'
 
 #Event Definitions - All Coroutines (stop and start anytime)
 
@@ -492,6 +493,25 @@ async def on_message(message):
                     await sendDMMessage(message.author, 'You are now opted in.')
                 eggConfig.saveConfig(eggConfig.activeConfig)
 
+            #Fun Crap
+            if cmdDict['action'] == 'hearts' and cmdGuild != '':
+                hearts = [" :purple_heart: ", " :yellow_heart: ", " :blue_heart: ", " :green_heart: ", " :heart: "]
+                msg = await message.channel.send("".join(hearts))
+                for i in range(0, 15):
+                    time.sleep(1)
+                    hearts.append(hearts.pop(0))
+                    await msg.edit(content="".join(hearts))
+                await msg.edit(delete_after=1)
+
+            if cmdDict['action'] == 'dabpower' and cmdGuild == 'Bleats\' Pasture':
+                mods = [" :inkBleatsDab: ", " :inkNayDab: ", " :inkStableDab: ", " :inkZanaDab: ", " :inkEggDab: ", " :inkGigiDab: ", " :inkBillDab: ", " :inkAlexDab: "]
+                msg = await message.channel.send("".join(mods))
+                for i in range(0, 15):
+                    time.sleep(1)
+                    mods.append(mods.pop(0))
+                    await msg.edit(content="".join(mods))
+                await msg.edit(delete_after=1)
+
         return True
 
 
@@ -596,7 +616,7 @@ async def shoulderBird(sMessage, sSearch, sTarget):
     if eggConfig.toggleBird(sTarget): return False
 
     #Searches sMessage for regEx(sSearch) and alerts sTarget if found
-    findRg = re.compile(r'{}\b'.format(sSearch), re.I)
+    findRg = re.compile(r'\b{}\b'.format(sSearch), re.I)
     found = findRg.search(sMessage.clean_content)
     if found:
         BIRD = discord.utils.get(sMessage.guild.members, name=sTarget)
@@ -610,7 +630,6 @@ async def shoulderBird(sMessage, sSearch, sTarget):
             '** saying: \n`' + sMessage.clean_content + '`')
         return True
     return False
-
 
 def commandPermsCheck(message, cmdDict):
     #Checks exclusive for Chat: Channels and Roles
