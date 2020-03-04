@@ -503,15 +503,6 @@ async def on_message(message):
                     await msg.edit(content="".join(hearts))
                 await msg.edit(delete_after=1)
 
-            if cmdDict['action'] == 'dabpower' and cmdGuild == 'Bleats\' Pasture':
-                mods = [" :inkBleatsDab: ", " :inkNayDab: ", " :inkStableDab: ", " :inkZanaDab: ", " :inkEggDab: ", " :inkGigiDab: ", " :inkBillDab: ", " :inkAlexDab: "]
-                msg = await message.channel.send("".join(mods))
-                for i in range(0, 15):
-                    time.sleep(1)
-                    mods.append(mods.pop(0))
-                    await msg.edit(content="".join(mods))
-                await msg.edit(delete_after=1)
-
         return True
 
 
@@ -522,8 +513,7 @@ async def on_message(message):
         else:
             await sendDMMessage(message.author, 'Hello, I\'m just a bot so if you\'re' + \
                 'looking for some social interaction you will need to DM someone else.' + \
-                '\n\nYou can type **!help** for a list of commands available to you.' + \
-                '\nYou can type **!optout** and I won\'t DM you again unless you DM me first.')
+                '\n\nYou can type **!help** for a list of commands available to you.')
 
     return False
 
