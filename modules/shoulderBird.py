@@ -112,42 +112,42 @@ class shoulderBird:
             return True
         return False
 
-    def loadConfig(self, inputFile: str) -> bool:
-        """ Loads ShoulderBird configuration into memory
-
-            This breaks with an empty file. How do we fix this?
-        """
+    def loadConfig(self, inputFile: str) -> dict:
+        """ Loads shoulderBird configuration into memory"""
 
         try:
             with open(inputFile) as file:
                 self.shoulderBird = json.load(file)
-
+        except json.decoder.JSONDecodeError:
+            logger.error(f'shoulderBird Config file empty ', exc_info=True)
         except FileNotFoundError:
-            logger.error(f'ShoulderBird Config file not found {inputFile}')
-            return False
+            logger.error(f'shoulderBird Config file not found '
+                         '{inputFile}', exc_info=True)
+            try:
+                open(inputFile, 'w')
+            except OSError:
+                logger.critical('shoulderBird failed to load. Closing. ',
+                                exc_info=True)
+                exit()
         self.activeConfig = inputFile
-        return True
+        return {"status": True, "response": "Config loaded"}
 
-    def saveConfig(self, outputFile: str = None) -> bool:
-        """ Writes ShoulderBird configuration to disk """
+    def saveConfig(self, outputFile: str = None) -> dict:
+        """ Writes shoulderBird configuration to disk """
 
-        if not(outputFile) == 0:
+        if not(outputFile) and len(self.activeConfig) > 0:
             outputFile = self.activeConfig
+        else:
+            logger.warning(f'saveConfig: No file give: {outputFile}')
+            return {"status": False, "response": "Missing filename"}
         try:
             with open(outputFile, 'w') as file:
                 file.write(json.dumps(self.shoulderBird, indent=4))
-                logger.info(f'Success: ShoulderBird config '
+                logger.info(f'Success: shoulderBird config '
                             'saved to {outputFile}')
 
         except OSError:
-            logger.error(f'ShoulderBird Config file not saved to {outputFile}')
-            return False
-        return True
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
+            logger.error(f'shoulderBird Config file not saved to {outputFile}',
+                         exc_info=True)
+            return {"status": False, "response": "Error saving config"}
+        return {"status": True, "response": "Config saved"}
