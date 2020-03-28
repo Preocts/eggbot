@@ -5,6 +5,7 @@
 
     Created by Preocts
     preocts@preocts.com | Preocts#8196 Discord
+    https://github.com/Preocts/Egg_Bot
 
     Refactor: 03/23/2020
 """
@@ -30,72 +31,95 @@ class shoulderBird:
 
         Definitions:
             Bird : A single search string in regEx
+
+        Returns:
+            {
+                "status": True/False,
+                "response": [output]
+            }
     """
 
-    def __init__(self, inputFile="../config/shoulderBird.json"):
+    def __init__(self, inputFile="./config/shoulderBird.json"):
         """INIT"""
-        self.shouldBird = {}
+        logging.info(f'Start: Initializing shoulderBird: {inputFile}')
+        self.shoulderBird = {}
         self.activeConfig = ""
         self.loadConfig(inputFile)
+        return None
+
+    def __str__(self):
+        return json.dumps(self.shoulderBird, indent=4)
+
+    def __bool__(self):
+        if len(self.shoulderBird):
+            return True
+        return False
+
+    __nonzero__ = __bool__
 
     def getBirds(self, guildname: str) -> dict:
         """ Fetch all defined Birds from the config file """
-        # Do we have this guild setup and is there anything there?
+
+        logger.debug(f'getBirds: {guildname}')
         if ((guildname in self.shoulderBird) and
            len(self.shoulderBird[guildname])):
-            return self.shoulderBird[guildname]
-        return False
+            return {"status": True, "response": self.shoulderBird[guildname]}
+        return {"status": False, "response": "Guild not found or empty"}
 
     def getBird(self, guildname: str, username: str) -> dict:
         """ Fetch a single defined Bird from the config file """
+
         logger.debug(f'getBird call: {guildname} | {username}')
         if ((guildname in self.shoulderBird) and
            len(self.shoulderBird[guildname])):
             if username in self.shoulderBird[guildname]:
                 if self.shoulderBird[guildname][username]["toggle"]:
-                    return self.shoulderBird[guildname][username]["regex"]
-        return False
+                    response = self.shoulderBird[guildname][username]["regex"]
+                    return {"status": True, "response": response}
+                else:
+                    return {"status": False, "response": "Toggled off"}
+        return {"status": False, "response": "Guild or user not found"}
 
-    def putBird(self, guildname: str, username: str, regex: str) -> bool:
+    def putBird(self, guildname: str, username: str, regex: str) -> dict:
         """ Stores a Bird into the loaded config """
-        # Literally just assign it. No gaurdrails at this time
+
+        logger.debug(f'putBird: {guildname} | {username} | {regex}')
         if not(guildname in self.shoulderBird):
             self.shoulderBird[guildname] = {}
         self.shoulderBird[guildname][username] = {}
         self.shoulderBird[guildname][username]["regex"] = regex
         self.shoulderBird[guildname][username]["toggle"] = False
-        return True
+        return {"status": True, "response": "Bird put in config"}
 
-    def delBird(self, guildname: str, username: str) -> bool:
+    def delBird(self, guildname: str, username: str) -> dict:
         """ Removes a Bird from the loaded config """
+
+        logger.debug(f'delBirds: {guildname} | {username}')
         if guildname in self.shoulderBird:
             if username in self.shoulderBird[guildname]:
                 del self.shoulderBird[guildname][username]
-                return True
-        return False
+                return {"status": True, "response": "Bird deleted"}
+        return {"status": False, "response": "Guild or user not found"}
 
     def toggleBird(self, guildname: str, username: str,
-                   update: bool = False) -> bool:
+                   update: bool = False) -> dict:
         """ Toggles ShoulderBird for a specific guild """
-        # If the user isn't set, move on.
+
+        logger.debug(f'delBirds: {guildname} | {username}')
         if guildname in self.shoulderBird:
             if username in self.shoulderBird[guildname]:
                 curToggle = self.shoulderBird[guildname][username]["toggle"]
                 if curToggle:
                     if update:
-                        curToggle = False  # Hide Bird Alerts
+                        curToggle = False
                 else:
                     if update:
-                        curToggle = True  # Send Bird Alerts
+                        curToggle = True
                 self.shoulderBird[guildname][username]["toggle"] = curToggle
-        return curToggle
+        return {"status": curToggle, "response": None}
 
-    def birdCall(self, sMessage: str, sSearch: str) -> bool:
+    def birdCall(self, sMessage: str, sSearch: str) -> dict:
         """ Uses regEx to find defined keywords in a chat message
-
-        Updates:
-            Added 0.1.2 - Preocts - Start to create flexible bird
-            Refactor 0.3.1 - Preocts - Moved to new Module
 
         Args:
             sMessage: The message being scanned (use message.clean_content)
@@ -109,8 +133,8 @@ class shoulderBird:
         findRg = re.compile(r'\b{}\b'.format(sSearch), re.I)
         found = findRg.search(sMessage)
         if found:
-            return True
-        return False
+            return {"status": True, "response": "Chirp Chirp"}
+        return {"status": True, "repsonse": None}
 
     def loadConfig(self, inputFile: str) -> dict:
         """ Loads shoulderBird configuration into memory"""
@@ -121,8 +145,8 @@ class shoulderBird:
         except json.decoder.JSONDecodeError:
             logger.error(f'shoulderBird Config file empty ', exc_info=True)
         except FileNotFoundError:
-            logger.error(f'shoulderBird Config file not found '
-                         '{inputFile}', exc_info=True)
+            logger.error('shoulderBird Config file not found '
+                         f'{inputFile}', exc_info=True)
             try:
                 open(inputFile, 'w')
             except OSError:
@@ -143,11 +167,14 @@ class shoulderBird:
         try:
             with open(outputFile, 'w') as file:
                 file.write(json.dumps(self.shoulderBird, indent=4))
-                logger.info(f'Success: shoulderBird config '
-                            'saved to {outputFile}')
+                logger.info('Success: shoulderBird config '
+                            f'saved to {outputFile}')
 
         except OSError:
             logger.error(f'shoulderBird Config file not saved to {outputFile}',
                          exc_info=True)
             return {"status": False, "response": "Error saving config"}
         return {"status": True, "response": "Config saved"}
+
+# May Bartmoss have mercy on your data for running this bot.
+# We are all only eggs
