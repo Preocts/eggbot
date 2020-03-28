@@ -1,3 +1,21 @@
+Change log 0.3.1 - Refactor I
+- Created Module for ShoulderBird
+- New config file for ShoulderBird
+- Load and Save config file for ShoulderBird created
+- Directory restructure including new folders:
+    + config : all configuration files
+    + logs : all log outputs
+    + modules : all module code
+- Python Logging Added
+- Logger configuration and init code completed
+
+- Created Module for welcomeMessage
+- Better welcome message configuration methods!
+    + More than one welcome message per guild?! It's true!
+    + Use 'role' to give incoming guests a unique welcome (such as patrons)
+
+- Standard output format for methods
+
 Change log 0.2.8 - patch
 - Removed optout references for the time being
 
