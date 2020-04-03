@@ -16,8 +16,12 @@ import json
 import logging
 import logging.config
 
+VALID_LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 
-def logINIT():
+
+def logINIT(llevel: str = 'INFO') -> bool:
+    if not(llevel in VALID_LOG_LEVELS):
+        llevel = "INFO"
     try:
         with open("config/logging_config.json") as file:
             logConfig = json.load(file)
@@ -28,6 +32,10 @@ def logINIT():
         logging.error('Exception occured', exc_info=True)
         logging.error('basicConfig loaded for logging_init. Not ideal!')
         return False
+
+    if llevel != 'INFO':
+        for hands in logConfig["handlers"]:
+            logConfig["handlers"][hands]["level"] = llevel
 
     logging.config.dictConfig(logConfig)
     logger = logging.getLogger(__name__)
