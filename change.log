@@ -9,12 +9,16 @@ Change log 0.3.1 - Refactor I
 - Python Logging Added
 - Logger configuration and init code completed
 
-- Created Module for welcomeMessage
-- Better welcome message configuration methods!
-    + More than one welcome message per guild?! It's true!
-    + Use 'role' to give incoming guests a unique welcome (such as patrons)
+- Created Module for joinActions
+    + Better welcome message configuration methods!
+    + Set roles on join
+    + Future update: roles for specific invites!
 
 - Standard output format for methods
+- Small changes to eggbot.py
+    + Very tiny
+    + You wouldn't notice at all
+    + Also not backward compatible, at all
 
 Change log 0.2.8 - patch
 - Removed optout references for the time being
