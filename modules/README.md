@@ -6,6 +6,8 @@
 
 ShoulderBird is a module that uses RegEx to scan incoming message events. If a match is found for a specific user on a specific server then that user can be alerted by a bot. **Note**: Creates, updates, and deletes to the loaded configuration file do not save to disk. A call to save **must** be made independently prior to the class being unloaded.
 
+**RegEx searches are case insensitive**
+
 Created by Preocts
 
 [preocts@preocts.com](mailto:preocts@preocts.com) | Preocts#8196 Discord | [Github](https://github.com/Preocts/Egg_Bot)
@@ -42,4 +44,22 @@ results = SB.birdCall("GuildName", "UserName", "Message String")
 Save Config:
 ```python
 SB.saveConfig("FileNameOptional")
+```
+
+Configuration file example:
+*will generate if missing*
+```json
+{
+    "GuildName": {
+        "Preocts": {
+            "regex": "(pre(|oct|octs)|oct(|s)|egg)",
+            "toggle": true
+        },
+        "DifferentUser": {
+            "regex": "(raffle|contest|free|give(|away|-away))",
+            "toggle": false
+        }
+    },
+    "Different GuildName": {}
+}
 ```
