@@ -7,7 +7,27 @@
     preocts@preocts.com | Preocts#8196 Discord
     https://github.com/Preocts/Egg_Bot
 
-    Refactor: 03/23/2020
+    Common Use Examples:
+    ---
+    Initialize: (loads config)
+        SB = shoulderBird.shoulderBird("FileNameOptional")
+
+    Create/Update a search:
+        results = SB.putBird("GuildName", "UserName", "RegEx Search String")
+
+    Delete a search:
+        results = SB.delBird("GuildName", "UserName")
+
+    Toggle a search on/off (returns new state):
+        results = SB.toggleBird("GuildName", "UserName")
+
+    Scan a message for a matching search:
+        results = SB.birdCall("GuildName", "UserName", "Message String")
+        # If results["status"] is True then results["response"] will be
+        # the username of who had a matching search.
+
+    Save Config:
+        SB.saveConfig("FileNameOptional")
 """
 import logging
 import json
@@ -101,8 +121,7 @@ class shoulderBird:
                 return {"status": True, "response": "Bird deleted"}
         return {"status": False, "response": "Guild or user not found"}
 
-    def toggleBird(self, guildname: str, username: str,
-                   update: bool = False) -> dict:
+    def toggleBird(self, guildname: str, username: str) -> dict:
         """ Toggles ShoulderBird for a specific guild """
 
         logger.debug(f'delBirds: {guildname} | {username}')
@@ -110,15 +129,13 @@ class shoulderBird:
             if username in self.shoulderBird[guildname]:
                 curToggle = self.shoulderBird[guildname][username]["toggle"]
                 if curToggle:
-                    if update:
-                        curToggle = False
+                    curToggle = False
                 else:
-                    if update:
-                        curToggle = True
+                    curToggle = True
                 self.shoulderBird[guildname][username]["toggle"] = curToggle
         return {"status": curToggle, "response": None}
 
-    def birdCall(self, sMessage: str, sSearch: str) -> dict:
+    def birdCall(self, guildname: str, username: str, message: str) -> dict:
         """ Uses regEx to find defined keywords in a chat message
 
         Args:
@@ -126,15 +143,24 @@ class shoulderBird:
             sSearch: The regEx string of the Bird
 
         Returns:
-            True if keyword found
-            False if keyword not found
+
         """
 
-        findRg = re.compile(r'\b{}\b'.format(sSearch), re.I)
-        found = findRg.search(sMessage)
-        if found:
-            return {"status": True, "response": "Chirp Chirp"}
-        return {"status": True, "repsonse": None}
+        logger.info(f'Bird Call: {guildname} | {username} | {message}')
+        results = self.getBirds(guildname)
+        if not(results["status"]):
+            return {"status": False, "Response": None}
+        nest = results["response"]
+        for bird in nest:
+            if bird == username and nest[bird]["toggle"]:
+                rx = nest[bird]["regex"]
+                findRg = re.compile(r'\b{}\b'.format(rx), re.I)
+                found = findRg.search(message)
+                if found:
+                    logger.info(f'Bird found for {bird}')
+                    return {"status": True, "response": bird}
+        logger.info('Empty Nest')
+        return {"status": False, "repsonse": None}
 
     def loadConfig(self, inputFile: str) -> dict:
         """ Loads shoulderBird configuration into memory"""
