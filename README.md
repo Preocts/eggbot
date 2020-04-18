@@ -4,6 +4,8 @@
 
 # Refactor in progress
 
+### v0.3.1 draws near
+
 ----
 
 ## Customizable Discord Chat Bot

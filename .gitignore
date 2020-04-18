@@ -1,7 +1,5 @@
 # Custom
-/test_code
-/test_config
-test*.py
+test_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
