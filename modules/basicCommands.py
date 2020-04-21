@@ -26,7 +26,7 @@ class basicCommands:
         return
 
     def __str__(self):
-        return self.bcConfig
+        return str(self.bcConfig)
 
     def __bool__(self):
         if len(self.bcConfig):

@@ -68,7 +68,7 @@ class shoulderBird:
         return None
 
     def __str__(self):
-        return self.shoulderBird
+        return str(self.shoulderBird)
 
     def __bool__(self):
         if len(self.shoulderBird):
@@ -174,7 +174,7 @@ class shoulderBird:
 
         logger.debug(f'loadConfig: {inFile}')
         try:
-            self.bcConfig = json_io.loadConfig(inFile)
+            self.sbConfig = json_io.loadConfig(inFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
@@ -186,7 +186,7 @@ class shoulderBird:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            self.bcConfig = json_io.saveConfig(self.bcConfig, outFile)
+            self.sbConfig = json_io.saveConfig(self.sbConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         return {"status": True, "response": "Config saved"}

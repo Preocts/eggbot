@@ -19,7 +19,7 @@
     and toggle messages
 """
 import logging
-import json
+from . import json_io
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -35,7 +35,7 @@ class joinActions:
         self.loadConfig(inFile)
 
     def __str__(self):
-        return json.dumps(self.jaConfig, indent=4)
+        return str(self.jaConfig)
 
     def __bool__(self):
         if len(self.jaConfig):
@@ -190,40 +190,63 @@ class joinActions:
         logger.info('Name not found')
         return {"status": False, "response": "Join action name not found"}
 
-    def loadConfig(self, inFile: str = "./config/joinActions.json") -> dict:
-        """ Loads joinActions configuration into memory"""
+    def loadConfig(self, inFile: str = "./config/joinActions.json") -> bool:
+        """ Load a config into the class """
 
+        logger.debug(f'loadConfig: {inFile}')
         try:
-            with open(inFile) as file:
-                self.jaConfig = json.load(file)
-        except json.decoder.JSONDecodeError:
-            logger.error(f'joinActions Config file empty ', exc_info=True)
-        except FileNotFoundError:
-            logger.error('joinActions Config file not found '
-                         f'{inFile}', exc_info=True)
-            try:
-                open(inFile, 'w')
-            except OSError:
-                logger.critical('joinActions failed to load. Closing. ',
-                                exc_info=True)
-                exit()
+            self.jaConfig = json_io.loadConfig(inFile)
+        except json_io.JSON_Config_Error:
+            logger.error('Failed loading config file!', exc_info=True)
+            return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
-        return {"status": True, "response": "Config loaded"}
+        return {"status": True, "response": "Config Loaded"}
 
-    def saveConfig(self, outFile: str = "./config/joinActions.json") -> dict:
-        """ Writes joinActions configuration to disk """
+    def saveConfig(self, outFile: str = "./config/joinActions.json") -> bool:
+        """ Save a config into the class """
 
+        logger.debug(f'saveConfig: {outFile}')
         try:
-            with open(outFile, 'w') as file:
-                file.write(json.dumps(self.jaConfig, indent=4))
-                logger.info('Success: joinActions config '
-                            f'saved to {outFile}')
-
-        except OSError:
-            logger.error('joinActions Config file not saved to '
-                         f'{outFile}', exc_info=True)
-            return {"status": False, "response": "Error saving config"}
+            self.jaConfig = json_io.saveConfig(self.jaConfig, outFile)
+        except json_io.JSON_Config_Error:
+            logger.error('Failed loading config file!', exc_info=True)
         return {"status": True, "response": "Config saved"}
+
+    def getJoinMessage(self, guild: str, user: str) -> dict:
+        """ Returns any join messages to send
+
+        Args:
+            guild: The guildname where the join even fired
+            user: The discord.user.name of who joined (not nickname)
+
+        Returns:
+            {"status": True,
+             "response":
+                [{"message": "Message to send",
+                 "channel": "ChannelName"},]
+            }
+            If status is fales, response contains reason why
+            If channel is blank, the message is intended to be a DM
+
+        Raises:
+            None
+        """
+
+        joinMessages = []
+        results = self.readAll(guild)
+        if not(results["status"]):
+            logger.info(f'Guild not configured: {guild}')
+            return {"status": False, "response": "Guild not configured"}
+        actions = results["response"]
+        logger.debug(f'joinActions found: {actions}')
+
+        for a in actions:
+            if a["active"]:
+                joinMessages.append({"message": a["message"],
+                                     "channel": a["channel"]})
+        if not(len(joinMessages)):
+            return {"status": False, "response": "No join actions found"}
+        return {"status": True, "response": joinMessages}
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

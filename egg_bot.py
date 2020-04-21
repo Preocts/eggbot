@@ -24,7 +24,6 @@ load_dotenv()
 BOT_OWNER = os.getenv('BOT_OWNER')
 VERSION = None
 VERSION_NAME = None
-ENVIRO = None
 LOGLEVEL = None
 
 # Global Classes from modules
@@ -55,58 +54,42 @@ async def on_disconnect():
 
 # ON JOIN - Welcome the new user
 @dClient.event
-async def on_member_join(dMember):
+async def on_member_join(member):
     """ Handle the event of a user joining the guild """
 
-    logger.info(f'Member Join: Display Name: {dMember.display_name}'
-                f' | User ID: {dMember.id}'
-                f' | Account Created: {dMember.created_at}'
-                f' | Guild: {dMember.guild.name}')
+    logger.info(f'Member Join: Display Name: {member.display_name}'
+                f' | User ID: {member.id}'
+                f' | Account Created: {member.created_at}'
+                f' | Guild: {member.guild.name}')
 
-    """ joinActions Block
-
-        This will need to be moved into the module for module level control
-        features.
-
-        Scans for active joinActions that relate to the member.guild.name that
-        is provided. When found the message and/or action is taken in following
-        order of operations:
-        - Process invite then non-invite specific join actions
-        - Order of operation during processing:
-          - Apply role
-          - Actions
-          - DM Messages (find first order)
-          - Channel Messages (find first order)
-    """
-
-    results = JA.readAll(dMember.guild.name)
-    if not(results["status"]):
-        logger.info(f'Guild not configured: {dMember.guild.name}')
-    actions = results["response"]
-    logger.debug(f'{actions}')
-    # These should be in a config
+    # These should be in a config - FUTURE MODULE replaceTags
     lsHolders = ['[MENTION]', '[USERNAME]', '[GUILDNAME]', '\\n']
-    lsMember = [dMember.mention, dMember.display_name,
-                dMember.guild.name, '\n']
-    for a in actions:
-        if a["active"] and a["channel"] == "":
-            logger.info(f'Sending DM welcome message to {dMember.name}')
-            DM = a["message"]
-            await dMember.create_dm()
+    lsMember = [member.mention, member.display_name,
+                member.guild.name, '\n']
+
+    # joinActions call - messages only (no actions taken)
+    jaResults = JA.getJoinMessage(member.guild.name, member.name)
+
+    if jaResults["status"]:
+        for a in jaResults["response"]:
+            # Make replacements for tags - MOVE TO MODULE IN FUTURE
+            if not(len(a["message"])):
+                logger.warning('Blank message found, skipping')
+                continue
             for rp in lsHolders:
-                DM = DM.replace(rp, lsMember[lsHolders.index(rp)])
-            if len(DM) > 0:
-                await dMember.dm_channel.send(str(DM))
-        elif a["active"] and len(a["message"]) > 0:
-            logger.info('Sending Chat welcome message to '
-                        f'{a["channel"]} | {dMember.display_name}')
-            chatRoom = discord.utils.get(dMember.guild.channels,
-                                         name=a["channel"])
-            if chatRoom:
-                CH = a["message"]
-                for rp in lsHolders:
-                    CH = CH.replace(rp, lsMember[lsHolders.index(rp)])
-                await chatRoom.send(CH)
+                a["message"] = a["message"].replace(rp, lsMember[lsHolders.index(rp)])  # noqa: E501
+            if len(a["channel"]):
+                logger.info('Sending Chat message to channel: {a["channel"]}')
+                chatRoom = discord.utils.get(member.guild.channels,
+                                             name=a["channel"])
+                if not(chatRoom):
+                    logger.warning('Channel not found: {a["channel"]}')
+                else:
+                    await chatRoom.send(a["message"])
+            else:
+                logger.info(f'Sending DM message to: {member.name}')
+                await member.create_dm()
+                await member.dm_channel.send(a["message"])
 
 # ON MESSAGE - Bot Commands
 @dClient.event
@@ -127,6 +110,8 @@ async def on_message(message):
         # Reload Configurations - System command
         if message.clean_content == "egg!reloadAll":
             classHandler("load")
+        # if message.clean_content == "egg!testjoin":
+        #     await on_member_join(dClient.get_guild(621085335979294740).get_member(int(BOT_OWNER)))  # noqa: E501
 
     if str(type(message.channel)) == "<class 'discord.channel.TextChannel'>":
 
@@ -171,8 +156,6 @@ def loadCore(inputFile: str = './config/eggbot.json') -> bool:
             VERSION_NAME = configs["CoreConfig"]["VersionName"]
             global LOGLEVEL
             LOGLEVEL = configs["CoreConfig"]["Debug_Level"]
-            global ENVIRO
-            ENVIRO = configs["CoreConfig"]["Environment"]
         except json.decoder.JSONDecodeError:
             logger.critical('Configuration file empty or formatted '
                             'incorrectly, that\'s sad')
@@ -243,7 +226,7 @@ def main():
     logger.info('Cracking the module carton open for more supplies...')
     classHandler("load")
     logger.info('Loaded yolk configuration file.')
-    logger.debug(f'{VERSION} {VERSION_NAME} {LOGLEVEL} {ENVIRO}')
+    logger.debug(f'{VERSION} {VERSION_NAME} {LOGLEVEL}')
     logger.info(f'Hatch cycle started.')
     logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
     logger.info('Hatching onto Discord now.')
