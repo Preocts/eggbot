@@ -15,6 +15,7 @@ import discord
 import json
 import logging
 import modules
+import asyncio
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
@@ -27,10 +28,13 @@ ENVIRO = None
 LOGLEVEL = None
 
 # Global Classes from modules
+# One day I'll figure out how to do these dynamically and the world will fall!
 JA = None
 SB = None
+BC = None
 
-dClient = discord.Client()
+dClient = discord.Client(status='online',
+                         activity=discord.Activity(type=2, name="you breathe"))
 
 # ON READY - connection established
 @dClient.event
@@ -109,8 +113,24 @@ async def on_member_join(dMember):
 async def on_message(message):
     """ Event triggers on every new message bot can see """
 
-    """ShoulderBird Block - Alerting for custom search strings """
+    # Ignore messages by bot account
+    if message.author == dClient.user:
+        return False
+
+    if str(message.author.id) == BOT_OWNER:
+        # Disconnect - System command
+        if message.clean_content == "egg!disconnect":
+            classHandler("drop")  # Save and drop our classes
+            await message.delete()
+            await dClient.close()
+            return False
+        # Reload Configurations - System command
+        if message.clean_content == "egg!reloadAll":
+            classHandler("load")
+
     if str(type(message.channel)) == "<class 'discord.channel.TextChannel'>":
+
+        # ShoulderBird Block - Alerting for custom search strings
         results = SB.birdCall(message.guild.name, message.author.name,
                               message.clean_content)
         if results["status"]:
@@ -124,6 +144,20 @@ async def on_message(message):
                                            message.channel.name +
                                            '** saying: \n`' +
                                            message.clean_content + '`')
+
+        # basicCommand Processing
+        results = BC.commandCheck(message.guild.name, message.channel.name,
+                                  message.author.roles.copy(),
+                                  message.author.name, message.clean_content)
+        if results["status"]:
+            await message.channel.send(results["response"])
+        else:
+            logger.debug(f'commandCheck False: {results["response"]}')
+
+    if str(type(message.channel)) == "<class 'discord.channel.DMChannel'>":
+        # Add message logging here for DM's to the bot
+        pass
+
     return
 
 
@@ -148,13 +182,48 @@ def loadCore(inputFile: str = './config/eggbot.json') -> bool:
             logger.critical('', exc_info=True)
 
 
-def loadClass():
-    """ Loads classes into globals. One day this will be automatic """
+def classHandler(action: str):
+    """ Handles the classes for the bot -=-=One day this will be automatic=-=-
 
+        Args:
+            action: One of two actions: Load, Drop
+
+        Returns:
+            None
+
+        Raises:
+            None
+    """
+
+    action = action.lower()
     global JA
-    JA = modules.joinActions.joinActions()
     global SB
-    SB = modules.shoulderBird.shoulderBird()
+    global BC
+
+    if action == "load":
+        if JA:
+            JA.loadConfig()
+        else:
+            JA = modules.joinActions.joinActions()
+    else:
+        JA = None
+
+    if action == "load":
+        if SB:
+            SB.loadConfig()
+        else:
+            SB = modules.shoulderBird.shoulderBird()
+    else:
+        SB = None
+
+    if action == "load":
+        if BC:
+            BC.loadConfig()
+        else:
+            BC = modules.basicCommands.basicCommands()
+    else:
+        BC = None
+
     return
 
 
@@ -172,14 +241,24 @@ def main():
         exit()
     logger.info('Secrets loaded, assets contained, plans are hatching...')
     logger.info('Cracking the module carton open for more supplies...')
-    loadClass()
+    classHandler("load")
     logger.info('Loaded yolk configuration file.')
     logger.debug(f'{VERSION} {VERSION_NAME} {LOGLEVEL} {ENVIRO}')
     logger.info(f'Hatch cycle started.')
     logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
     logger.info('Hatching onto Discord now.')
 
-    dClient.run(DISCORD_TOKEN)
+    # dClient.run(DISCORD_TOKEN)
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(dClient.start(DISCORD_TOKEN))
+    except KeyboardInterrupt:
+        logging.info('KeyboardInterrupt detected. Logging out')
+        loop.run_until_complete(dClient.logout())
+        # cancel all tasks lingering
+    finally:
+        loop.close()
+
     return
 
 

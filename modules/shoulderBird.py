@@ -59,12 +59,12 @@ class shoulderBird:
             }
     """
 
-    def __init__(self, inputFile="./config/shoulderBird.json"):
+    def __init__(self, inFile: str = "./config/shoulderBird.json"):
         """INIT"""
-        logging.info(f'Start: Initializing shoulderBird: {inputFile}')
+        logging.info(f'Start: Initializing shoulderBird: {inFile}')
         self.shoulderBird = {}
         self.activeConfig = ""
-        self.loadConfig(inputFile)
+        self.loadConfig(inFile)
         return None
 
     def __str__(self):
@@ -76,6 +76,13 @@ class shoulderBird:
         return False
 
     __nonzero__ = __bool__
+
+    def __del__(self):
+        """ Save configs on exit """
+        if self.activeConfig is None:
+            logger.warn('Lost activeConfig name while closing, not good.')
+            self.activeConfig = "./config/shoulderBird_DUMP.json"
+        self.saveConfig(self.activeConfig)
 
     def getBirds(self, guildname: str) -> dict:
         """ Fetch all defined Birds from the config file """
@@ -162,42 +169,37 @@ class shoulderBird:
         logger.info('Empty Nest')
         return {"status": False, "repsonse": None}
 
-    def loadConfig(self, inputFile: str) -> dict:
+    def loadConfig(self, inFile: str = "./config/shoulderBird.json") -> dict:
         """ Loads shoulderBird configuration into memory"""
 
         try:
-            with open(inputFile) as file:
+            with open(inFile) as file:
                 self.shoulderBird = json.load(file)
         except json.decoder.JSONDecodeError:
             logger.error(f'shoulderBird Config file empty ', exc_info=True)
         except FileNotFoundError:
             logger.error('shoulderBird Config file not found '
-                         f'{inputFile}', exc_info=True)
+                         f'{inFile}', exc_info=True)
             try:
-                open(inputFile, 'w')
+                open(inFile, 'w')
             except OSError:
                 logger.critical('shoulderBird failed to load. Closing. ',
                                 exc_info=True)
                 exit()
-        self.activeConfig = inputFile
+        self.activeConfig = inFile
         return {"status": True, "response": "Config loaded"}
 
-    def saveConfig(self, outputFile: str = None) -> dict:
+    def saveConfig(self, outFile: str = "./config/shoulderBird.json") -> dict:
         """ Writes shoulderBird configuration to disk """
 
-        if not(outputFile) and len(self.activeConfig) > 0:
-            outputFile = self.activeConfig
-        else:
-            logger.warning(f'saveConfig: No file give: {outputFile}')
-            return {"status": False, "response": "Missing filename"}
         try:
-            with open(outputFile, 'w') as file:
+            with open(outFile, 'w') as file:
                 file.write(json.dumps(self.shoulderBird, indent=4))
                 logger.info('Success: shoulderBird config '
-                            f'saved to {outputFile}')
+                            f'saved to {outFile}')
 
         except OSError:
-            logger.error(f'shoulderBird Config file not saved to {outputFile}',
+            logger.error(f'shoulderBird Config file not saved to {outFile}',
                          exc_info=True)
             return {"status": False, "response": "Error saving config"}
         return {"status": True, "response": "Config saved"}
