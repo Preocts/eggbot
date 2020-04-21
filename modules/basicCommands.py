@@ -8,7 +8,6 @@
     response and replies back into the chat where executed. Th
 """
 import logging
-import json
 import time
 from . import json_io
 
@@ -27,7 +26,7 @@ class basicCommands:
         return
 
     def __str__(self):
-        return json.dumps(self.bcConfig, indent=4)
+        return self.bcConfig
 
     def __bool__(self):
         if len(self.bcConfig):
@@ -130,17 +129,7 @@ class basicCommands:
         return {"status": True, "response": cData["content"]}
 
     def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
-        """ Load a config into the class
-
-            Args:
-                inFile: JSON file to be loaded
-
-            Returns:
-                {"status": true/false, "response": str}
-
-            Raises:
-                None
-        """
+        """ Load a config into the class """
 
         logger.debug(f'loadConfig: {inFile}')
         try:
@@ -152,18 +141,7 @@ class basicCommands:
         return {"status": True, "response": "Config Loaded"}
 
     def saveConfig(self, outFile: str = "./config/basicCommands.json") -> bool:
-        """ Save a config into the class
-
-            Args:
-                outFile: JSON file to be loaded
-                (If not provided, self.activeConfig is used)
-
-            Returns:
-                {"status": true/false, "response": str}
-
-            Raises:
-                None
-        """
+        """ Save a config into the class """
 
         logger.debug(f'saveConfig: {outFile}')
         try:
@@ -192,7 +170,6 @@ class basicCommands:
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs
-
 
     # def create(self, guildname: str, **kwargs) -> dict:
     #     """ Creates a new join action in the configuration file
