@@ -1,12 +1,17 @@
-# Egg Bot
+# Egg Bot v0.3.1
+
+Created by Preocts
+
+[preocts@preocts.com](mailto:preocts@preocts.com) | Preocts#8196 Discord | [Github](https://github.com/Preocts/Egg_Bot)
 
 ---
 
-# Refactor in progress
+**Requirements**
+- [Python 3.8.1](https://www.python.org/)
+- [discordpy v1.3.2](https://github.com/Rapptz/discord.py)
+- [pyhton-dotenv](https://github.com/theskumar/python-dotenv)
 
-### v0.3.1 draws near
-
-----
+---
 
 ## Customizable Discord Chat Bot
 What started as a simple way to send a welcome message when a new user joined a guild, Egg Bot has expanded to include:
@@ -14,12 +19,11 @@ What started as a simple way to send a welcome message when a new user joined a 
 - Definable greetings, both DM and chat, for new user joins
 - A custom, regex driven, alert system that watches for mentions of your choice called ShoulderBird
 - Highly definable permission based chat commands
- - Control by Guild, Channels, Roles, and Users
- - more features in the works
-
-Contact **Preocts#8196** on Discord for more info
+- Control by Guild, Channels, Roles, and Users
+- more features in the works
 
 ----
+
 ## .env
 Running this program requires you to create and define your own .env file with two keys.
 
