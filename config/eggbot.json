@@ -1,0 +1,8 @@
+{
+    "CoreConfig": {
+        "Version": "0.3.1",
+        "VersionName": "Spawn Egg",
+        "Debug_Level": "DEBUG",
+        "Environment": "Prod"
+    }
+}

@@ -1,3 +1,33 @@
+Change log 0.3.1 - Refactor I
+- Created Module for ShoulderBird
+- New config file for ShoulderBird
+- Load and Save config file for ShoulderBird created
+- Directory restructure including new folders:
+    + config : all configuration files
+    + logs : all log outputs
+    + modules : all module code
+- Python Logging Added
+- Logger configuration and init code completed
+
+- Created Module for joinActions
+    + Better welcome message configuration methods!
+    + Set roles on join
+    + Future update: roles for specific invites!
+
+- Standard output format for methods
+- Small changes to eggbot.py
+    + Very tiny
+    + You wouldn't notice at all
+    + Also not backward compatible, at all
+
+- json_io helper scripts created to ease loading/saving json configs
+    + Custom Raise Class: JSON_Config_Error
+- Created Module for basicCommands
+    + VASTLY definable restrictions
+    + Throttle to prevent spam
+    + basicCommands only return a value to print to a channel
+
+
 Change log 0.2.8 - patch
 - Removed optout references for the time being
 
