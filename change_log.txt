@@ -1,11 +1,13 @@
 Change log v0.3.2 - Clean-up
-- __str__ output of joinActions.py changed (removed json.dumps)
+- __str__ output format of joinActions.py changed (removed json.dumps)
   - Same done for basicCommands.py
   - Same done for shoulderBird.py
 - Import of json removed from joinActions.py, basicCommands.py, shoulderBird.py
 - saveConfig and loadConfig methods adjusted to call from json_io module (for unified file i/o)
   - Done in shoulderBird.py and joinActions.py
-
+- Migrated the rest of joinAction code not dealing with discord objects to the module
+  - Created getJoinMessage() method to process on_member_join events
+- Added error checks for empty joinAction messages
 
 Change log 0.3.1 - Refactor I
 - Created Module for ShoulderBird
