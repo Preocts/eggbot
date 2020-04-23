@@ -1,3 +1,12 @@
+Change log v0.3.3 - basicCommands enhancements
+- addCommand method created. Supports simple or complex commands
+  - Simple Command:
+    - !setTrigger !command Whatever the command will say in chat
+  - Complex Command:
+    - !setTrigger !command | content = Whatever the command will say | roles = RoleRestriction | users = UserName
+  - Key list: users, channels, roles, throttle, content, help
+
+
 Change log v0.3.2 - Clean-up
 - __str__ output format of joinActions.py changed (removed json.dumps)
   - Same done for basicCommands.py

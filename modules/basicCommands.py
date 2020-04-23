@@ -12,6 +12,13 @@ import time
 from . import json_io
 
 logger = logging.getLogger(__name__)  # Create module level logger
+GUILD_TEMPLATE = {"prohibitedChannels": [],
+                  "prohibitedUsers": [],
+                  "guildCommands": {}}
+COMMAND_KEYS = ["users", "channels", "roles", "throttle",
+                "lastran", "content", "help"]
+COMMAND_DEFAULT = [[], [], [], 10, 0, "", ""]
+COMMAND_DATATYPE = ["list", "list", "list", "int", "int", "str", "str"]
 
 
 class basicCommands:
@@ -128,6 +135,50 @@ class basicCommands:
         self.bcConfig[guild]["guildCommands"][cName]["lastran"] = time.time()
         return {"status": True, "response": cData["content"]}
 
+    def addCommand(self, guild: str, input: str) -> dict:
+        """ Add a command to the config unless it already exists """
+
+        if not(len(input)):
+            return {"status": False, "response": "No input"}
+        logger.debug(f'addCommand: {guild} | {input}')
+        sliceIn = input.split(" | ")
+        trigger = sliceIn[0].split()[1]
+        content = " ".join(sliceIn.pop(0).split()[2:])
+        # Check for empty content
+        if (not(len(content)) and
+           not(len(list(filter(lambda x: "content" in x, sliceIn))))):
+            return {"status": False, "response": "No content to set"}
+        # Check for guild config
+        if not(guild in self.bcConfig.keys()):
+            self.bcConfig[guild] = GUILD_TEMPLATE
+
+        if trigger in self.bcConfig[guild]["guildCommands"].keys():
+            return {"status": False, "response": "Command exists"}
+
+        self.bcConfig[guild]["guildCommands"][trigger] = {}
+        for key in COMMAND_KEYS:
+            keyValue = COMMAND_DEFAULT[COMMAND_KEYS.index(key)]
+            self.bcConfig[guild]["guildCommands"][trigger][key] = keyValue
+
+        if not(len(sliceIn)):
+            # simple command
+            self.bcConfig[guild]["guildCommands"][trigger]["content"] = content
+        else:
+            # complex command
+            for o in sliceIn:
+                if (not(len(o.split(" = ")))
+                   and not(o.split(" = ") in COMMAND_KEYS)):
+                    continue
+                key = o.split(" = ")[0]
+                value = o.split(" = ")[1]
+                if COMMAND_DATATYPE[COMMAND_KEYS.index(key)] == "str":
+                    self.bcConfig[guild]["guildCommands"][trigger][key] = value
+                elif COMMAND_DATATYPE[COMMAND_KEYS.index(key)] == "int":
+                    self.bcConfig[guild]["guildCommands"][trigger][key] = int(value)  # noqa: E501
+                else:
+                    self.bcConfig[guild]["guildCommands"][trigger][key].append(value)  # noqa: E501
+        return {"status": True, "reponse": "Command set"}
+
     def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
         """ Load a config into the class """
 
@@ -170,45 +221,3 @@ class basicCommands:
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs
-
-    # def create(self, guildname: str, **kwargs) -> dict:
-    #     """ Creates a new join action in the configuration file
-    #
-    #     Keyword arguements are optional, the config entry will be populated
-    #     with empty values. .update() can be used to edit. Returns a failure
-    #     if the "name" keyword already exists in the configuration file.
-    #
-    #     Args:
-    #         guildname: Target guildname
-    #         [name], (optionals set by config)
-    #
-    #     Keys:
-    #         name: Unique name for the join action
-    #         channel: Channel any message is displayed.
-    #                  Leaving this blank will result in a direct message
-    #         addRole: Grants user a list of roles on join
-    #         message: Displays this message to given channel/DM
-    #         active: Boolean toggle
-    #
-    #         limitRole: List roles required to recieve this join action
-    #         limitInvite: List invite IDs required to recieve this join action
-    #
-    #     Returns:
-    #         {"status": true/false, "response": str}
-    #     """
-    #
-    #     logger.debug(f'create: {guildname} | {kwargs.items()}')
-    #     # Default Config, change to add/remove:
-    #     config = {'name': '',
-    #               'channel': '',
-    #               'roles': '',
-    #               'message': '',
-    #               'active': True,
-    #               'limitRole': '',
-    #               'limitInvite': ''}
-    #     for key, value in kwargs.items():
-    #         if key in config:
-    #             config[key] = value
-    #     if len(config["name"]) == 0:
-    #         logger.info('Name not provided for join action')
-    #         return {"status": False, "response": "Name not defined"}
