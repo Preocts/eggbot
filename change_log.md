@@ -1,4 +1,4 @@
-Change log v0.3.3 - basicCommands enhancements
+##### Change Log v0.3.3 - basicCommands enhancements
 - addCommand method created. Supports simple or complex commands
   - Simple Command:
     - !setTrigger !command Whatever the command will say in chat
@@ -6,8 +6,12 @@ Change log v0.3.3 - basicCommands enhancements
     - !setTrigger !command | content = Whatever the command will say | roles = RoleRestriction | users = UserName
   - Key list: users, channels, roles, throttle, content, help
 
+- ShoulderBird can now ignore specific users on specific guilds
+- ShoulderBird will no longer chirp if the user isn't in the room a message is seen in.
 
-Change log v0.3.2 - Clean-up
+---
+
+##### Change Log v0.3.2 - Clean-up
 - __str__ output format of joinActions.py changed (removed json.dumps)
   - Same done for basicCommands.py
   - Same done for shoulderBird.py
@@ -18,7 +22,9 @@ Change log v0.3.2 - Clean-up
   - Created getJoinMessage() method to process on_member_join events
 - Added error checks for empty joinAction messages
 
-Change log 0.3.1 - Refactor I
+---
+
+##### Change Log 0.3.1 - Refactor I
 - Created Module for ShoulderBird
 - New config file for ShoulderBird
 - Load and Save config file for ShoulderBird created
@@ -47,18 +53,25 @@ Change log 0.3.1 - Refactor I
     + Throttle to prevent spam
     + basicCommands only return a value to print to a channel
 
+---
 
-Change log 0.2.8 - patch
+##### Change Log 0.2.8 - patch
 - Removed optout references for the time being
 
-Change log 0.2.7 - ShoulderBird patch
+---
+
+##### Change Log 0.2.7 - ShoulderBird patch
 - Fixed the regEx search to include proper word boundaries
 - Secret command actions for funs
 
-Change log 0.2.6 - ShoulderBird patch
+---
+
+##### Change Log 0.2.6 - ShoulderBird patch
 - ShoulderBird now uses message.clean_content for better output. (remove @123456789 with mentions)
 
-Change log 0.2.5 - OptOut Options
+---
+
+##### Change Log 0.2.5 - OptOut Options
 - Hotfix: missed 'await' in on_member_join updates. I am full of cocoa
 - Hotfix: discord.member class behaving weirdly in on_member_join - rolled back to the old code (kinda)
 - EggConfig additions
@@ -70,10 +83,14 @@ Change log 0.2.5 - OptOut Options
     + Added config load to eggConfigFile.loadConfig() and eggConfigFile.saveConfig()
 - on_member_join now checks for optoutToggle status
 
-Change log 0.2.4 - Hotfix
+---
+
+##### Change Log 0.2.4 - Hotfix
 - Corrected sb-set action so that it no longer removes all one entry in ShoulderBird searches
 
-Change log 0.2.3 - ShoulderBird
+---
+
+##### Change Log 0.2.3 - ShoulderBird
 - Formatting changes.
 - on_member_join updated to use the proper DM and Chat calls
     + It was previously using its' own call, how arrogant
@@ -86,7 +103,9 @@ Change log 0.2.3 - ShoulderBird
     + sb-show : Output current regEx ShoulderBird search for all guilds
     + sb-delete {guildname} : Delete search from provided guild
 
-Change log 0.2.2
+---
+
+##### Change Log 0.2.2
 - tore apart (refactored) on_message
     + Shoulder Bird gets its own def
     + Commands go to their own def
@@ -127,7 +146,9 @@ Change log 0.2.2
 - Updated base.egg to show some default commands
 - Updated README.md - the struggle is real
 
-Change log 0.2.1
+---
+
+##### Change Log 0.2.1
 - Input parameter for configuration file created.
     + egg_bot.py <filename>
     + if parameter is not provided default is 'base.egg'
@@ -152,7 +173,9 @@ Change log 0.2.1
 - Code Changes:
     + instances of .addGuild changed to .addConfig
 
-Change log 0.1.3
+---
+
+##### Change Log 0.1.3
 - renamed class eggINI to eggConfig
     - renamed dict iniFile to configFile
 - removed def loadFile() from code
@@ -163,7 +186,9 @@ Change log 0.1.3
 - Known bug - Bots don't like greeting other bots (sending DMs)
 - Known bug - setting an image file for greetings and not having the image causes an ungraceful exception
 
-Change log 0.1.2
+---
+
+##### Change Log 0.1.2
 - Added support for Keyword to config file
     + [MENTION] - @ tag of user display name
 - Added config line "allowedChatRooms"
@@ -179,7 +204,9 @@ Change log 0.1.2
 - Hard coded use for ShoulderBird (Future INI planned)
 - on_message now conditions according to the channel type (Chat/DM/Group)
 
-Change log 0.1.1
+---
+
+##### Change Log 0.1.1
 - Logging for connection added
 - Logging for disconnect added
 - Removed event for status changes
