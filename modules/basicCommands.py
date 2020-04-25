@@ -196,7 +196,7 @@ class basicCommands:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            self.bcConfig = json_io.saveConfig(self.bcConfig, outFile)
+            json_io.saveConfig(self.bcConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         return {"status": True, "response": "Config saved"}
