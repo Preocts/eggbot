@@ -121,7 +121,11 @@ async def on_message(message):
         if results["status"]:
             bird = discord.utils.get(message.guild.members,
                                      name=results["response"])
-            if bird:
+            # Anti-snooping: Stop bird from chirping if user isn't in channel
+            snack = discord.utils.find(lambda m: m.name == message.author.name,
+                                       message.channel.members)
+            logger.debug(f'Anti-snoop: {snack}')
+            if bird and snack:
                 await bird.create_dm()
                 await bird.dm_channel.send('Mention alert: **' +
                                            str(message.author.display_name) +
@@ -230,6 +234,11 @@ def main():
     logger.info(f'Hatch cycle started.')
     logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
     logger.info('Hatching onto Discord now.')
+
+    # import time
+    # classHandler("drop")
+    # time.sleep(3)
+    # exit()
 
     # dClient.run(DISCORD_TOKEN)
     loop = asyncio.get_event_loop()
