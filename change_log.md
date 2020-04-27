@@ -1,3 +1,9 @@
+##### Change Log v0.3.4 - shoulderBird enhancements
+- Bug fix: No need to check username in bird search. It resulted in all negative searches unless the person typing was the person the shoulderBird ping was for which... defeats the purpose.  Honestly angry at this mistake I made.
+- Bug fix: anti-snoop was looking at the wrong name. Again, the user typing the message can be assumed to be in the room the message is typed. Just sayin'
+- Bug fix/Enhancement: Return a list of birds(users) found instead of finding first regex match and returning.
+
+
 ##### Change Log v0.3.3 - basicCommands enhancements
 - addCommand method created. Supports simple or complex commands
   - Simple Command:

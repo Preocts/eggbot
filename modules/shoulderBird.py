@@ -155,24 +155,33 @@ class shoulderBird:
             sSearch: The regEx string of the Bird
 
         Returns:
+            {"status": true, "response": ["usernames"]}
 
+        Raises:
+            None
         """
 
         logger.debug(f'Bird Call: {guildname} | {username} | {message}')
+        # Is the guild configured?
         results = self.getBirds(guildname)
         if not(results["status"]):
+            logger.debug(f'Guild returned no results: {guildname}')
             return {"status": False, "Response": None}
         nest = results["response"]
+        birdList = []
         for bird in nest:
-            if bird == username and nest[bird]["toggle"]:
+            # check all available active regex for a hit
+            if nest[bird]["toggle"]:
                 rx = nest[bird]["regex"]
                 findRg = re.compile(r'\b{}\b'.format(rx), re.I)
                 found = findRg.search(message)
                 if found:
                     logger.info(f'Bird found for {bird}')
-                    return {"status": True, "response": bird}
+                    birdList.append(bird)
+        if len(birdList):
+            return {"status": True, "response": birdList}
         logger.info('Empty Nest')
-        return {"status": False, "repsonse": None}
+        return {"status": False, "repsonse": []}
 
     def gagBird(self, guildname: str, username: str, target: str) -> dict:
         """ Toggles a given target for a given guild to be ignored

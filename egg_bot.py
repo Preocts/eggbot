@@ -128,20 +128,22 @@ async def on_message(message):
         results = SB.birdCall(message.guild.name, message.author.name,
                               message.clean_content)
         if results["status"]:
-            bird = discord.utils.get(message.guild.members,
-                                     name=results["response"])
-            # Anti-snooping: Stop bird from chirping if user isn't in channel
-            snack = discord.utils.find(lambda m: m.name == message.author.name,
-                                       message.channel.members)
-            logger.debug(f'Anti-snoop: {snack}')
-            if bird and snack:
-                await bird.create_dm()
-                await bird.dm_channel.send('Mention alert: **' +
-                                           str(message.author.display_name) +
-                                           '** mentioned you in **' +
-                                           message.channel.name +
-                                           '** saying: \n`' +
-                                           message.clean_content + '`')
+            birds = results["response"]
+            for feathers in birds:
+                bird = discord.utils.get(message.guild.members,
+                                         name=feathers)
+                # Anti-snooping: Stop bird chirping if user isn't in channel
+                snack = discord.utils.find(lambda m: m.name == feathers,
+                                           message.channel.members)
+                logger.debug(f'Anti-snoop: {feathers} - {snack}')
+                if bird and snack:
+                    await bird.create_dm()
+                    await bird.dm_channel.send('Mention alert: **' +
+                                               str(message.author.display_name)
+                                               + '** mentioned you in **' +
+                                               message.channel.name +
+                                               '** saying: \n`' +
+                                               message.clean_content + '`')
 
         # basicCommand Processing
         results = BC.commandCheck(message.guild.name, message.channel.name,
