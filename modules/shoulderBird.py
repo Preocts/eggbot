@@ -47,7 +47,8 @@ class shoulderBird:
             "guildname" {
                 "username": {
                     "regex": "Expression",
-                    "toggle": Boolean
+                    "toggle": Boolean,
+                    "ignore": ["string",]
                 }
             }
         }

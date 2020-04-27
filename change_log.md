@@ -5,9 +5,9 @@
   - Complex Command:
     - !setTrigger !command | content = Whatever the command will say | roles = RoleRestriction | users = UserName
   - Key list: users, channels, roles, throttle, content, help
-
 - ShoulderBird can now ignore specific users on specific guilds
 - ShoulderBird will no longer chirp if the user isn't in the room a message is seen in.
+- Fixed issue with owner command trying to delete a DM message
 
 ---
 
