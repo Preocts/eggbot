@@ -73,7 +73,7 @@ def saveConfig(json_config: dict, outputFile: str) -> bool:
     except OSError:
         # logger.error(f'File not be opened: {outputFile}', exc_info=True)
         raise JSON_Config_Error(f"Could not open target file: {outputFile}")
-    logger.info('Success: Config saved to: {outputFile}')
+    logger.info(f'Success: Config saved to: {outputFile}')
     return True
 
 # May Bartmoss have mercy on your data for running this bot.

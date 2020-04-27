@@ -15,6 +15,9 @@
     Create/Update a search:
         results = SB.putBird("GuildName", "UserName", "RegEx Search String")
 
+    Add/Remove ignore name:
+        results = SB.gagBird("GuildName", "UserName")
+
     Delete a search:
         results = SB.delBird("GuildName", "UserName")
 
@@ -44,7 +47,8 @@ class shoulderBird:
             "guildname" {
                 "username": {
                     "regex": "Expression",
-                    "toggle": Boolean
+                    "toggle": Boolean,
+                    "ignore": ["string",]
                 }
             }
         }
@@ -62,16 +66,16 @@ class shoulderBird:
     def __init__(self, inFile: str = "./config/shoulderBird.json"):
         """INIT"""
         logging.info(f'Start: Initializing shoulderBird: {inFile}')
-        self.shoulderBird = {}
+        self.sbConfig = {}
         self.activeConfig = ""
         self.loadConfig(inFile)
         return None
 
     def __str__(self):
-        return str(self.shoulderBird)
+        return str(self.sbConfig)
 
     def __bool__(self):
-        if len(self.shoulderBird):
+        if len(self.sbConfig):
             return True
         return False
 
@@ -88,20 +92,20 @@ class shoulderBird:
         """ Fetch all defined Birds from the config file """
 
         logger.debug(f'getBirds: {guildname}')
-        if ((guildname in self.shoulderBird) and
-           len(self.shoulderBird[guildname])):
-            return {"status": True, "response": self.shoulderBird[guildname]}
+        if ((guildname in self.sbConfig) and
+           len(self.sbConfig[guildname])):
+            return {"status": True, "response": self.sbConfig[guildname]}
         return {"status": False, "response": "Guild not found or empty"}
 
     def getBird(self, guildname: str, username: str) -> dict:
         """ Fetch a single defined Bird from the config file """
 
         logger.debug(f'getBird call: {guildname} | {username}')
-        if ((guildname in self.shoulderBird) and
-           len(self.shoulderBird[guildname])):
-            if username in self.shoulderBird[guildname]:
-                if self.shoulderBird[guildname][username]["toggle"]:
-                    response = self.shoulderBird[guildname][username]["regex"]
+        if ((guildname in self.sbConfig) and
+           len(self.sbConfig[guildname])):
+            if username in self.sbConfig[guildname]:
+                if self.sbConfig[guildname][username]["toggle"]:
+                    response = self.sbConfig[guildname][username]["regex"]
                     return {"status": True, "response": response}
                 else:
                     return {"status": False, "response": "Toggled off"}
@@ -111,20 +115,21 @@ class shoulderBird:
         """ Stores a Bird into the loaded config """
 
         logger.debug(f'putBird: {guildname} | {username} | {regex}')
-        if not(guildname in self.shoulderBird):
-            self.shoulderBird[guildname] = {}
-        self.shoulderBird[guildname][username] = {}
-        self.shoulderBird[guildname][username]["regex"] = regex
-        self.shoulderBird[guildname][username]["toggle"] = False
+        if not(guildname in self.sbConfig):
+            self.sbConfig[guildname] = {}
+        self.sbConfig[guildname][username] = {}
+        self.sbConfig[guildname][username]["regex"] = regex
+        self.sbConfig[guildname][username]["toggle"] = False
+        self.sbConfig[guildname][username]["ignore"] = []
         return {"status": True, "response": "Bird put in config"}
 
     def delBird(self, guildname: str, username: str) -> dict:
         """ Removes a Bird from the loaded config """
 
         logger.debug(f'delBirds: {guildname} | {username}')
-        if guildname in self.shoulderBird:
-            if username in self.shoulderBird[guildname]:
-                del self.shoulderBird[guildname][username]
+        if guildname in self.sbConfig:
+            if username in self.sbConfig[guildname]:
+                del self.sbConfig[guildname][username]
                 return {"status": True, "response": "Bird deleted"}
         return {"status": False, "response": "Guild or user not found"}
 
@@ -132,14 +137,14 @@ class shoulderBird:
         """ Toggles ShoulderBird for a specific guild """
 
         logger.debug(f'delBirds: {guildname} | {username}')
-        if guildname in self.shoulderBird:
-            if username in self.shoulderBird[guildname]:
-                curToggle = self.shoulderBird[guildname][username]["toggle"]
+        if guildname in self.sbConfig:
+            if username in self.sbConfig[guildname]:
+                curToggle = self.sbConfig[guildname][username]["toggle"]
                 if curToggle:
                     curToggle = False
                 else:
                     curToggle = True
-                self.shoulderBird[guildname][username]["toggle"] = curToggle
+                self.sbConfig[guildname][username]["toggle"] = curToggle
         return {"status": curToggle, "response": None}
 
     def birdCall(self, guildname: str, username: str, message: str) -> dict:
@@ -153,7 +158,7 @@ class shoulderBird:
 
         """
 
-        logger.info(f'Bird Call: {guildname} | {username} | {message}')
+        logger.debug(f'Bird Call: {guildname} | {username} | {message}')
         results = self.getBirds(guildname)
         if not(results["status"]):
             return {"status": False, "Response": None}
@@ -168,6 +173,43 @@ class shoulderBird:
                     return {"status": True, "response": bird}
         logger.info('Empty Nest')
         return {"status": False, "repsonse": None}
+
+    def gagBird(self, guildname: str, username: str, target: str) -> dict:
+        """ Toggles a given target for a given guild to be ignored
+
+        While logging messages may capture messages from ignored users if
+        the logging levels are set low enough, ignored users will not trigger
+        a shoulderBird alert.
+
+        Hopefully, someday, Discord figures out the simple application of
+        display: none; to hide blocked users in the channel history. >:V
+
+        Args:
+            guildname: Name of the guild to configure
+            username: Username of ShoulderBird user
+            target: Username (not nickname) of user to ignore
+
+        Returns:
+            {"status": True/False, "response": "string"}
+
+        Raises:
+            None
+        """
+
+        logger.debug(f'Gag Bird: {guildname} | {username}')
+        if not(guildname in self.sbConfig):
+            return {"status": False, "response": "No nests in that guild"}
+        if not(username in self.sbConfig[guildname]):
+            return {"status": False, "response": "No bird by that username"}
+        if target in self.sbConfig[guildname][username]["ignore"]:
+            ix = self.sbConfig[guildname][username]["ignore"].index(target)
+            self.sbConfig[guildname][username]["ignore"].pop(ix)
+            return {"status": True,
+                    "response": f"ShoulderBird listen to {target} now"}
+        else:
+            self.sbConfig[guildname][username]["ignore"].append(target)
+            return {"status": True,
+                    "response": f"ShoulderBird ignore {target} now"}
 
     def loadConfig(self, inFile: str = "./config/shoulderBird.json") -> bool:
         """ Load a config into the class """
@@ -186,7 +228,7 @@ class shoulderBird:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            self.sbConfig = json_io.saveConfig(self.sbConfig, outFile)
+            json_io.saveConfig(self.sbConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         return {"status": True, "response": "Config saved"}

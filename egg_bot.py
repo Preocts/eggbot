@@ -100,11 +100,20 @@ async def on_message(message):
     if message.author == dClient.user:
         return False
 
+    if str(type(message.channel)) == "<class 'discord.channel.TextChannel'>":
+        channelType = "text"
+    elif str(type(message.channel)) == "<class 'discord.channel.DMChannel'>":
+        channelType = "dm"
+    else:
+        # Bot doesn't support Group private chats
+        return False
+
     if str(message.author.id) == BOT_OWNER:
         # Disconnect - System command
         if message.clean_content == "egg!disconnect":
             classHandler("drop")  # Save and drop our classes
-            await message.delete()
+            if channelType == "text":
+                await message.delete()
             await dClient.close()
             return False
         # Reload Configurations - System command
@@ -113,7 +122,7 @@ async def on_message(message):
         # if message.clean_content == "egg!testjoin":
         #     await on_member_join(dClient.get_guild(621085335979294740).get_member(int(BOT_OWNER)))  # noqa: E501
 
-    if str(type(message.channel)) == "<class 'discord.channel.TextChannel'>":
+    if channelType == "text":
 
         # ShoulderBird Block - Alerting for custom search strings
         results = SB.birdCall(message.guild.name, message.author.name,
@@ -121,7 +130,11 @@ async def on_message(message):
         if results["status"]:
             bird = discord.utils.get(message.guild.members,
                                      name=results["response"])
-            if bird:
+            # Anti-snooping: Stop bird from chirping if user isn't in channel
+            snack = discord.utils.find(lambda m: m.name == message.author.name,
+                                       message.channel.members)
+            logger.debug(f'Anti-snoop: {snack}')
+            if bird and snack:
                 await bird.create_dm()
                 await bird.dm_channel.send('Mention alert: **' +
                                            str(message.author.display_name) +
@@ -139,7 +152,7 @@ async def on_message(message):
         else:
             logger.debug(f'commandCheck False: {results["response"]}')
 
-    if str(type(message.channel)) == "<class 'discord.channel.DMChannel'>":
+    if channelType == "dm":
         # Add message logging here for DM's to the bot
         pass
 
@@ -230,6 +243,11 @@ def main():
     logger.info(f'Hatch cycle started.')
     logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
     logger.info('Hatching onto Discord now.')
+
+    # import time
+    # classHandler("drop")
+    # time.sleep(3)
+    # exit()
 
     # dClient.run(DISCORD_TOKEN)
     loop = asyncio.get_event_loop()

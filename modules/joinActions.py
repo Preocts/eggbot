@@ -207,7 +207,7 @@ class joinActions:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            self.jaConfig = json_io.saveConfig(self.jaConfig, outFile)
+            json_io.saveConfig(self.jaConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         return {"status": True, "response": "Config saved"}
