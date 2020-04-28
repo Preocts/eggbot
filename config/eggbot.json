@@ -1,6 +1,6 @@
 {
     "CoreConfig": {
-        "Version": "0.3.3",
+        "Version": "0.3.5",
         "VersionName": "Spawn Egg",
         "Debug_Level": "DEBUG"
     }
