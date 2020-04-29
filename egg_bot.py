@@ -31,6 +31,7 @@ LOGLEVEL = None
 JA = None
 SB = None
 BC = None
+GM = None
 
 dClient = discord.Client(status='online',
                          activity=discord.Activity(type=2, name="you breathe"))
@@ -123,6 +124,10 @@ async def on_message(message):
         #     await on_member_join(dClient.get_guild(621085335979294740).get_member(int(BOT_OWNER)))  # noqa: E501
 
     if channelType == "text":
+        # guildMetrics Block - The egg watches. The egg knows.
+        GM.logit(message.guild.id, message.guild.name, message.author.id,
+                 message.author.name, message.author.display_name,
+                 message.clean_content)
 
         # ShoulderBird Block - Alerting for custom search strings
         results = SB.birdCall(message.guild.name, message.author.name,
@@ -197,6 +202,7 @@ def classHandler(action: str):
     global JA
     global SB
     global BC
+    global GM
 
     if action == "load":
         if JA:
@@ -221,6 +227,14 @@ def classHandler(action: str):
             BC = modules.basicCommands.basicCommands()
     else:
         BC = None
+
+    if action == "load":
+        if GM:
+            GM.loadConfig()
+        else:
+            GM = modules.guildMetrics.guildMetrics()
+    else:
+        GM = None
 
     return
 
