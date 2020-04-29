@@ -30,6 +30,7 @@ class basicCommands:
         self.bcConfig = {}
         self.activeConfig = None
         self.loadConfig(inFile)
+        logger.info(f'Config loaded with {len(self.bcConfig)}')
         return
 
     def __str__(self):
@@ -46,6 +47,7 @@ class basicCommands:
         """ Save configs on exit """
         if self.activeConfig is None:
             logger.warn('Lost activeConfig name while closing, not good.')
+            logger.info('Dump file attempt: ./config/basicCommands_DUMP.json')
             self.activeConfig = "./config/basicCommands_DUMP.json"
         self.saveConfig(self.activeConfig)
 
@@ -133,6 +135,7 @@ class basicCommands:
             return {"status": False, "response": "Throttle active"}
 
         self.bcConfig[guild]["guildCommands"][cName]["lastran"] = time.time()
+        logger.debug(f'Command returned: {cData["content"]}')
         return {"status": True, "response": cData["content"]}
 
     def addCommand(self, guild: str, input: str) -> dict:
@@ -143,6 +146,7 @@ class basicCommands:
         logger.debug(f'addCommand: {guild} | {input}')
         sliceIn = input.split(" | ")
         trigger = sliceIn[0].split()[1]
+        # capture input sans command and trigger
         content = " ".join(sliceIn.pop(0).split()[2:])
         # Check for empty content
         if (not(len(content)) and
@@ -153,6 +157,7 @@ class basicCommands:
             self.bcConfig[guild] = GUILD_TEMPLATE
 
         if trigger in self.bcConfig[guild]["guildCommands"].keys():
+            logger.debug(f'Command exists: {trigger}')
             return {"status": False, "response": "Command exists"}
 
         self.bcConfig[guild]["guildCommands"][trigger] = {}
@@ -162,9 +167,11 @@ class basicCommands:
 
         if not(len(sliceIn)):
             # simple command
+            logger.debug(f'Simple command: {trigger} | {content}')
             self.bcConfig[guild]["guildCommands"][trigger]["content"] = content
         else:
             # complex command
+            logger.debug(f'Complex command: {trigger} | {sliceIn}')
             for o in sliceIn:
                 if (not(len(o.split(" = ")))
                    and not(o.split(" = ") in COMMAND_KEYS)):
@@ -189,6 +196,7 @@ class basicCommands:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
+        logger.debug(f'loadConfig success: {inFile}')
         return {"status": True, "response": "Config Loaded"}
 
     def saveConfig(self, outFile: str = "./config/basicCommands.json") -> bool:
@@ -199,6 +207,7 @@ class basicCommands:
             json_io.saveConfig(self.bcConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
+        logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
     def parseRoles(self, discord_roles):

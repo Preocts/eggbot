@@ -33,6 +33,8 @@ class joinActions:
         self.jaConfig = {}
         self.activeConfig = ''
         self.loadConfig(inFile)
+        logger.info(f'Config loaded with {len(self.jaConfig)}')
+        return
 
     def __str__(self):
         return str(self.jaConfig)
@@ -48,6 +50,7 @@ class joinActions:
         """ Save configs on exit """
         if self.activeConfig is None:
             logger.warn('Lost activeConfig name while closing, not good.')
+            logger.info('Dump file attempt: ./config/joinActions_DUMP.json')
             self.activeConfig = "./config/joinActions_DUMP.json"
         self.saveConfig(self.activeConfig)
 
@@ -90,7 +93,7 @@ class joinActions:
             if key in config:
                 config[key] = value
         if len(config["name"]) == 0:
-            logger.info('Name not provided for join action')
+            logger.debug('Name not provided for join action')
             return {"status": False, "response": "Name not defined"}
         if not(guildname in self.jaConfig):
             self.jaConfig[guildname] = [config, ]
@@ -100,7 +103,7 @@ class joinActions:
                     logger.info(f'Name already exists: {config["name"]}')
                     return {"status": False, "response": "Name already exists"}
             self.jaConfig[guildname].append(config)
-        logger.info(f'Join action added for {guildname}')
+        logger.debug(f'Join action added for {guildname} | {config}')
         return {"status": True, "response": "Join action created"}
 
     def read(self, guildname: str, name: str) -> dict:
@@ -112,13 +115,13 @@ class joinActions:
 
         logger.debug(f'read: {guildname} | {name}')
         if not(guildname in self.jaConfig):
-            logger.info('Guild not found')
+            logger.debug('Read: Guild not found')
             return {"status": False, "response": "Guild not found"}
         for n in self.jaConfig[guildname]:
             if n["name"] == name:
-                logger.info('Join action found')
+                logger.debug('Read: Join action found')
                 return {"status": True, "response": n}
-        logger.info('Name not found')
+        logger.debug('Read: Name not found')
         return {"status": False, "response": "Name not found"}
 
     def readAll(self, guildname: str) -> dict:
@@ -130,7 +133,7 @@ class joinActions:
 
         logger.debug(f'readAll: {guildname}')
         if not(guildname in self.jaConfig):
-            logger.info('Guild not found')
+            logger.debug('readAll: Guild not found')
             return {"status": False, "response": "Guild not found"}
         return{"status": True, "response": self.jaConfig[guildname]}
 
@@ -153,7 +156,7 @@ class joinActions:
             {"status": true/false, "response": str}
         """
 
-        logger.debug(f'update: {guildname} | {name} | {kwargs.items()}')
+        logger.debug(f'Update: {guildname} | {name} | {kwargs.items()}')
         results = self.read(guildname, name)
         if not(results["status"]):
             return {"status": False, "response": "Guild or Name not found"}
@@ -165,7 +168,7 @@ class joinActions:
         for action in self.jaConfig[guildname]:
             if action["name"] == name:
                 i = self.jaConfig[guildname].index(action)
-                logger.info(f'Updating join action index: {i}')
+                logger.debug(f'Update: Updating join action index: {i}')
                 self.jaConfig[guildname][i] = config
                 return {"status": True, "response": "Join action updated"}
         logger.warning(f'Something went wrong: name missing')
@@ -179,15 +182,15 @@ class joinActions:
         """
         logger.debug(f'deleteMessage: {guildname} | {name}')
         if not(guildname in self.jaConfig):
-            logger.info('Guild not found')
+            logger.debug('Delete: Guild not found')
             return {"status": False, "response": "Guild not found"}
         for n in self.jaConfig[guildname]:
             if n["name"] == name:
-                logger.info(f'Deleting join action name: {name}')
+                logger.debug(f'Deleting join action name: {name}')
                 i = self.jaConfig[guildname].index(n)
                 del self.jaConfig[guildname][i]
                 return {"status": True, "response": "Join action deleted"}
-        logger.info('Name not found')
+        logger.debug('Delete: Name not found')
         return {"status": False, "response": "Join action name not found"}
 
     def loadConfig(self, inFile: str = "./config/joinActions.json") -> bool:
@@ -200,6 +203,7 @@ class joinActions:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
+        logger.debug(f'loadConfig success: {inFile}')
         return {"status": True, "response": "Config Loaded"}
 
     def saveConfig(self, outFile: str = "./config/joinActions.json") -> bool:
@@ -210,6 +214,7 @@ class joinActions:
             json_io.saveConfig(self.jaConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
+        logger.debug(f'loadConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
     def getJoinMessage(self, guild: str, user: str) -> dict:
@@ -235,7 +240,7 @@ class joinActions:
         joinMessages = []
         results = self.readAll(guild)
         if not(results["status"]):
-            logger.info(f'Guild not configured: {guild}')
+            logger.debug(f'Guild not configured: {guild}')
             return {"status": False, "response": "Guild not configured"}
         actions = results["response"]
         logger.debug(f'joinActions found: {actions}')
@@ -245,7 +250,9 @@ class joinActions:
                 joinMessages.append({"message": a["message"],
                                      "channel": a["channel"]})
         if not(len(joinMessages)):
+            logger.debug('No active join actions found')
             return {"status": False, "response": "No join actions found"}
+        logger.debug(f'Join actions: {joinMessages}')
         return {"status": True, "response": joinMessages}
 
 # May Bartmoss have mercy on your data for running this bot.

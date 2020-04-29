@@ -69,7 +69,8 @@ class shoulderBird:
         self.sbConfig = {}
         self.activeConfig = ""
         self.loadConfig(inFile)
-        return None
+        logger.info(f'Config loaded with {len(self.sbConfig)}')
+        return
 
     def __str__(self):
         return str(self.sbConfig)
@@ -85,6 +86,7 @@ class shoulderBird:
         """ Save configs on exit """
         if self.activeConfig is None:
             logger.warn('Lost activeConfig name while closing, not good.')
+            logger.info('Dump file attempt: ./config/shoulderBird_DUMP.json')
             self.activeConfig = "./config/shoulderBird_DUMP.json"
         self.saveConfig(self.activeConfig)
 
@@ -213,10 +215,12 @@ class shoulderBird:
         if target in self.sbConfig[guildname][username]["ignore"]:
             ix = self.sbConfig[guildname][username]["ignore"].index(target)
             self.sbConfig[guildname][username]["ignore"].pop(ix)
+            logger.debug(f'Bird listening: {target}')
             return {"status": True,
                     "response": f"ShoulderBird listen to {target} now"}
         else:
             self.sbConfig[guildname][username]["ignore"].append(target)
+            logger.dubug(f'Bird ignoring: {target}')
             return {"status": True,
                     "response": f"ShoulderBird ignore {target} now"}
 
@@ -230,6 +234,7 @@ class shoulderBird:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
+        logger.debug(f'loadConfig success: {inFile}')
         return {"status": True, "response": "Config Loaded"}
 
     def saveConfig(self, outFile: str = "./config/shoulderBird.json") -> bool:
@@ -240,6 +245,7 @@ class shoulderBird:
             json_io.saveConfig(self.sbConfig, outFile)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
+        logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
 # May Bartmoss have mercy on your data for running this bot.
