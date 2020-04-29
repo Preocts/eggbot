@@ -99,7 +99,7 @@ class guildMetrics:
             return False
         self.checkGuild(guildID, guildName)
         self.checkUser(guildID, userID, userName)
-        user = self.gmConfig["guilds"][guildID]["members"][userID].copy()
+        user = self.gmConfig["guilds"][guildID]["members"][userID]
         nowTime = time.strftime('%j|%Y-%m-%d|%H.%M.%S|%z')
         if not(userName in user["userNames"]):
             user["userNames"].append(userName)
@@ -109,9 +109,10 @@ class guildMetrics:
         user["hours"][int(time.strftime('%H'))] += 1
         user["messageCounters"][0] += 1
         user["messageCounters"][1] += len(content.split(' '))
-        if content[-1] == ".":
-            user["messageCounters"][2] += 1
-        self.gmConfig["guilds"][guildID]["members"][userID] = user.copy()
+        if len(content):
+            if content[-1] == ".":
+                user["messageCounters"][2] += 1
+        self.gmConfig["guilds"][guildID]["members"][userID] = user
         if (time.time() - self.lastSave) >= self.saveRate:
             self.saveConfig(self.activeConfig)
             self.lastSave = time.time()
