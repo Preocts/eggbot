@@ -72,17 +72,17 @@ class basicCommands:
                   - Is there a matching command in the config
                 - Command level checks:
                   - If defined, is this from an allowed ["channel"]
-                  - If defined, is this from an allowoed ["user"]
-                  - If defined, is this from an allowoed ["role"]
+                  - If defined, is this from an allowed ["user"]
+                  - If defined, is this from an allowed ["role"]
                   - If defined, is the command throttled
             If all of these pass you get Returns.
 
             Args:
-                guild: Guild that the message came from
-                channel: Channel name the message posted in
-                roles: dicord.roles list of roles the user holds
-                user: display_name of the message author (not nickname)
-                message: The message to scan for a command.
+                guildID (str): The ID of the guild
+                channelID (str): The ID of the channel
+                roleIDs (List(str)): List of role IDs
+                userID (str): The ID of the user
+                message (str): The message to scan for a command.
 
             Returns:
                 Pass:
@@ -139,7 +139,18 @@ class basicCommands:
         return {"status": True, "response": cData["content"]}
 
     def addCommand(self, guild: str, input: str) -> dict:
-        """ Add a command to the config unless it already exists """
+        """ Add a command to the config unless it already exists
+
+            Args:
+                guild (str): The ID of the guild
+                input (str): The message content
+
+            Returns:
+                dict : {"status": bool, "response": str}
+
+            Raises:
+                None
+        """
 
         if not(len(input)):
             return {"status": False, "response": "No input"}
@@ -181,7 +192,10 @@ class basicCommands:
                 if COMMAND_DATATYPE[COMMAND_KEYS.index(key)] == "str":
                     self.bcConfig[guild]["guildCommands"][trigger][key] = value
                 elif COMMAND_DATATYPE[COMMAND_KEYS.index(key)] == "int":
-                    self.bcConfig[guild]["guildCommands"][trigger][key] = int(value)  # noqa: E501
+                    try:
+                        self.bcConfig[guild]["guildCommands"][trigger][key] = int(value)  # noqa: E501
+                    except ValueError:
+                        self.bcConfig[guild]["guildCommands"][trigger][key] = 0
                 else:
                     self.bcConfig[guild]["guildCommands"][trigger][key].append(value)  # noqa: E501
         return {"status": True, "reponse": "Command set"}
@@ -224,8 +238,8 @@ class basicCommands:
 
         clean_roles = []
         for r in discord_roles:
-            clean_roles.append(r.name)
-        logging.debug(f'parseRoles: {clean_roles}')
+            clean_roles.append(str(r.id))
+        # logging.debug(f'parseRoles: {clean_roles}')
         return clean_roles
 
 # May Bartmoss have mercy on your data for running this bot.

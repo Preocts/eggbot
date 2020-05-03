@@ -1,4 +1,5 @@
-""" joinActions is a module for Egg_Bot for welcome messages
+"""
+    joinActions is a module for Egg_Bot for welcome messages
 
     Created by Preocts
     preocts@preocts.com | Preocts#8196 Discord
@@ -54,33 +55,41 @@ class joinActions:
             self.activeConfig = "./config/joinActions_DUMP.json"
         self.saveConfig(self.activeConfig)
 
-    def create(self, guildname: str, **kwargs) -> dict:
-        """ Creates a new join action in the configuration file
+    def create(self, guild: str, **kwargs) -> dict:
+        """
+        Creates a new join action in the configuration file
 
         Keyword arguements are optional, the config entry will be populated
         with empty values. .update() can be used to edit. Returns a failure
         if the "name" keyword already exists in the configuration file.
 
         Args:
-            guildname: Target guildname
-            [name], (optionals set by config)
+            guild (int): discord.guild.id
 
-        Keys:
-            name: Unique name for the join action
-            channel: Channel any message is displayed.
-                     Leaving this blank will result in a direct message
-            addRole: Grants user a list of roles on join
-            message: Displays this message to given channel/DM
-            active: Boolean toggle
+        **kwargs:
+            name (str): Unique name for the join action
+            channel (str): Channel ID any message is displayed.
+                           Leaving this blank will result in a direct message
+            message (str): Displays this message to given channel/DM
+            active (bool): Controls if the action is used or not
 
-            limitRole: List roles required to recieve this join action
-            limitInvite: List invite IDs required to recieve this join action
+        Not currently used:
+            addRole (str): Grants user a list of roles IDs on join
+            limitRole (str): List roles IDs to recieve this join action
+            limitInvite (str): List invite IDs to recieve this join action
 
         Returns:
-            {"status": true/false, "response": str}
+            (dict) : {"status": true/false, "response": str}
+
+        Raises:
+            None
         """
 
-        logger.debug(f'create: {guildname} | {kwargs.items()}')
+        logger.debug(f'create: {guild} | {kwargs.items()}')
+        try:
+            guild = str(guild)
+        except ValueError as err:
+            return {"status": False, "response": err}
         # Default Config, change to add/remove:
         config = {'name': '',
                   'channel': '',
@@ -95,50 +104,66 @@ class joinActions:
         if len(config["name"]) == 0:
             logger.debug('Name not provided for join action')
             return {"status": False, "response": "Name not defined"}
-        if not(guildname in self.jaConfig):
-            self.jaConfig[guildname] = [config, ]
+        if not(guild in self.jaConfig):
+            self.jaConfig[guild] = [config, ]
         else:
-            for n in self.jaConfig[guildname]:
+            for n in self.jaConfig[guild]:
                 if n["name"] == config["name"]:
                     logger.info(f'Name already exists: {config["name"]}')
                     return {"status": False, "response": "Name already exists"}
-            self.jaConfig[guildname].append(config)
-        logger.debug(f'Join action added for {guildname} | {config}')
+            self.jaConfig[guild].append(config)
+        logger.debug(f'Join action added for {guild} | {config}')
         return {"status": True, "response": "Join action created"}
 
-    def read(self, guildname: str, name: str) -> dict:
-        """ Return a specific action for a guild
+    def read(self, guild: str, name: str) -> dict:
+        """
+        Return a specific action for a guild
 
-            Returns:
-                {"status": true/false, "response": str}
+        Args:
+            guild (str): ID of the guild
+            name (str): Name of the join action being requested
+
+        Returns:
+            (dict) : {"status": true/false, "response": str}
+
+        Raises:
+            None
         """
 
-        logger.debug(f'read: {guildname} | {name}')
-        if not(guildname in self.jaConfig):
+        logger.debug(f'read: {guild} | {name}')
+        if not(guild in self.jaConfig):
             logger.debug('Read: Guild not found')
             return {"status": False, "response": "Guild not found"}
-        for n in self.jaConfig[guildname]:
+        for n in self.jaConfig[guild]:
             if n["name"] == name:
                 logger.debug('Read: Join action found')
                 return {"status": True, "response": n}
         logger.debug('Read: Name not found')
         return {"status": False, "response": "Name not found"}
 
-    def readAll(self, guildname: str) -> dict:
-        """ Return all actions for a guild
+    def readAll(self, guild: str) -> dict:
+        """
+        Return all actions for a guild
 
-            Returns:
-                {"status": true/false, "response": str}
+        Args:
+            guild (str): ID of the guild
+
+        Returns:
+            (dict) : {"status": true/false, "response": list}
+
+        Raises:
+            None
         """
 
-        logger.debug(f'readAll: {guildname}')
-        if not(guildname in self.jaConfig):
+        logger.debug(f'readAll: {guild}')
+        if not(guild in self.jaConfig):
             logger.debug('readAll: Guild not found')
             return {"status": False, "response": "Guild not found"}
-        return{"status": True, "response": self.jaConfig[guildname]}
+        return{"status": True, "response": self.jaConfig[guild]}
 
-    def update(self, guildname: str, name: str, **kwargs) -> dict:
-        """ Update an existing join action in the configuration file
+    def update(self, guild: str, name: str, **kwargs) -> dict:
+        """
+        Update an existing join action in the configuration file
 
         Keyword arguements are optional, the config entry will be populated
         with current values. Return a failure if the name keyword is not found.
@@ -146,18 +171,20 @@ class joinActions:
         the keywords.
 
         Args:
-            guildname: Target guildname
-            name: Target action to update
-            [name], (optionals set by config)
-
-        Keys: **See .create()
+            guild (str): ID of the guild
+            name (str): Name of the join action being updated
+        **kwargs:
+            See .create()
 
         Returns:
-            {"status": true/false, "response": str}
+            (dict) : {"status": true/false, "response": str}
+
+        Raises:
+            None
         """
 
-        logger.debug(f'Update: {guildname} | {name} | {kwargs.items()}')
-        results = self.read(guildname, name)
+        logger.debug(f'Update: {guild} | {name} | {kwargs.items()}')
+        results = self.read(guild, name)
         if not(results["status"]):
             return {"status": False, "response": "Guild or Name not found"}
         config = results["response"]
@@ -165,30 +192,38 @@ class joinActions:
             if (key in config) and (key != 'name'):
                 config[key] = value
 
-        for action in self.jaConfig[guildname]:
+        for action in self.jaConfig[guild]:
             if action["name"] == name:
-                i = self.jaConfig[guildname].index(action)
+                i = self.jaConfig[guild].index(action)
                 logger.debug(f'Update: Updating join action index: {i}')
-                self.jaConfig[guildname][i] = config
+                self.jaConfig[guild][i] = config
                 return {"status": True, "response": "Join action updated"}
         logger.warning(f'Something went wrong: name missing')
         return {"status": False, "response": "Something went wrong"}
 
-    def delete(self, guildname: str, name: str) -> dict:
-        """ Deletes a stored config for welcome messages
-
-            Returns:
-                {"status": true/false, "response": str}
+    def delete(self, guild: str, name: str) -> dict:
         """
-        logger.debug(f'deleteMessage: {guildname} | {name}')
-        if not(guildname in self.jaConfig):
+        Deletes a stored config for welcome messages
+
+        Args:
+            guild (str): ID of the guild
+            name (str): Name of the join action being requested
+
+        Returns:
+            (dict) : {"status": true/false, "response": str}
+
+        Raises:
+            None
+        """
+        logger.debug(f'deleteMessage: {guild} | {name}')
+        if not(guild in self.jaConfig):
             logger.debug('Delete: Guild not found')
             return {"status": False, "response": "Guild not found"}
-        for n in self.jaConfig[guildname]:
+        for n in self.jaConfig[guild]:
             if n["name"] == name:
                 logger.debug(f'Deleting join action name: {name}')
-                i = self.jaConfig[guildname].index(n)
-                del self.jaConfig[guildname][i]
+                i = self.jaConfig[guild].index(n)
+                del self.jaConfig[guild][i]
                 return {"status": True, "response": "Join action deleted"}
         logger.debug('Delete: Name not found')
         return {"status": False, "response": "Join action name not found"}
@@ -218,23 +253,25 @@ class joinActions:
         return {"status": True, "response": "Config saved"}
 
     def getJoinMessage(self, guild: str, user: str) -> dict:
-        """ Returns any join messages to send
+        """
+        Returns any join messages to send
 
         Args:
-            guild: The guildname where the join even fired
-            user: The discord.user.name of who joined (not nickname)
+            guild (str): ID of the guild
+            user (str): ID of the user that joined
 
-        Returns:
-            {"status": True,
-             "response":
-                [{"message": "Message to send",
-                 "channel": "ChannelName"},]
-            }
-            If status is fales, response contains reason why
-            If channel is blank, the message is intended to be a DM
+            Returns:
+                (dict) :
+                    {"status": True,
+                     "response":
+                        [{"message": "Message to send",
+                         "channel": int},]
+                    }
+                    If status is fales, response contains reason why
+                    If channel is blank, the message is intended to be a DM
 
-        Raises:
-            None
+            Raises:
+                None
         """
 
         joinMessages = []
@@ -247,8 +284,12 @@ class joinActions:
 
         for a in actions:
             if a["active"]:
-                joinMessages.append({"message": a["message"],
-                                     "channel": a["channel"]})
+                try:
+                    joinMessages.append({"message": a["message"],
+                                        "channel": int(a["channel"])})
+                except ValueError as err:
+                    logger.warning(f"Bad join action: {guild} | {a} | {err}")
+                    continue
         if not(len(joinMessages)):
             logger.debug('No active join actions found')
             return {"status": False, "response": "No join actions found"}

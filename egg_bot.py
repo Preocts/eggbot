@@ -3,7 +3,8 @@ Egg Bot, Discord Modular Bot
 
 Created by Preocts
 preocts@preocts.com | Preocts#8196 Discord
-Permissions integer assumed: 502848
+Permissions integer assumed: 502848 / 268807234
+https://discordapp.com/api/oauth2/authorize?client_id=650127838552522753&permissions=268807234&scope=bot
 
 https://github.com/Preocts/Egg_Bot
 
@@ -69,22 +70,22 @@ async def on_member_join(member):
                 member.guild.name, '\n']
 
     # joinActions call - messages only (no actions taken)
-    jaResults = JA.getJoinMessage(member.guild.name, member.name)
+    jaResults = JA.getJoinMessage(str(member.guild.id), str(member.id))
 
     if jaResults["status"]:
         for a in jaResults["response"]:
-            # Make replacements for tags - MOVE TO MODULE IN FUTURE
             if not(len(a["message"])):
                 logger.warning('Blank message found, skipping')
                 continue
+            # Make replacements for tags - MOVE TO MODULE IN FUTURE
             for rp in lsHolders:
                 a["message"] = a["message"].replace(rp, lsMember[lsHolders.index(rp)])  # noqa: E501
-            if len(a["channel"]):
-                logger.info('Sending Chat message to channel: {a["channel"]}')
+            if a["channel"]:
+                logger.info(f'Sending Chat message to channel: {a["channel"]}')
                 chatRoom = discord.utils.get(member.guild.channels,
-                                             name=a["channel"])
+                                             id=a["channel"])
                 if not(chatRoom):
-                    logger.warning('Channel not found: {a["channel"]}')
+                    logger.warning(f'Channel not found: {a["channel"]}')
                 else:
                     await chatRoom.send(a["message"])
             else:
@@ -130,15 +131,15 @@ async def on_message(message):
                  message.clean_content)
 
         # ShoulderBird Block - Alerting for custom search strings
-        results = SB.birdCall(message.guild.name, message.author.name,
+        results = SB.birdCall(str(message.guild.id), str(message.author.id),
                               message.clean_content)
         if results["status"]:
             birds = results["response"]
             for feathers in birds:
                 bird = discord.utils.get(message.guild.members,
-                                         name=feathers)
+                                         id=feathers)
                 # Anti-snooping: Stop bird chirping if user isn't in channel
-                snack = discord.utils.find(lambda m: m.name == feathers,
+                snack = discord.utils.find(lambda m: m.id == feathers,
                                            message.channel.members)
                 logger.debug(f'Anti-snoop: {feathers} - {snack}')
                 if bird and snack:
@@ -151,9 +152,11 @@ async def on_message(message):
                                                message.clean_content + '`')
 
         # basicCommand Processing
-        results = BC.commandCheck(message.guild.name, message.channel.name,
-                                  message.author.roles.copy(),
-                                  message.author.name, message.clean_content)
+        results = BC.commandCheck(str(message.guild.id),
+                                  str(message.channel.id),
+                                  message.author.roles,
+                                  str(message.author.id),
+                                  message.clean_content)
         if results["status"]:
             await message.channel.send(results["response"])
         else:
