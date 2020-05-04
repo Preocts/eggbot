@@ -3,8 +3,6 @@ Egg Bot, Discord Modular Bot
 
 Created by Preocts
 preocts@preocts.com | Preocts#8196 Discord
-Permissions integer assumed: 502848 / 268807234
-https://discordapp.com/api/oauth2/authorize?client_id=650127838552522753&permissions=268807234&scope=bot
 
 https://github.com/Preocts/Egg_Bot
 
@@ -33,6 +31,7 @@ JA = None
 SB = None
 BC = None
 GM = None
+BG = None
 
 dClient = discord.Client(status='online',
                          activity=discord.Activity(type=2, name="you breathe"))
@@ -63,6 +62,26 @@ async def on_member_join(member):
                 f' | User ID: {member.id}'
                 f' | Account Created: {member.created_at}'
                 f' | Guild: {member.guild.name}')
+
+    # Is this join a bot? Handle it *gun cocks*
+    if member.bot:
+        logger.info('Bot join detected...')
+        bgResults = BG.checkList(str(member.guild.id), str(member.id))
+        if not(bgResults["status"]):
+            # This bot is not allowed
+            await member.kick(reason="This bot was not approved to join.")
+            ch = member.guild.get_channel(bgResults["channel"])
+            await ch.send(bgResults["response"])
+            await ch.send('If this bot is desired, please add the following '
+                          f'ID to the allow list: {member.id}')
+            return
+        else:
+            # This bot is allowed
+            ch = member.guild.get_channel(bgResults["channel"])
+            await ch.send(bgResults["response"])
+            await ch.send('If this bot was not desired, please remove the '
+                          f' following ID from the allow list: {member.id}')
+            return
 
     # These should be in a config - FUTURE MODULE replaceTags
     lsHolders = ['[MENTION]', '[USERNAME]', '[GUILDNAME]', '\\n']
@@ -126,9 +145,9 @@ async def on_message(message):
 
     if channelType == "text":
         # guildMetrics Block - The egg watches. The egg knows.
-        GM.logit(message.guild.id, message.guild.name, message.author.id,
-                 message.author.name, message.author.display_name,
-                 message.clean_content)
+        GM.logit(str(message.guild.id), message.guild.name,
+                 str(message.author.id), message.author.name,
+                 message.author.display_name, message.clean_content)
 
         # ShoulderBird Block - Alerting for custom search strings
         results = SB.birdCall(str(message.guild.id), str(message.author.id),
@@ -206,6 +225,7 @@ def classHandler(action: str):
     global SB
     global BC
     global GM
+    global BG
 
     if action == "load":
         if JA:
@@ -238,6 +258,14 @@ def classHandler(action: str):
             GM = modules.guildMetrics.guildMetrics()
     else:
         GM = None
+
+    if action == "load":
+        if BG:
+            BG.loadConfig()
+        else:
+            BG = modules.botGuard.botGuard()
+    else:
+        BG = None
 
     return
 

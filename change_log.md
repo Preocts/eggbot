@@ -1,3 +1,32 @@
+##### Change Log v0.4.1 - Annul Egg
+**This feature change is not backward compatible**
+- Configuration files now use guild IDs instead of names
+- Configuration files now use user IDs instead of names
+- Configuration files now use channel IDs instead of names
+- Configuration files now use role IDs instead of names
+- Catching a trend?
+- json_io.py saveConfig() has a new optional argument
+  - raw=False : (default) Readable JSON with an indent of 4 spaces
+  - raw=True : No formatting to the config will be applied
+- New module: guildMetrics.py
+  - Tracks harmless metrics of a guild
+    - Guild names by ID (history)
+    - Member names by ID (history)
+    - Member nicknames by ID (history)
+    - "First seen" and "Last seen" for members
+    - Message counters:
+      - Number of total messages sent
+      - Number of words sent (by space delimit)
+      - Number of messages that ended with a period "."
+    - Hours - 24 hour breakdown of activity
+      - Okay, this one blurs the line of creepy. I admit it.
+- New module: botGuard.py
+  - Will do nothing for now unless configured manually
+  - Auto-kicks new bot joins unless the bot is on the Allow-list.
+    - Spam/Malicious protection
+
+---
+
 ##### Change Log v0.3.5 - shoulderBird enhancements
 - Logging adjustments in modules. Shifted to mostly all debug level for noise reduction.
 - guildMetrics module created
