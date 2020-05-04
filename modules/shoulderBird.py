@@ -1,4 +1,5 @@
-""" ShoulderBird is a Discord channel alert tool
+"""
+    ShoulderBird is a Discord channel alert tool
 
     Alerts a user when a keyword of their choice is said in any chat
     that is being watched by the bot.
@@ -13,21 +14,21 @@
         SB = shoulderBird.shoulderBird("FileNameOptional")
 
     Create/Update a search:
-        results = SB.putBird("GuildName", "UserName", "RegEx Search String")
+        results = SB.putBird("guild", "user", "RegEx Search String")
 
     Add/Remove ignore name:
-        results = SB.gagBird("GuildName", "UserName")
+        results = SB.gagBird("guild", "user")
 
     Delete a search:
-        results = SB.delBird("GuildName", "UserName")
+        results = SB.delBird("guild", "user")
 
     Toggle a search on/off (returns new state):
-        results = SB.toggleBird("GuildName", "UserName")
+        results = SB.toggleBird("guild", "user")
 
     Scan a message for a matching search:
-        results = SB.birdCall("GuildName", "UserName", "Message String")
+        results = SB.birdCall("guild", "user", "Message String")
         # If results["status"] is True then results["response"] will be
-        # the username of who had a matching search.
+        # the user of who had a matching search.
 
     Save Config:
         SB.saveConfig("FileNameOptional")
@@ -40,27 +41,22 @@ logger = logging.getLogger(__name__)  # Create module level logger
 
 
 class shoulderBird:
-    """Defines the ShouldBird Object
+    """
+    Defines the ShouldBird Object
 
-        Config format:
-        {
-            "guildname" {
-                "username": {
-                    "regex": "Expression",
-                    "toggle": Boolean,
-                    "ignore": ["string",]
-                }
+    Config format:
+    {
+        "guild" {
+            "user": {
+                "regex": "Expression",
+                "toggle": Boolean,
+                "ignore": ["string",]
             }
         }
+    }
 
-        Definitions:
-            Bird : A single search string in regEx
-
-        Returns:
-            {
-                "status": True/False,
-                "response": [output]
-            }
+    Definitions:
+        Bird : A single search string in regEx
     """
 
     def __init__(self, inFile: str = "./config/shoulderBird.json"):
@@ -90,103 +86,174 @@ class shoulderBird:
             self.activeConfig = "./config/shoulderBird_DUMP.json"
         self.saveConfig(self.activeConfig)
 
-    def getBirds(self, guildname: str) -> dict:
-        """ Fetch all defined Birds from the config file """
-
-        logger.debug(f'getBirds: {guildname}')
-        if ((guildname in self.sbConfig) and
-           len(self.sbConfig[guildname])):
-            return {"status": True, "response": self.sbConfig[guildname]}
-        return {"status": False, "response": "Guild not found or empty"}
-
-    def getBird(self, guildname: str, username: str) -> dict:
-        """ Fetch a single defined Bird from the config file """
-
-        logger.debug(f'getBird call: {guildname} | {username}')
-        if ((guildname in self.sbConfig) and
-           len(self.sbConfig[guildname])):
-            if username in self.sbConfig[guildname]:
-                if self.sbConfig[guildname][username]["toggle"]:
-                    response = self.sbConfig[guildname][username]["regex"]
-                    return {"status": True, "response": response}
-                else:
-                    return {"status": False, "response": "Toggled off"}
-        return {"status": False, "response": "Guild or user not found"}
-
-    def putBird(self, guildname: str, username: str, regex: str) -> dict:
-        """ Stores a Bird into the loaded config """
-
-        logger.debug(f'putBird: {guildname} | {username} | {regex}')
-        if not(guildname in self.sbConfig):
-            self.sbConfig[guildname] = {}
-        self.sbConfig[guildname][username] = {}
-        self.sbConfig[guildname][username]["regex"] = regex
-        self.sbConfig[guildname][username]["toggle"] = False
-        self.sbConfig[guildname][username]["ignore"] = []
-        return {"status": True, "response": "Bird put in config"}
-
-    def delBird(self, guildname: str, username: str) -> dict:
-        """ Removes a Bird from the loaded config """
-
-        logger.debug(f'delBirds: {guildname} | {username}')
-        if guildname in self.sbConfig:
-            if username in self.sbConfig[guildname]:
-                del self.sbConfig[guildname][username]
-                return {"status": True, "response": "Bird deleted"}
-        return {"status": False, "response": "Guild or user not found"}
-
-    def toggleBird(self, guildname: str, username: str) -> dict:
-        """ Toggles ShoulderBird for a specific guild """
-
-        logger.debug(f'delBirds: {guildname} | {username}')
-        if guildname in self.sbConfig:
-            if username in self.sbConfig[guildname]:
-                curToggle = self.sbConfig[guildname][username]["toggle"]
-                if curToggle:
-                    curToggle = False
-                else:
-                    curToggle = True
-                self.sbConfig[guildname][username]["toggle"] = curToggle
-        return {"status": curToggle, "response": None}
-
-    def birdCall(self, guildname: str, username: str, message: str) -> dict:
-        """ Uses regEx to find defined keywords in a chat message
+    def getBirds(self, guild: str) -> dict:
+        """
+        Fetch all defined Birds from the config file
 
         Args:
-            sMessage: The message being scanned (use message.clean_content)
-            sSearch: The regEx string of the Bird
+            guild (str): Guild ID to pull results from
 
         Returns:
-            {"status": true, "response": ["usernames"]}
+            (dict) : {"status": bool, "response": str}
 
         Raises:
             None
         """
 
-        logger.debug(f'Bird Call: {guildname} | {username} | {message}')
+        logger.debug(f'getBirds: {guild}')
+        if ((guild in self.sbConfig) and
+           len(self.sbConfig[guild])):
+            return {"status": True, "response": self.sbConfig[guild]}
+        return {"status": False, "response": "Guild not found or empty"}
+
+    def getBird(self, guild: str, user: str) -> dict:
+        """
+        Fetch a single defined Bird from the config file
+
+        Args:
+            guild (str): Guild ID to pull results from
+            user (str): User ID to pull results for
+
+        Returns:
+            (dict) : {"status": bool, "response": str}
+
+        Raises:
+            None
+        """
+
+        logger.debug(f'getBird call: {guild} | {user}')
+        if ((guild in self.sbConfig) and
+           len(self.sbConfig[guild])):
+            if user in self.sbConfig[guild]:
+                if self.sbConfig[guild][user]["toggle"]:
+                    response = self.sbConfig[guild][user]["regex"]
+                    return {"status": True, "response": response}
+                else:
+                    return {"status": False, "response": "Toggled off"}
+        return {"status": False, "response": "Guild or user not found"}
+
+    def putBird(self, guild: str, user: str, regex: str) -> dict:
+        """
+        Stores a Bird into the loaded config
+
+        Args:
+            guild (str): Guild ID to assign
+            user (str): User ID to assign
+            regex (str): Regex expression to search chat with
+                         All expressions are word-bound be default and
+                         case insensitive
+
+        Returns:
+            (dict) : {"status": bool, "response": str}
+
+        Raises:
+            None
+        """
+
+        logger.debug(f'putBird: {guild} | {user} | {regex}')
+        if not(guild in self.sbConfig):
+            self.sbConfig[guild] = {}
+        self.sbConfig[guild][user] = {}
+        self.sbConfig[guild][user]["regex"] = regex
+        self.sbConfig[guild][user]["toggle"] = False
+        self.sbConfig[guild][user]["ignore"] = []
+        return {"status": True, "response": "Bird put in config"}
+
+    def delBird(self, guild: str, user: str) -> dict:
+        """
+        Removes a Bird from the loaded config
+
+        Args:
+            guild (str): Guild ID
+            user (str): User ID to delete
+
+        Returns:
+            (dict) : {"status": bool, "response": str}
+
+        Raises:
+            None
+        """
+
+        logger.debug(f'delBirds: {guild} | {user}')
+        if guild in self.sbConfig:
+            if user in self.sbConfig[guild]:
+                del self.sbConfig[guild][user]
+                return {"status": True, "response": "Bird deleted"}
+        return {"status": False, "response": "Guild or user not found"}
+
+    def toggleBird(self, guild: str, user: str) -> dict:
+        """
+        Toggles ShoulderBird for a specific guild
+
+        Args:
+            guild (str): Guild ID
+            user (str): User ID to toggle
+
+        Returns:
+            (dict) : {"status": bool, "response": str}
+
+        Raises:
+            None
+        """
+
+        logger.debug(f'delBirds: {guild} | {user}')
+        if guild in self.sbConfig:
+            if user in self.sbConfig[guild]:
+                curToggle = self.sbConfig[guild][user]["toggle"]
+                if curToggle:
+                    curToggle = False
+                else:
+                    curToggle = True
+                self.sbConfig[guild][user]["toggle"] = curToggle
+        return {"status": curToggle, "response": None}
+
+    def birdCall(self, guild: str, user: str, message: str) -> dict:
+        """
+        Uses regEx to find defined keywords in a chat message
+
+        Args:
+            guild (str): Guild ID to pull results from
+            user (str): User ID to pull results for
+            message (str): Message content to run regex against
+
+        Returns:
+            (dict) : {"status": bool, "response": (list)[UserIDs]}
+
+        Raises:
+            None
+        """
+
+        logger.debug(f'Bird Call: {guild} | {user} | {message}')
         # Is the guild configured?
-        results = self.getBirds(guildname)
+        results = self.getBirds(guild)
         if not(results["status"]):
-            logger.debug(f'Guild returned no results: {guildname}')
-            return {"status": False, "Response": None}
+            logger.debug(f'Guild returned no results: {guild}')
+            return {"status": False, "Response": []}
         nest = results["response"]
         birdList = []
         for bird in nest:
             # check all available active regex for a hit
             if nest[bird]["toggle"]:
+                if user in nest[bird]["ignore"]:
+                    continue
                 rx = nest[bird]["regex"]
                 findRg = re.compile(r'\b{}\b'.format(rx), re.I)
                 found = findRg.search(message)
                 if found:
                     logger.info(f'Bird found for {bird}')
-                    birdList.append(bird)
+                    try:
+                        birdList.append(int(bird))
+                    except ValueError as e:
+                        logger.warning(f'Bad bird: {guild} | {user} | {e}')
+                        continue
         if len(birdList):
             return {"status": True, "response": birdList}
         logger.info('Empty Nest')
         return {"status": False, "repsonse": []}
 
-    def gagBird(self, guildname: str, username: str, target: str) -> dict:
-        """ Toggles a given target for a given guild to be ignored
+    def gagBird(self, guild: str, user: str, target: str) -> dict:
+        """
+        Toggles a given target for a given guild to be ignored
 
         While logging messages may capture messages from ignored users if
         the logging levels are set low enough, ignored users will not trigger
@@ -196,9 +263,9 @@ class shoulderBird:
         display: none; to hide blocked users in the channel history. >:V
 
         Args:
-            guildname: Name of the guild to configure
-            username: Username of ShoulderBird user
-            target: Username (not nickname) of user to ignore
+            guild (str): Guild ID
+            user (str): User ID to assign config to
+            target (str): User ID to ignore
 
         Returns:
             {"status": True/False, "response": "string"}
@@ -207,19 +274,19 @@ class shoulderBird:
             None
         """
 
-        logger.debug(f'Gag Bird: {guildname} | {username}')
-        if not(guildname in self.sbConfig):
+        logger.debug(f'Gag Bird: {guild} | {user}')
+        if not(guild in self.sbConfig):
             return {"status": False, "response": "No nests in that guild"}
-        if not(username in self.sbConfig[guildname]):
-            return {"status": False, "response": "No bird by that username"}
-        if target in self.sbConfig[guildname][username]["ignore"]:
-            ix = self.sbConfig[guildname][username]["ignore"].index(target)
-            self.sbConfig[guildname][username]["ignore"].pop(ix)
+        if not(user in self.sbConfig[guild]):
+            return {"status": False, "response": "No bird by that user"}
+        if target in self.sbConfig[guild][user]["ignore"]:
+            ix = self.sbConfig[guild][user]["ignore"].index(target)
+            self.sbConfig[guild][user]["ignore"].pop(ix)
             logger.debug(f'Bird listening: {target}')
             return {"status": True,
                     "response": f"ShoulderBird listen to {target} now"}
         else:
-            self.sbConfig[guildname][username]["ignore"].append(target)
+            self.sbConfig[guild][user]["ignore"].append(target)
             logger.dubug(f'Bird ignoring: {target}')
             return {"status": True,
                     "response": f"ShoulderBird ignore {target} now"}

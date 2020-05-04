@@ -56,7 +56,7 @@ class guildMetrics:
         self.gmConfig["guilds"] = {}
         return True
 
-    def checkGuild(self, guildID: int, guildName: str) -> bool:
+    def checkGuild(self, guildID: str, guildName: str) -> bool:
         """ Creates a guild if it does not exist in the config """
         if guildID in self.gmConfig["guilds"].keys():
             return True
@@ -68,7 +68,7 @@ class guildMetrics:
         self.gmConfig["guilds"][guildID] = guildSchema
         return True
 
-    def checkUser(self, guildID: int, userID: int, userName: str) -> bool:
+    def checkUser(self, guildID: str, userID: str, userName: str) -> bool:
         """ Creates a user entry in guild if it does not exist in the config"""
         if userID in self.gmConfig["guilds"][guildID]["members"].keys():
             return True
@@ -84,7 +84,7 @@ class guildMetrics:
         self.gmConfig["guilds"][guildID]["members"][userID] = userSchema
         return True
 
-    def logit(self, guildID: int, guildName: str, userID: int,
+    def logit(self, guildID: str, guildName: str, userID: str,
               userName: str, userNick: str, content: str) -> bool:
         """ Processes a messasge and stores all the data for the Egg
 
@@ -114,8 +114,8 @@ class guildMetrics:
                 user["messageCounters"][2] += 1
         self.gmConfig["guilds"][guildID]["members"][userID] = user
         if (time.time() - self.lastSave) >= self.saveRate:
-            self.saveConfig(self.activeConfig)
             self.lastSave = time.time()
+            self.saveConfig(self.activeConfig)
         return True
 
     def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
@@ -136,7 +136,7 @@ class guildMetrics:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            json_io.saveConfig(self.gmConfig, outFile)
+            json_io.saveConfig(self.gmConfig, outFile, raw=False)
         except json_io.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         logger.debug(f'saveConfig success: {outFile}')

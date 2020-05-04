@@ -52,7 +52,7 @@ def loadConfig(inputFile: str) -> dict:
     return json_file
 
 
-def saveConfig(json_config: dict, outputFile: str) -> bool:
+def saveConfig(json_config: dict, outputFile: str, raw: bool = False) -> bool:
     """ Writes provided JSON content to file
 
         Args:
@@ -69,7 +69,11 @@ def saveConfig(json_config: dict, outputFile: str) -> bool:
 
     try:
         with open(outputFile, 'w') as file:
-            file.write(json.dumps(json_config, indent=4))
+            if raw:
+                file.write(json.dumps(json_config))
+            else:
+                file.write(json.dumps(json_config, indent=4))
+
     except OSError:
         # logger.error(f'File not be opened: {outputFile}', exc_info=True)
         raise JSON_Config_Error(f"Could not open target file: {outputFile}")
