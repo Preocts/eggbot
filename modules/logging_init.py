@@ -13,6 +13,7 @@
 """
 
 import json
+import pathlib
 import logging
 import logging.config
 
@@ -20,6 +21,7 @@ VALID_LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
 def logINIT(llevel: str = 'INFO') -> bool:
+    pathlib.Path('/logs').mkdir(exist_ok=True)
     if not(llevel in VALID_LOG_LEVELS):
         llevel = "INFO"
     try:
@@ -38,7 +40,7 @@ def logINIT(llevel: str = 'INFO') -> bool:
             logConfig["handlers"][hands]["level"] = llevel
 
     logging.config.dictConfig(logConfig)
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("default")
 
     logger.info('Success: Logging configuration loaded and initialized')
     return True

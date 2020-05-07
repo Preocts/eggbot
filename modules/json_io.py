@@ -8,7 +8,7 @@
 import json
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("default")
 
 
 class JSON_Config_Error(Exception):

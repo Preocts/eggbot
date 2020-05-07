@@ -1,4 +1,4 @@
-# Egg Bot v0.3.1
+# Egg_Bot - A Discord Chat Bot
 
 Created by Preocts
 
@@ -19,7 +19,8 @@ What started as a simple way to send a welcome message when a new user joined a 
 - Definable greetings, both DM and chat, for new user joins
 - A custom, regex driven, alert system that watches for mentions of your choice called ShoulderBird
 - Highly definable permission based chat commands
-- Control by Guild, Channels, Roles, and Users
+  - Control by Guild, Channels, Roles, and Users
+- Bot Guard - an allow list for bots that kicks unexpected bots to reduce noise/spam/scams
 - more features in the works
 
 ----
