@@ -1,7 +1,7 @@
 {
     "CoreConfig": {
-        "Version": "0.4.1",
+        "Version": "0.4.2",
         "VersionName": "Annul Egg",
-        "Debug_Level": "DEBUG"
+        "Debug_Level": "WARNING"
     }
 }

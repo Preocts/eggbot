@@ -11,7 +11,8 @@ import logging
 import time
 from . import json_io
 
-logger = logging.getLogger(__name__)  # Create module level logger
+logger = logging.getLogger("default")  # Create module level logger
+
 GUILD_TEMPLATE = {"prohibitedChannels": [],
                   "prohibitedUsers": [],
                   "guildCommands": {}}

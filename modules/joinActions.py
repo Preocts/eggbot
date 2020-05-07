@@ -22,7 +22,7 @@
 import logging
 from . import json_io
 
-logger = logging.getLogger(__name__)  # Create module level logger
+logger = logging.getLogger("default")  # Create module level logger
 
 
 class joinActions:

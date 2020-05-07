@@ -1,3 +1,10 @@
+##### Change Log v0.4.2 - Annul Egg
+- Logging tweak to reduce the number of handlers and simplify my life.
+- Some core level tweaks to ensure required directories exist
+- Documentation updates
+
+---
+
 ##### Change Log v0.4.1 - Annul Egg
 **This feature change is not backward compatible**
 - Configuration files now use guild IDs instead of names

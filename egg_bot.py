@@ -17,7 +17,7 @@ import modules
 import asyncio
 from dotenv import load_dotenv
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("default")
 
 load_dotenv()
 BOT_OWNER = os.getenv('BOT_OWNER')
