@@ -254,7 +254,7 @@ class basicCommands:
         # logging.debug(f'parseRoles: {clean_roles}')
         return clean_roles
 
-    async def onMessage(self, message) -> bool:
+    async def onMessage(self, chtype, message, **kwargs) -> bool:
         """
         Hook method to be called from core script on Message event
 
@@ -263,7 +263,9 @@ class basicCommands:
         should break from iterations.
 
         Args:
-            member: a discord.message class
+            chtype (str) : Either "text" or "dm" or "group"
+            member (discord.member) : a discord.message class
+            **kwargs :
 
         Returns:
             (boolean)
@@ -271,6 +273,9 @@ class basicCommands:
         Raises:
             None
         """
+        # This modules only deals with text channels
+        if chtype != "text":
+            return True
 
         results = self.commandCheck(str(message.guild.id),
                                     str(message.channel.id),
