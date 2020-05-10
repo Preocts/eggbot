@@ -8,13 +8,22 @@
 """
 import logging
 import time
-from . import json_io
+from . import jsonIO
 
 logger = logging.getLogger("default")  # Create module level logger
 
 
+def initClass():
+    """ A fucntion to allow automated creation of a class instance """
+    return guildMetrics()
+
+
 class guildMetrics:
     """ Defines the guildMetrics class """
+
+    name = "guildMetrics"
+    allowReload = False
+    instCount = 0
 
     def __init__(self, inFile: str = "./config/guildMetrics.json"):
         logger.info(f'Initialize guildMetrics: {inFile}')
@@ -23,6 +32,7 @@ class guildMetrics:
         self.saveRate = 60
         self.lastSave = time.time()
         self.loadConfig(inFile)
+        guildMetrics.instCount += 1
         logger.info(f'Config loaded with {len(self.gmConfig)} records.')
         return
 
@@ -41,8 +51,10 @@ class guildMetrics:
         if self.activeConfig is None:
             logger.warn('Lost activeConfig name while closing, not good.')
             logger.info('Dump file attempt: ./config/guildMetrics_DUMP.json')
-            self.activeConfig = "./config/basicCommands_DUMP.json"
+            self.activeConfig = "./config/guildMetrics_DUMP.json"
         self.saveConfig(self.activeConfig)
+        guildMetrics.instCount -= 1
+        return
 
     def checkSys(self) -> bool:
         """ Creates a system record if it does not exist in the config """
@@ -118,26 +130,53 @@ class guildMetrics:
             self.saveConfig(self.activeConfig)
         return True
 
-    def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
+    def loadConfig(self, inFile: str = "./config/guildMetrics.json") -> bool:
         """ Load a config into the class """
 
         logger.debug(f'loadConfig: {inFile}')
         try:
-            self.gmConfig = json_io.loadConfig(inFile)
-        except json_io.JSON_Config_Error:
+            self.gmConfig = jsonIO.loadConfig(inFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
         logger.debug(f'loadConfig success: {inFile}')
         return {"status": True, "response": "Config Loaded"}
 
-    def saveConfig(self, outFile: str = "./config/basicCommands.json") -> bool:
+    def saveConfig(self, outFile: str = "./config/guildMetrics.json") -> bool:
         """ Save a config into the class """
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            json_io.saveConfig(self.gmConfig, outFile, raw=False)
-        except json_io.JSON_Config_Error:
+            jsonIO.saveConfig(self.gmConfig, outFile, raw=False)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
+
+    async def onMessage(self, message) -> bool:
+        """
+        Hook method to be called from core script on Message event
+
+        Return value controls if additional mod calls are performed. If True
+        the core script should continue with calls. If False the core script
+        should break from iterations.
+
+        Args:
+            member: a discord.message class
+
+        Returns:
+            (boolean)
+
+        Raises:
+            None
+        """
+
+        # The egg watches. The egg knows.
+        self.logit(str(message.guild.id), message.guild.name,
+                   str(message.author.id), message.author.name,
+                   message.author.display_name, message.clean_content)
+        return True
+
+# May Bartmoss have mercy on your data for running this bot.
+# We are all only eggs

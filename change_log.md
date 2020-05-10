@@ -1,3 +1,22 @@
+##### Change Log v0.5.1 - Opus Egg
+- Modoles in the ./module path are now dynamically loaded
+- What does this mean?
+  - I can't forget to update the \_\_init\_\_.py again
+  - Module classes are instanced from a standard modules.moduleName.initClass() function
+  - Classes are loaded into a list of objects
+  - Classes are iterated through during events with a call to a standard method. (onJoin, onMessage)
+  - If the method doesn't exist, the script moves on gracefully (no errors, no logs)
+  - As new modules are created, following the template, they can be dropped into the directory and will just "work"
+- Fixed a poor copy/pasta that was causing guildMetrics to save in basicCommands.json.
+- Module specific changes:
+  - Classes for modules now have a class variables:
+    - instCount (int): Count of active instances of class
+    - name (str): Name of class
+    - allowReload (bool): Allow/deny the class to reload config from file without saving
+- Core script changes:
+  - No code handling module responses remains, completely migrated into modules.
+
+
 ##### Change Log v0.4.2 - Annul Egg
 - Logging tweak to reduce the number of handlers and simplify my life.
 - Some core level tweaks to ensure required directories exist
