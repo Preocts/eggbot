@@ -9,7 +9,7 @@
 """
 import logging
 import time
-from . import json_io
+from . import jsonIO
 
 logger = logging.getLogger("default")  # Create module level logger
 
@@ -22,8 +22,16 @@ COMMAND_DEFAULT = [[], [], [], 10, 0, "", ""]
 COMMAND_DATATYPE = ["list", "list", "list", "int", "int", "str", "str"]
 
 
+def initClass():
+    """ A fucntion to allow automated creation of a class instance """
+    return basicCommands()
+
+
 class basicCommands:
     """ Defines the basicCommands class """
+    name = "basicCommands"
+    allowReload = True
+    instCount = 0
 
     def __init__(self, inFile: str = "./config/basicCommands.json"):
         """ Defines __init__ """
@@ -31,6 +39,7 @@ class basicCommands:
         self.bcConfig = {}
         self.activeConfig = None
         self.loadConfig(inFile)
+        basicCommands.instCount += 1
         logger.info(f'Config loaded with {len(self.bcConfig)}')
         return
 
@@ -51,6 +60,8 @@ class basicCommands:
             logger.info('Dump file attempt: ./config/basicCommands_DUMP.json')
             self.activeConfig = "./config/basicCommands_DUMP.json"
         self.saveConfig(self.activeConfig)
+        basicCommands.instCount -= 1
+        return
 
     def commandCheck(self, guild: str, channel: str, roles: list,
                      user: str, message: str) -> dict:
@@ -206,8 +217,8 @@ class basicCommands:
 
         logger.debug(f'loadConfig: {inFile}')
         try:
-            self.bcConfig = json_io.loadConfig(inFile)
-        except json_io.JSON_Config_Error:
+            self.bcConfig = jsonIO.loadConfig(inFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
@@ -219,8 +230,8 @@ class basicCommands:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            json_io.saveConfig(self.bcConfig, outFile)
-        except json_io.JSON_Config_Error:
+            jsonIO.saveConfig(self.bcConfig, outFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
@@ -242,6 +253,36 @@ class basicCommands:
             clean_roles.append(str(r.id))
         # logging.debug(f'parseRoles: {clean_roles}')
         return clean_roles
+
+    async def onMessage(self, message) -> bool:
+        """
+        Hook method to be called from core script on Message event
+
+        Return value controls if additional mod calls are performed. If True
+        the core script should continue with calls. If False the core script
+        should break from iterations.
+
+        Args:
+            member: a discord.message class
+
+        Returns:
+            (boolean)
+
+        Raises:
+            None
+        """
+
+        results = self.commandCheck(str(message.guild.id),
+                                    str(message.channel.id),
+                                    message.author.roles,
+                                    str(message.author.id),
+                                    message.clean_content)
+        if results["status"]:
+            await message.channel.send(results["response"])
+        else:
+            logger.debug(f'commandCheck False: {results["response"]}')
+        return True
+
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

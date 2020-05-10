@@ -35,9 +35,14 @@
 """
 import logging
 import re
-from . import json_io
+from . import jsonIO
 
 logger = logging.getLogger("default")  # Create module level logger
+
+
+def initClass():
+    """ A fucntion to allow automated creation of a class instance """
+    return shoulderBird()
 
 
 class shoulderBird:
@@ -59,12 +64,17 @@ class shoulderBird:
         Bird : A single search string in regEx
     """
 
+    name = "shoulderBird"
+    allowReload = True
+    instCount = 0
+
     def __init__(self, inFile: str = "./config/shoulderBird.json"):
         """INIT"""
         logging.info(f'Start: Initializing shoulderBird: {inFile}')
         self.sbConfig = {}
         self.activeConfig = ""
         self.loadConfig(inFile)
+        shoulderBird.instCount += 1
         logger.info(f'Config loaded with {len(self.sbConfig)}')
         return
 
@@ -85,6 +95,8 @@ class shoulderBird:
             logger.info('Dump file attempt: ./config/shoulderBird_DUMP.json')
             self.activeConfig = "./config/shoulderBird_DUMP.json"
         self.saveConfig(self.activeConfig)
+        shoulderBird.instCount -= 1
+        return
 
     def getBirds(self, guild: str) -> dict:
         """
@@ -296,8 +308,8 @@ class shoulderBird:
 
         logger.debug(f'loadConfig: {inFile}')
         try:
-            self.sbConfig = json_io.loadConfig(inFile)
-        except json_io.JSON_Config_Error:
+            self.sbConfig = jsonIO.loadConfig(inFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
@@ -309,11 +321,56 @@ class shoulderBird:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            json_io.saveConfig(self.sbConfig, outFile)
-        except json_io.JSON_Config_Error:
+            jsonIO.saveConfig(self.sbConfig, outFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
+
+    async def onMessage(self, message) -> bool:
+        """
+        Hook method to be called from core script on Message event
+
+        Return value controls if additional mod calls are performed. If True
+        the core script should continue with calls. If False the core script
+        should break from iterations.
+
+        Args:
+            member: a discord.message class
+
+        Returns:
+            (boolean)
+
+        Raises:
+            None
+        """
+
+        # ShoulderBird Block - Alerting for custom search strings
+        results = self.birdCall(str(message.guild.id), str(message.author.id),
+                                message.clean_content)
+        if results["status"]:
+            birds = results["response"]
+            for feathers in birds:
+                bird = message.guild.get_member(feathers)
+                # Anti-snooping: Stop bird chirping if user isn't in channel
+                # This might need to be more efficient in the future
+                for m in message.channel.members:
+                    if m.id == feathers:
+                        snack = m.id
+                        break
+                # snack = discord.utils.find(lambda m: m.id == feathers,
+                #                            message.channel.members)
+
+                logger.debug(f'Anti-snoop: {feathers} - {snack}')
+                if bird and snack:
+                    await bird.create_dm()
+                    await bird.dm_channel.send('Mention alert: **' +
+                                               str(message.author.display_name)
+                                               + '** mentioned you in **' +
+                                               message.channel.name +
+                                               '** saying: \n`' +
+                                               message.clean_content + '`')
+
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

@@ -1,7 +1,7 @@
 {
     "CoreConfig": {
-        "Version": "0.4.2",
-        "VersionName": "Annul Egg",
-        "Debug_Level": "WARNING"
+        "Version": "0.5.1",
+        "VersionName": "Opus Egg",
+        "Debug_Level": "INFO"
     }
 }

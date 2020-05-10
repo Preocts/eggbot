@@ -14,9 +14,14 @@
 """
 
 import logging
-from . import json_io
+from . import jsonIO
 
 logger = logging.getLogger("default")  # Create module level logger
+
+
+def initClass():
+    """ A fucntion to allow automated creation of a class instance """
+    return botGuard()
 
 
 class botGuard:
@@ -34,12 +39,17 @@ class botGuard:
     }
     """
 
+    name = "botGuard"
+    allowReload = True
+    instCount = 0
+
     def __init__(self, inFile: str = "./config/botGuard.json"):
         """INIT"""
         logging.info(f'Start: Initializing botGuard: {inFile}')
         self.bgConfig = {}
         self.activeConfig = ""
         self.loadConfig(inFile)
+        botGuard.instCount += 1
         logger.info(f'Config loaded with {len(self.bgConfig)}')
         return
 
@@ -60,14 +70,16 @@ class botGuard:
             logger.info('Dump file attempt: ./config/botGuard_DUMP.json')
             self.activeConfig = "./config/botGuard_DUMP.json"
         self.saveConfig(self.activeConfig)
+        botGuard.instCount -= 1
+        return
 
     def loadConfig(self, inFile: str = "./config/botGuard.json") -> bool:
         """ Load a config into the class """
 
         logger.debug(f'loadConfig: {inFile}')
         try:
-            self.bgConfig = json_io.loadConfig(inFile)
-        except json_io.JSON_Config_Error:
+            self.bgConfig = jsonIO.loadConfig(inFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
@@ -79,8 +91,8 @@ class botGuard:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            json_io.saveConfig(self.bgConfig, outFile)
-        except json_io.JSON_Config_Error:
+            jsonIO.saveConfig(self.bgConfig, outFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
@@ -276,6 +288,45 @@ class botGuard:
             return {"status": False,
                     "channel": int(self.bgConfig[guild]["channel"]),
                     "response": self.bgConfig[guild]["content_deny"]}
+
+    async def onJoin(self, member) -> bool:
+        """
+        Hook method to be called from core script on Join event
+
+        Return value controls if additional mod calls are performed. If True
+        the core script should continue with calls. If False the core script
+        should break from iterations.
+
+        Args:
+            member: a discord.member class
+
+        Returns:
+            (boolean)
+
+        Raises:
+            None
+        """
+
+        # Is this join a bot? Handle it *gun cocks*
+        if not(member.bot):
+            return True
+        logger.info('Bot join detected...')
+        bgResults = self.checkList(str(member.guild.id), str(member.id))
+        if not(bgResults["status"]):
+            # This bot is not allowed
+            await member.kick(reason="This bot was not approved to join.")
+            ch = member.guild.get_channel(bgResults["channel"])
+            await ch.send(bgResults["response"])
+            await ch.send('If this bot is desired, please add this '
+                          f'ID to the allow list: {member.id}')
+            return False
+        else:
+            # This bot is allowed
+            ch = member.guild.get_channel(bgResults["channel"])
+            await ch.send(bgResults["response"])
+            await ch.send('If this bot was not desired, please remove '
+                          f'this ID from the allow list: {member.id}')
+            return True
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

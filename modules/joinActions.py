@@ -20,13 +20,22 @@
     and toggle messages
 """
 import logging
-from . import json_io
+from . import jsonIO
 
 logger = logging.getLogger("default")  # Create module level logger
 
 
+def initClass():
+    """ A fucntion to allow automated creation of a class instance """
+    return joinActions()
+
+
 class joinActions:
     """ Defines the joinActions class """
+
+    name = "joinActions"
+    allowReload = True
+    instCount = 0
 
     def __init__(self, inFile: str = "./config/joinActions.json"):
         """ Define __init__ """
@@ -34,6 +43,7 @@ class joinActions:
         self.jaConfig = {}
         self.activeConfig = ''
         self.loadConfig(inFile)
+        joinActions.instCount += 1
         logger.info(f'Config loaded with {len(self.jaConfig)}')
         return
 
@@ -54,6 +64,8 @@ class joinActions:
             logger.info('Dump file attempt: ./config/joinActions_DUMP.json')
             self.activeConfig = "./config/joinActions_DUMP.json"
         self.saveConfig(self.activeConfig)
+        joinActions.instCount -= 1
+        return
 
     def create(self, guild: str, **kwargs) -> dict:
         """
@@ -233,8 +245,8 @@ class joinActions:
 
         logger.debug(f'loadConfig: {inFile}')
         try:
-            self.jaConfig = json_io.loadConfig(inFile)
-        except json_io.JSON_Config_Error:
+            self.jaConfig = jsonIO.loadConfig(inFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
             return {"status": False, "response": "Error loading config"}
         self.activeConfig = inFile
@@ -246,8 +258,8 @@ class joinActions:
 
         logger.debug(f'saveConfig: {outFile}')
         try:
-            json_io.saveConfig(self.jaConfig, outFile)
-        except json_io.JSON_Config_Error:
+            jsonIO.saveConfig(self.jaConfig, outFile)
+        except jsonIO.JSON_Config_Error:
             logger.error('Failed loading config file!', exc_info=True)
         logger.debug(f'loadConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
@@ -295,6 +307,55 @@ class joinActions:
             return {"status": False, "response": "No join actions found"}
         logger.debug(f'Join actions: {joinMessages}')
         return {"status": True, "response": joinMessages}
+
+    async def onJoin(self, member) -> bool:
+        """
+        Hook method to be called from core script on Join event
+
+        Return value controls if additional mod calls are performed. If True
+        the core script should continue with calls. If False the core script
+        should break from iterations.
+
+        Args:
+            member: a discord.member class
+
+        Returns:
+            (boolean)
+
+        Raises:
+            None
+        """
+
+        # These should be in a config - FUTURE MODULE replaceTags
+        lsHolders = ['[MENTION]', '[USERNAME]', '[GUILDNAME]', '\\n']
+        lsMember = [member.mention, member.display_name,
+                    member.guild.name, '\n']
+
+        jaResults = self.getJoinMessage(str(member.guild.id), str(member.id))
+        if not(jaResults["status"]):
+            return True
+
+        for a in jaResults["response"]:
+            if not(len(a["message"])):
+                logger.warning('Blank message found, skipping')
+                continue
+            # START: Make replacements for tags - MOVE TO MODULE IN FUTURE
+            for rp in lsHolders:
+                a["message"] = a["message"].replace(rp, lsMember[lsHolders.index(rp)])  # noqa: E501
+            # END
+            if a["channel"]:
+                logger.info(f'Sending Chat message to channel: {a["channel"]}')
+                chatRoom = member.guild.get_channel(a["channel"])
+
+                if not(chatRoom):
+                    logger.warning(f'Channel not found: {a["channel"]}')
+                else:
+                    await chatRoom.send(a["message"])
+            else:
+                logger.info(f'Sending DM message to: {member.name}')
+                await member.create_dm()
+                await member.dm_channel.send(a["message"])
+        return True
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

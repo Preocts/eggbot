@@ -10,6 +10,7 @@ https://github.com/Preocts/Egg_Bot
 
 # Additional imports
 import os
+import sys
 import discord
 import json
 import logging
@@ -25,16 +26,10 @@ VERSION = None
 VERSION_NAME = None
 LOGLEVEL = None
 
-# Global Classes from modules
-# One day I'll figure out how to do these dynamically and the world will fall!
-JA = None
-SB = None
-BC = None
-GM = None
-BG = None
-
+# Global List of Classes from modules
+botMods = []
 dClient = discord.Client(status='online',
-                         activity=discord.Activity(type=2, name="you breathe"))
+                         activity=discord.Activity(type=2, name="everything."))
 
 # ON READY - connection established
 @dClient.event
@@ -63,54 +58,13 @@ async def on_member_join(member):
                 f' | Account Created: {member.created_at}'
                 f' | Guild: {member.guild.name}')
 
-    # Is this join a bot? Handle it *gun cocks*
-    if member.bot:
-        logger.info('Bot join detected...')
-        bgResults = BG.checkList(str(member.guild.id), str(member.id))
-        if not(bgResults["status"]):
-            # This bot is not allowed
-            await member.kick(reason="This bot was not approved to join.")
-            ch = member.guild.get_channel(bgResults["channel"])
-            await ch.send(bgResults["response"])
-            await ch.send('If this bot is desired, please add the following '
-                          f'ID to the allow list: {member.id}')
-            return
-        else:
-            # This bot is allowed
-            ch = member.guild.get_channel(bgResults["channel"])
-            await ch.send(bgResults["response"])
-            await ch.send('If this bot was not desired, please remove the '
-                          f' following ID from the allow list: {member.id}')
-            return
-
-    # These should be in a config - FUTURE MODULE replaceTags
-    lsHolders = ['[MENTION]', '[USERNAME]', '[GUILDNAME]', '\\n']
-    lsMember = [member.mention, member.display_name,
-                member.guild.name, '\n']
-
-    # joinActions call - messages only (no actions taken)
-    jaResults = JA.getJoinMessage(str(member.guild.id), str(member.id))
-
-    if jaResults["status"]:
-        for a in jaResults["response"]:
-            if not(len(a["message"])):
-                logger.warning('Blank message found, skipping')
-                continue
-            # Make replacements for tags - MOVE TO MODULE IN FUTURE
-            for rp in lsHolders:
-                a["message"] = a["message"].replace(rp, lsMember[lsHolders.index(rp)])  # noqa: E501
-            if a["channel"]:
-                logger.info(f'Sending Chat message to channel: {a["channel"]}')
-                chatRoom = discord.utils.get(member.guild.channels,
-                                             id=a["channel"])
-                if not(chatRoom):
-                    logger.warning(f'Channel not found: {a["channel"]}')
-                else:
-                    await chatRoom.send(a["message"])
-            else:
-                logger.info(f'Sending DM message to: {member.name}')
-                await member.create_dm()
-                await member.dm_channel.send(a["message"])
+    for mods in botMods:
+        try:
+            if not(await mods.onJoin(member)):
+                break
+        except AttributeError:
+            continue
+    return
 
 # ON MESSAGE - Bot Commands
 @dClient.event
@@ -130,56 +84,32 @@ async def on_message(message):
         return False
 
     if str(message.author.id) == BOT_OWNER:
+        # SYSTEM LEVEL COMMANDS
         # Disconnect - System command
+        if message.clean_content == 'egg!bot':
+            await message.channel.send(f'Egg_Bot version: {VERSION} - '
+                                       f' {VERSION_NAME} - :egg:')
+            return False
         if message.clean_content == "egg!disconnect":
-            classHandler("drop")  # Save and drop our classes
+            dropClasses()  # Save and drop our classes
             if channelType == "text":
                 await message.delete()
             await dClient.close()
             return False
         # Reload Configurations - System command
         if message.clean_content == "egg!reloadAll":
-            classHandler("load")
+            reloadClasses()
+            return False
         # if message.clean_content == "egg!testjoin":
         #     await on_member_join(dClient.get_guild(621085335979294740).get_member(int(BOT_OWNER)))  # noqa: E501
 
     if channelType == "text":
-        # guildMetrics Block - The egg watches. The egg knows.
-        GM.logit(str(message.guild.id), message.guild.name,
-                 str(message.author.id), message.author.name,
-                 message.author.display_name, message.clean_content)
-
-        # ShoulderBird Block - Alerting for custom search strings
-        results = SB.birdCall(str(message.guild.id), str(message.author.id),
-                              message.clean_content)
-        if results["status"]:
-            birds = results["response"]
-            for feathers in birds:
-                bird = discord.utils.get(message.guild.members,
-                                         id=feathers)
-                # Anti-snooping: Stop bird chirping if user isn't in channel
-                snack = discord.utils.find(lambda m: m.id == feathers,
-                                           message.channel.members)
-                logger.debug(f'Anti-snoop: {feathers} - {snack}')
-                if bird and snack:
-                    await bird.create_dm()
-                    await bird.dm_channel.send('Mention alert: **' +
-                                               str(message.author.display_name)
-                                               + '** mentioned you in **' +
-                                               message.channel.name +
-                                               '** saying: \n`' +
-                                               message.clean_content + '`')
-
-        # basicCommand Processing
-        results = BC.commandCheck(str(message.guild.id),
-                                  str(message.channel.id),
-                                  message.author.roles,
-                                  str(message.author.id),
-                                  message.clean_content)
-        if results["status"]:
-            await message.channel.send(results["response"])
-        else:
-            logger.debug(f'commandCheck False: {results["response"]}')
+        for mods in botMods:
+            try:
+                if not(await mods.onMessage(message)):
+                    break
+            except AttributeError:
+                continue
 
     if channelType == "dm":
         # Add message logging here for DM's to the bot
@@ -207,66 +137,51 @@ def loadCore(inputFile: str = './config/eggbot.json') -> bool:
             logger.critical('', exc_info=True)
 
 
-def classHandler(action: str):
-    """ Handles the classes for the bot -=-=One day this will be automatic=-=-
+def loadClasses():
+    """
+    Handles the classes for the bot
 
-        Args:
-            action: One of two actions: Load, Drop
+    This should only be run if no classes are initialized. Otherwise, This
+    will create duplicate instances which will lead to unexpected behavior.
 
-        Returns:
-            None
+    Args:
 
-        Raises:
-            None
+    Returns:
+
+    Raises:
     """
 
-    action = action.lower()
-    global JA
-    global SB
-    global BC
-    global GM
-    global BG
+    global botMods
 
-    if action == "load":
-        if JA:
-            JA.loadConfig()
-        else:
-            JA = modules.joinActions.joinActions()
-    else:
-        JA = None
+    for mod in modules.MODULE_NAMES:
+        try:
+            logger.info(f'Loading initClass() for: {mod}...')
+            botMods.append(sys.modules["modules." + mod].initClass())
+            logger.info(f'Successfully loaded initClass() for: {mod}')
+        except AttributeError:
+            logger.info(f'No initClass() found for: {mod}')
 
-    if action == "load":
-        if SB:
-            SB.loadConfig()
-        else:
-            SB = modules.shoulderBird.shoulderBird()
-    else:
-        SB = None
+    logger.info(f'Loaded {len(botMods)} mods for Egg_Bot')
+    return
 
-    if action == "load":
-        if BC:
-            BC.loadConfig()
-        else:
-            BC = modules.basicCommands.basicCommands()
-    else:
-        BC = None
 
-    if action == "load":
-        if GM:
-            GM.loadConfig()
-        else:
-            GM = modules.guildMetrics.guildMetrics()
-    else:
-        GM = None
+def reloadClasses():
+    """ Reload classes that allow a forced reload """
+    global botMods
+    for mod in botMods:
+        try:
+            if mod.allowReload:
+                mod.loadConfig(mod.activeConfig)
+        except AttributeError:
+            continue
+    return
 
-    if action == "load":
-        if BG:
-            BG.loadConfig()
-        else:
-            BG = modules.botGuard.botGuard()
-    else:
-        BG = None
 
+def dropClasses():
+    """ Drops (destroys) all class instances. """
+    global botMods
+    for x in range(0, len(botMods)):
+        botMods[x] = None
     return
 
 
@@ -284,7 +199,7 @@ def main():
         exit()
     logger.info('Secrets loaded, assets contained, plans are hatching...')
     logger.info('Cracking the module carton open for more supplies...')
-    classHandler("load")
+    loadClasses()
     logger.info('Loaded yolk configuration file.')
     logger.debug(f'{VERSION} {VERSION_NAME} {LOGLEVEL}')
     logger.info(f'Hatch cycle started.')
