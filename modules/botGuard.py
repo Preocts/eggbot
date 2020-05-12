@@ -289,7 +289,7 @@ class botGuard:
                     "channel": int(self.bgConfig[guild]["channel"]),
                     "response": self.bgConfig[guild]["content_deny"]}
 
-    async def onJoin(self, member) -> bool:
+    async def onJoin(self, member, **kwargs) -> bool:
         """
         Hook method to be called from core script on Join event
 
@@ -298,7 +298,8 @@ class botGuard:
         should break from iterations.
 
         Args:
-            member: a discord.member class
+            member (discord.member): a discord.member class
+            **kwargs :
 
         Returns:
             (boolean)

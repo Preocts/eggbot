@@ -154,7 +154,7 @@ class guildMetrics:
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
-    async def onMessage(self, message) -> bool:
+    async def onMessage(self, chtype, message, **kwargs) -> bool:
         """
         Hook method to be called from core script on Message event
 
@@ -163,7 +163,9 @@ class guildMetrics:
         should break from iterations.
 
         Args:
-            member: a discord.message class
+            chtype (str) : Either "text" or "dm" or "group"
+            member (discord.member) : a discord.message class
+            **kwargs :
 
         Returns:
             (boolean)
@@ -171,6 +173,8 @@ class guildMetrics:
         Raises:
             None
         """
+        if chtype != "text":
+            return True
 
         # The egg watches. The egg knows.
         self.logit(str(message.guild.id), message.guild.name,

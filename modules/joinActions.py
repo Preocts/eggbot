@@ -308,7 +308,7 @@ class joinActions:
         logger.debug(f'Join actions: {joinMessages}')
         return {"status": True, "response": joinMessages}
 
-    async def onJoin(self, member) -> bool:
+    async def onJoin(self, member, **kwargs) -> bool:
         """
         Hook method to be called from core script on Join event
 
@@ -317,7 +317,8 @@ class joinActions:
         should break from iterations.
 
         Args:
-            member: a discord.member class
+            member (discord.member) : a discord.member class
+            **kwargs :
 
         Returns:
             (boolean)
