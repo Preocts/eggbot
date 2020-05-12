@@ -37,9 +37,9 @@ async def on_ready():
     logger.info('Egg hatched! Connection Established!')
     logger.info('Egg successfully hatched.')
     logger.info('Connection to Discord Established.')
-    logger.info('Available Guilds:')
-    for guild in dClient.guilds:
-        logger.info(f'\t{guild}')
+    # logger.info('Available Guilds:')
+    # for guild in dClient.guilds:
+    #     logger.info(f'\t{guild}')
     return True
 
 # ON DISCONNECT - connection closed or lost
@@ -80,16 +80,18 @@ async def on_message(message):
     elif str(type(message.channel)) == "<class 'discord.channel.DMChannel'>":
         channelType = "dm"
     else:
-        # Bot doesn't support Group private chats
+        channelType = "group"
+        # Bot does not currently support Group private chats
         return False
 
+    # SYSTEM LEVEL COMMANDS
     if str(message.author.id) == BOT_OWNER:
-        # SYSTEM LEVEL COMMANDS
-        # Disconnect - System command
+        # Pulse check
         if message.clean_content == 'egg!bot':
             await message.channel.send(f'Egg_Bot version: {VERSION} - '
                                        f' {VERSION_NAME} - :egg:')
             return False
+        # Disconnect - System command
         if message.clean_content == "egg!disconnect":
             dropClasses()  # Save and drop our classes
             if channelType == "text":
@@ -103,18 +105,13 @@ async def on_message(message):
         # if message.clean_content == "egg!testjoin":
         #     await on_member_join(dClient.get_guild(621085335979294740).get_member(int(BOT_OWNER)))  # noqa: E501
 
-    if channelType == "text":
-        for mods in botMods:
-            try:
-                if not(await mods.onMessage(message)):
-                    break
-            except AttributeError:
-                continue
-
-    if channelType == "dm":
-        # Add message logging here for DM's to the bot
-        pass
-
+    for mods in botMods:
+        try:
+            # I REALLY do not want to pass dClient here....
+            if not(await mods.onMessage(channelType, message, client=dClient)):
+                break
+        except AttributeError:
+            continue
     return
 
 

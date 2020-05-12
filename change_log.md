@@ -1,4 +1,30 @@
+##### Change Log v0.5.2 - Opus Egg
+
+- Added chtype to the OnMessage class method call in egg_bot.py
+  - chtype (str) : Channel Type: text, dm, or group
+- Added \*\*kwargs to class methods for future growth
+  - Also allows passing the discord instance which is helpful
+- General DM "!help" command implimented
+  - Will step through all available "general" help commands in each module. Used to offer a more specific guide from loaded modules.
+- ShoulderBird DM commands now functional.
+  - sb!help
+    - Displays this list
+  - sb!set [guild name/ID] = [RegEx]
+    - Sets a user's RegEx search for given guild
+  - sb!toggle [guild name/ID]
+    - Toggles a search without deleting it
+  - sb!ignore [guild name/ID] = [name/ID]
+    - Toggle a specific user to be ignored by ShoulderBird
+  - sb!remove [guild name/ID]
+    - Deletes a stored search from given guild
+  - sb!list [guild name/ID]
+    - Lists stored search from given guild
+- eggUtils.py - simple helper function storage
+
+---
+
 ##### Change Log v0.5.1 - Opus Egg
+
 - Modoles in the ./module path are now dynamically loaded
 - What does this mean?
   - I can't forget to update the \_\_init\_\_.py again
@@ -16,6 +42,7 @@
 - Core script changes:
   - No code handling module responses remains, completely migrated into modules.
 
+---
 
 ##### Change Log v0.4.2 - Annul Egg
 - Logging tweak to reduce the number of handlers and simplify my life.
