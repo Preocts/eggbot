@@ -208,17 +208,18 @@ class shoulderBird:
             None
         """
 
-        logger.debug(f'delBirds: {guild} | {user}')
+        logger.debug(f'toggleBird: {guild} | {user}')
         response = None
+        curToggle = False
         if guild in self.sbConfig:
             if user in self.sbConfig[guild]:
                 curToggle = self.sbConfig[guild][user]["toggle"]
                 if curToggle:
                     curToggle = False
-                    response = f'Bird now inactive for requested guild.'
+                    response = 'Bird now inactive for requested guild.'
                 else:
                     curToggle = True
-                    response = f'Bird now active for requested guild.'
+                    response = 'Bird now active for requested guild.'
                 self.sbConfig[guild][user]["toggle"] = curToggle
         return {"status": curToggle, "response": response}
 
@@ -299,7 +300,7 @@ class shoulderBird:
             self.sbConfig[guild][user]["ignore"].pop(ix)
             logger.debug(f'Bird listening: {target}')
             return {"status": True,
-                    "response": f"Will listen to that person now."}
+                    "response": "Will listen to that person now."}
         else:
             self.sbConfig[guild][user]["ignore"].append(target)
             logger.debug(f'Bird ignoring: {target}')
@@ -385,12 +386,15 @@ class shoulderBird:
                 logger.debug(f'Anti-snoop: {feathers} - {snack}')
                 if bird and snack:
                     await bird.create_dm()
-                    await bird.dm_channel.send('Mention alert: **' +
-                                               str(message.author.display_name)
-                                               + '** mentioned you in **' +
-                                               message.channel.name +
-                                               '** saying: \n`' +
-                                               message.clean_content + '`')
+                    msg = ''.join([
+                        'Mention alert: **',
+                        str(message.author.display_name),
+                        '** mentioned you in **',
+                        message.channel.name,
+                        '** saying:\n`',
+                        message.clean_content,
+                        '`'])
+                    await bird.dm_channel.send(msg)
         return True
 
     def commands(self, message, dClient) -> str:

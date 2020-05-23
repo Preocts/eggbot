@@ -1,10 +1,28 @@
+##### Change Log v0.5.3 - Opus Egg
+
+- README - Spelling corrections
+- shoulderBird - toggleBird() - bug fix: possible to return undefined variable
+- shoulderBird - Formatting corrections
+- shoulderBird - Changed dm output to use .join instead of "+" because it's more efficient.
+- basicCommands - Refactor:
+  - addCommand() now just does simple commands to keep it simple
+    - expected input: "command!add [commandname] [command text]"
+  - modCommand() created to handle modifying commands
+    - expected input: "command!mod [commandname] [(+/-/-+)key] [input]
+    - "+": append(add), "-": remove(lists only), "-+": replace all
+    - example: "command!mod !myCommand +roles Mods, VIPs"
+      - Adds "Mods" and "VIPs" to roles list
+
+
+---
+
 ##### Change Log v0.5.2 - Opus Egg
 
 - Added chtype to the OnMessage class method call in egg_bot.py
   - chtype (str) : Channel Type: text, dm, or group
 - Added \*\*kwargs to class methods for future growth
   - Also allows passing the discord instance which is helpful
-- General DM "!help" command implimented
+- General DM "!help" command implemented
   - Will step through all available "general" help commands in each module. Used to offer a more specific guide from loaded modules.
 - ShoulderBird DM commands now functional.
   - sb!help
@@ -25,7 +43,7 @@
 
 ##### Change Log v0.5.1 - Opus Egg
 
-- Modoles in the ./module path are now dynamically loaded
+- Modules in the ./module path are now dynamically loaded
 - What does this mean?
   - I can't forget to update the \_\_init\_\_.py again
   - Module classes are instanced from a standard modules.moduleName.initClass() function
@@ -113,7 +131,7 @@
   - Same done for basicCommands.py
   - Same done for shoulderBird.py
 - Import of json removed from joinActions.py, basicCommands.py, shoulderBird.py
-- saveConfig and loadConfig methods adjusted to call from json_io module (for unified file i/o)
+- saveConfig and loadConfig methods adjusted to call from json_io module (for unified file input/output)
   - Done in shoulderBird.py and joinActions.py
 - Migrated the rest of joinAction code not dealing with discord objects to the module
   - Created getJoinMessage() method to process on_member_join events
@@ -168,7 +186,7 @@
 
 ---
 
-##### Change Log 0.2.5 - OptOut Options
+##### Change Log 0.2.5 - Opt-Out Options
 - Hotfix: missed 'await' in on_member_join updates. I am full of cocoa
 - Hotfix: discord.member class behaving weirdly in on_member_join - rolled back to the old code (kinda)
 - EggConfig additions
@@ -206,14 +224,14 @@
 - tore apart (refactored) on_message
     + Shoulder Bird gets its own def
     + Commands go to their own def
-    + Chat messages and DM message breifly had their own def
+    + Chat messages and DM message briefly had their own def
     + Handles Chat and DM messages differently
 - "botCommands" section added to json config
     + botCommands{} -> GuildName{} -> CommandName{} -> CommandConfigs{}
 - created handler_ChatMessage and handler_DMMessage
 - deleted handler_ChatMessage and handler_DMMessage
 - Questioned my sanity
-- Class addtions
+- Class additions
     + botCommands dict
     + listCommand(GuildName) - returns list of command names set in Guild
     + getCommand(GuildName, CommandName) - returns dict of specific command
@@ -231,7 +249,7 @@
     + 'delete-command' : used to delete a command from the guild/DM
     + 'list-command' : used to return a list of all commands in guild/DM
 - Class updates:
-    + 'getBird' : returns a specifc user's ShoulderBird search
+    + 'getBird' : returns a specific user's ShoulderBird search
     + 'getBirds' : returns a guild's dict of ShoulderBird searches
     + 'putBird' : create/update a user's search (adds guild if missing)
     + 'delBird' : deletes a user's entry.  Why would you do this?
@@ -251,7 +269,7 @@
     + if parameter is not provided default is 'base.egg'
 - More verbose console output on launch
 - More egg references
-- logOutput now takes a fileName arguement - future scope work
+- logOutput now takes a fileName argument - future scope work
 - Updates to eggConfig class
     + addGuild created
 - on_chat_message upgrades
@@ -261,8 +279,8 @@
 - sendDMMessage created to handle all DM traffic
 - Config file refactor
     + using JSON now to store configs
-    + implimented configs: Guild Configs, Shoulder Bird
-    + planned configs: Sass Back, Custom !commands, OptOut List
+    + implemented configs: Guild Configs, Shoulder Bird
+    + planned configs: Sass Back, Custom !commands, Opt-Out List
 - Class changes
     + addGuild removed (didn't last long)
     + Refactor to use JSON
@@ -276,7 +294,7 @@
 - renamed class eggINI to eggConfig
     - renamed dict iniFile to configFile
 - removed def loadFile() from code
-- Updates to eggCongif class
+- Updates to eggConfig class
     + loadConfig, saveConfig, listConfig, listActiveFile, listConfigFiles : created
     + Smarter return values for error handling
 - Bot now attempts to load 'base.egg' and fails if not found
@@ -297,7 +315,7 @@
 - Added to eggINI Class
     + isAllowedChat
 - ShoulderBird moved to its own routine (also now called ShoulderBird)
-- Removed FindNay (replaced with Shoulderbird)
+- Removed FindNay (replaced with ShoulderBird)
 - Hard coded use for ShoulderBird (Future INI planned)
 - on_message now conditions according to the channel type (Chat/DM/Group)
 
@@ -313,9 +331,9 @@
 - Logging for new joins
 - Added Support for keys to config file
     + @, names the guild following keys are applied to
-    + &, configuation settings
+    + &, configuration settings
 - Added support for Keywords to config file
-    + [USERNAME] - user's displayname (nickname if set)
+    + [USERNAME] - user's display name (nickname if set)
     + [GUILDNAME] - Guild name
 - Nay finder added *specifically requested feature
 - Logging for commands actually added
@@ -323,4 +341,4 @@
 - env control for bot's owner added
 - !greetme command to get the bot greetings without leaving/joining
 - eggINI class
-    + addConfig, getConfig, hasGuild, hasMemeber, getMemeber, addmember
+    + addConfig, getConfig, hasGuild, hasMember, getMember, addMember
