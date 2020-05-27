@@ -154,18 +154,13 @@ class guildMetrics:
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
-    async def onMessage(self, chtype, message, **kwargs) -> bool:
+    async def onMessage(self, **kwargs) -> bool:
         """
         Hook method to be called from core script on Message event
 
-        Return value controls if additional mod calls are performed. If True
-        the core script should continue with calls. If False the core script
-        should break from iterations.
-
-        Args:
+        Keyword Args:
             chtype (str) : Either "text" or "dm" or "group"
-            member (discord.member) : a discord.message class
-            **kwargs :
+            message (discord.message) : a discord.message class
 
         Returns:
             (boolean)
@@ -173,6 +168,9 @@ class guildMetrics:
         Raises:
             None
         """
+        chtype = kwargs.get('chtype')
+        message = kwargs.get('message')
+
         if chtype != "text":
             return True
 

@@ -217,7 +217,7 @@ class botGuard:
 
         logger.debug(f'denyMessage: {guild} | {message}')
         self.bgConfig[guild]["content_deny"] = message
-        return {"status": True, "response": f"Message set for Denied"}
+        return {"status": True, "response": "Message set for Denied"}
 
     def allowMessage(self, guild: str, message: str) -> dict:
         """
@@ -238,7 +238,7 @@ class botGuard:
 
         logger.debug(f'allowMessage: {guild} | {message}')
         self.bgConfig[guild]["content_allow"] = message
-        return {"status": True, "response": f"Message set for Allowed"}
+        return {"status": True, "response": "Message set for Allowed"}
 
     def checkList(self, guild: str, bot: str) -> dict:
         """
@@ -289,17 +289,12 @@ class botGuard:
                     "channel": int(self.bgConfig[guild]["channel"]),
                     "response": self.bgConfig[guild]["content_deny"]}
 
-    async def onJoin(self, member, **kwargs) -> bool:
+    async def onJoin(self, **kwargs) -> bool:
         """
         Hook method to be called from core script on Join event
 
-        Return value controls if additional mod calls are performed. If True
-        the core script should continue with calls. If False the core script
-        should break from iterations.
-
-        Args:
+        Keyword Args:
             member (discord.member): a discord.member class
-            **kwargs :
 
         Returns:
             (boolean)
@@ -307,6 +302,7 @@ class botGuard:
         Raises:
             None
         """
+        member = kwargs.get('member')
 
         # Is this join a bot? Handle it *gun cocks*
         if not(member.bot):
