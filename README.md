@@ -1,18 +1,30 @@
-# Egg Bot
+# Egg_Bot - A Discord Chat Bot
 
-----
-## Custom Discord Chat Bot
+Created by Preocts
+
+[preocts@preocts.com](mailto:preocts@preocts.com) | Preocts#8196 Discord | [Github](https://github.com/Preocts/Egg_Bot)
+
+---
+
+**Requirements**
+- [Python 3.8.1](https://www.python.org/)
+- [discordpy v1.3.2](https://github.com/Rapptz/discord.py)
+- [pyhton-dotenv](https://github.com/theskumar/python-dotenv)
+
+---
+
+## Customizable Discord Chat Bot
 What started as a simple way to send a welcome message when a new user joined a guild, Egg Bot has expanded to include:
 
 - Definable greetings, both DM and chat, for new user joins
 - A custom, regex driven, alert system that watches for mentions of your choice called ShoulderBird
 - Highly definable permission based chat commands
- - Control by Guild, Channels, Roles, and Users
- - more features in the works
-
-Contact **Preocts#8196** on Discord for more info
+  - Control by Guild, Channels, Roles, and Users
+- Bot Guard - an allow list for bots that kicks unexpected bots to reduce noise/spam/scams
+- more features in the works
 
 ----
+
 ## .env
 Running this program requires you to create and define your own .env file with two keys.
 
@@ -20,80 +32,3 @@ Running this program requires you to create and define your own .env file with t
 DISCORD_TOKEN={API Secret Here}
 BOT_OWNER={Your Discord ID here}
 ```
-
-----
-## base.egg
-
-Configuration is done is JSON format with a base.egg file provided to get you started. It uses three main keys with sub keys to define the guild each applies to.
-
-**Foreshadowing, these are all changing in 0.3 because they need to.**
-
-**Version 0.2.2** - Sticky Egg configuration keys:
-
-
-### guildConfig { "Guild Name": { "Options" } }
-
-Options that do things in guildConfig:
-
-- autowelcomeDM - Chat that is sent to a new join via DM
-- autowelcomeChat - Chat that is sent to the welcome channel listed below on new join
-- autowelcomeChannel - Where the bot is allowed to post welcome message. If blank the bot will not post to any channel.
-- allowedChatRooms - Depreciated
-
-*\*Image path starts in the same directory the code is running from*
-
-### shoulderBird { "Guild name": { "User Name" : "Regex Search" } }
-
-- This will search all incoming chats that the bot can see and look for the Regex expression
-- If Regex finds a match, the chat is DM'ed to the User Name defined
-
-### botCommands { "Guild name" : { "Trigger": { "Options" } } }
-
-Options that do things in botCommands:
-
-*These are all case sensitive*
-
-- content : This is the bot's chat output when a command runs
-- users : Restricts command to listed users
-- roles : Restricts command to listed roles
-- channels : Restricts command to listed channels
-- action : triggers some hard-coded actions
-
-*All listed values are comma separated with spaces*
-
-*Example: "users" : "Preocts, NotPreocts, EggMan"*
-
-**Chat and DM Actions**
-- disconnect : Shuts connection down
-  - *Can **only** be run by userID that matches BOT_OWNER in .env file regardless of options*
-
-- edit-command : Creates or updates given command
-  - *!trigger {Command Name} | {option1 = value} | {option2 = value} | {optionN = value}*
-
-- delete-command : Deletes given command
-  - *!trigger {Command Name}*
-
-- get-command : Outputs the command in the same format it was created. Use this for copy/pasting commands or remembering how to format them
-  - *!trigger {Command Name}*
-
-- list-command : Lists all commands in guild.
-  - *!trigger {Command Name}*
-
-**ShoulderBird Actions - DM Only**
-
-- sb-toggle : Toggle ShoulderBird on and off
-  - *!trigger*
-
-- sb-show : Output current regEx ShoulderBird searches for all guilds
-  - *!trigger*
-
-- sb-set : Replace existing, or create, ShoulderBird search
-  - *!trigger {guildname} = {regEx}*
-
-- sb-delete : Delete search from provided guild
-  - *!trigger {guildname}*
-
-**DM Only Actions**
-
-- optout-toggle : Toggles the user's optout status which doesn't do much right now
-  - *!trigger*
