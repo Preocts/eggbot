@@ -1,0 +1,7 @@
+{
+    "CoreConfig": {
+        "Version": "0.6.1",
+        "VersionName": "Fickled Egg",
+        "Debug_Level": "INFO"
+    }
+}
