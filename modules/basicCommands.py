@@ -390,17 +390,13 @@ class basicCommands:
         # logging.debug(f'parseRoles: {clean_roles}')
         return clean_roles
 
-    async def onMessage(self, chtype, message) -> bool:
+    async def onMessage(self, **kwargs) -> bool:
         """
         Hook method to be called from core script on Message event
 
-        Return value controls if additional mod calls are performed. If True
-        the core script should continue with calls. If False the core script
-        should break from iterations.
-
-        Args:
+        Keyword Args:
             chtype (str) : Either "text" or "dm" or "group"
-            member (discord.member) : a discord.message class
+            message (discord.message) : a discord.message class
 
         Returns:
             (boolean)
@@ -408,9 +404,11 @@ class basicCommands:
         Raises:
             None
         """
+        chtype = kwargs.get('chtype')
+        message = kwargs.get('message')
         # This modules only deals with text channels
         if chtype != 'text':
-            return True
+            return
 
         results = self.commandCheck(str(message.guild.id),
                                     str(message.channel.id),
@@ -421,7 +419,7 @@ class basicCommands:
             await message.channel.send(results['response'])
         else:
             logger.debug(f'commandCheck False: {results["response"]}')
-        return True
+        return
 
 
 # May Bartmoss have mercy on your data for running this bot.

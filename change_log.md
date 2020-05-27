@@ -1,4 +1,6 @@
-##### Change Log v0.5.3 - Opus Egg
+##### Change Log v0.6.1 - Fickled Egg
+
+**This feature change is not backward compatible**
 
 - README - Spelling corrections
 - shoulderBird - toggleBird() - bug fix: possible to return undefined variable
@@ -12,7 +14,12 @@
     - "+": append(add), "-": remove(lists only), "-+": replace all
     - example: "command!mod !myCommand +roles Mods, VIPs"
       - Adds "Mods" and "VIPs" to roles list
-
+- typingReact.py created and prototyped
+  - Events and such for when people are typing. Don't know where this one is going.
+  - Current default includes reactions at 5, 10, 15, and 20 people typing with a 3 second window
+  - Each level of escalated #s has its own cooldown
+  - Default cooldown is 24 hours
+- Updated ALL hooks in modules to only take keywords args. Saving headaches one day at a time.
 
 ---
 

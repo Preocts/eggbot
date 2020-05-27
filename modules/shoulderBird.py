@@ -114,8 +114,7 @@ class shoulderBird:
         """
 
         logger.debug(f'getBirds: {guild}')
-        if ((guild in self.sbConfig) and
-           len(self.sbConfig[guild])):
+        if ((guild in self.sbConfig) and len(self.sbConfig[guild])):
             return {"status": True, "response": self.sbConfig[guild]}
         return {"status": False, "response": "Guild not found or empty"}
 
@@ -136,8 +135,7 @@ class shoulderBird:
 
         logger.debug(f'getBird call: {guild} | {user}')
         response = None
-        if ((guild in self.sbConfig) and
-           len(self.sbConfig[guild])):
+        if ((guild in self.sbConfig) and len(self.sbConfig[guild])):
             if user in self.sbConfig[guild]:
                 response = (self.sbConfig[guild][user]["regex"],
                             self.sbConfig[guild][user]["toggle"])
@@ -331,19 +329,14 @@ class shoulderBird:
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
-    async def onMessage(self, chtype, message, **kwargs) -> bool:
+    async def onMessage(self, **kwargs) -> bool:
         """
         Hook method to be called from core script on Message event
 
-        Return value controls if additional mod calls are performed. If True
-        the core script should continue with calls. If False the core script
-        should break from iterations.
-
-        Args:
+        Keyword Args:
             chtype (str) : Channel type. Either "text" or "dm" or "group"
-            member (discord.member) : a discord.message class
-            **kwargs :
-                client (discord.client) : Active discord client reference
+            message (discord.message) : a discord.message class
+            client (discord.client) : Active discord client reference
 
         Returns:
             (boolean)
@@ -351,7 +344,11 @@ class shoulderBird:
         Raises:
             None
         """
-        if not("client" in kwargs.keys()):
+        chtype = kwargs.get('chtype')
+        message = kwargs.get('message')
+        client = kwargs.get('client')
+
+        if client is None:
             return True
 
         if chtype == "dm":

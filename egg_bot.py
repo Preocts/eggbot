@@ -53,6 +53,7 @@ async def on_disconnect():
 async def on_member_join(member):
     """ Handle the event of a user joining the guild """
 
+    global botMods
     logger.info(f'Member Join: Display Name: {member.display_name}'
                 f' | User ID: {member.id}'
                 f' | Account Created: {member.created_at}'
@@ -60,17 +61,33 @@ async def on_member_join(member):
 
     for mods in botMods:
         try:
-            if not(await mods.onJoin(member)):
-                break
+            await mods.onJoin(member=member)
         except AttributeError:
             continue
     return
+
+# ON TYPING - things and stuff
+@dClient.event
+async def on_typing(channel, user, when):
+    global botMods
+    for mods in botMods:
+        try:
+            # I REALLY do not want to pass dClient here....
+            await mods.onTyping(
+                channel=channel,
+                user=user,
+                when=when)
+        except AttributeError:
+            continue
+    return
+
 
 # ON MESSAGE - Bot Commands
 @dClient.event
 async def on_message(message):
     """ Event triggers on every new message bot can see """
 
+    global botMods
     # Ignore messages by bot account
     if message.author == dClient.user:
         return False
@@ -107,9 +124,10 @@ async def on_message(message):
 
     for mods in botMods:
         try:
-            # I REALLY do not want to pass dClient here....
-            if not(await mods.onMessage(channelType, message, client=dClient)):
-                break
+            await mods.onMessage(
+                chtype=channelType,
+                message=message,
+                client=dClient)
         except AttributeError:
             continue
     return
@@ -199,7 +217,7 @@ def main():
     loadClasses()
     logger.info('Loaded yolk configuration file.')
     logger.debug(f'{VERSION} {VERSION_NAME} {LOGLEVEL}')
-    logger.info(f'Hatch cycle started.')
+    logger.info('Hatch cycle started.')
     logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
     logger.info('Hatching onto Discord now.')
 
