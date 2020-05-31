@@ -123,6 +123,10 @@ class typingReact:
         logger.debug(f'saveConfig success: {outFile}')
         return {"status": True, "response": "Config saved"}
 
+    async def onMessage(self, **kwargs):
+        """ TO DO: Few basic commands controlled by guild owner/allowed """
+        pass
+
     async def onTyping(self, **kwargs):
         """ Hook to discord.on_typing event called from core script
 
@@ -141,39 +145,50 @@ class typingReact:
 
         if channel.guild is None:
             return
+        if channel.guild.id in self.trConfig['SYS-Rec']['optoutGuilds']:
+            return
 
         self.checkGuild(str(channel.guild.id))
         self._cleanup()
-        qsearch = [u for u in self.tracktyping if u[0] == user.id]
-        if not(len(qsearch)):
-            self.tracktyping.append((user.id, round(time.time())))
+        qsearch = [u for u in self.tracktyping
+                   if u[0] == user.id and u[2] == channel.id]
+        if not(qsearch):
+            self.tracktyping.append(
+                (user.id, round(time.time()), channel.id))
 
-        outmsg = None
         cooldown = self.trConfig[str(channel.guild.id)].get('cooldown', 86400)
+        channels = {}
+        # Get unique channels with how many active typing
+        # This is such a hack.  I love it. <3
+        # It was also at this point in my life I learned GiGi = Wild
+        for tt in self.tracktyping:
+            channels[tt[2]] = channels.get(tt[2], 0) + 1
+
         for pile in self.trConfig[str(channel.guild.id)].get('piles', []):
-            if len(self.tracktyping) >= pile.get('peak'):
-                elap = time.time() - pile.get('lastran', 0)
-                if elap > cooldown:
-                    outmsg = pile.get('msg')
-                    pile['lastran'] = round(time.time())
-        if outmsg is not None:
-            # await channel.send(outmsg)
-            print(''.join(['#'] * 70))
-            print(outmsg)
-            print(''.join(['#'] * 70))
-        # ADD CHECK COOLDOWN AND UPDATE LASTRAN
+            for ch in channels:
+                if channels[ch] >= pile.get('peak', 999):
+                    elap = time.time() - pile.get('lastran', 0)
+                    if elap > cooldown:
+                        pile['lastran'] = round(time.time())
+                        # Is it safe to assume that the person who typed
+                        # and triggered this is in the guild/channel we
+                        # care about?  I think it is.
+                        deets = (channel.guild.id, channel.id, channel.name,
+                                 user.id, user.name, pile.get('msg', ''))
+                        logging.info(f'Reacting to a lot of typing: {deets}')
+                        await channel.send(pile.get('msg', ''))
         return
 
     def _cleanup(self):
         """ Cleans up what we are tracking if older than 3 seconds"""
         newlist = []
         for user in self.tracktyping:
-            uid, tic = user
+            uid, tic, channel = user
             if round(time.time()) - tic > 3:
                 continue
-            newlist.append((uid, tic))
+            newlist.append((uid, tic, channel))
         self.tracktyping = newlist
-
+        return
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

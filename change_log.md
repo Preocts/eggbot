@@ -1,3 +1,9 @@
+##### Change Log v0.6.2 - Fickled Egg
+
+- typingReact changes/addition (still not live):
+  - Added check for guilds that are opted out of this feature
+  - Should now react to channel specific counts of users typing within a 3 second window (ish)
+
 ##### Change Log v0.6.1 - Fickled Egg
 
 **This feature change is not backward compatible**
