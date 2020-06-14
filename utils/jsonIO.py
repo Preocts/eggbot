@@ -8,7 +8,7 @@
 import json
 import logging
 
-logger = logging.getLogger("default")
+logger = logging.getLogger(__name__)  # Create module level logger
 
 
 class JSON_Config_Error(Exception):
@@ -44,7 +44,7 @@ def loadConfig(inputFile: str) -> dict:
         with open(inputFile) as file:
             json_file = json.load(file)
     except json.decoder.JSONDecodeError:
-        # logger.error(f'Config file empty ', exc_info=True)
+        logger.error('Config file empty ', exc_info=True)
         raise JSON_Config_Error(f"Config file is empty: {inputFile}")
     except FileNotFoundError:
         logger.error(f'Config file not found: {inputFile}', exc_info=True)
@@ -75,7 +75,7 @@ def saveConfig(json_config: dict, outputFile: str, raw: bool = False) -> bool:
                 file.write(json.dumps(json_config, indent=4))
 
     except OSError:
-        # logger.error(f'File not be opened: {outputFile}', exc_info=True)
+        logger.error(f'File not be opened: {outputFile}', exc_info=True)
         raise JSON_Config_Error(f"Could not open target file: {outputFile}")
     logger.info(f'Success: Config saved to: {outputFile}')
     return True
