@@ -1,8 +1,16 @@
 ##### Change Log v0.6.2 - Fickled Egg
 
-- typingReact changes/addition (still not live):
+- typingReact changes/addition:
   - Added check for guilds that are opted out of this feature
-  - Should now react to channel specific counts of users typing within a 3 second window (ish)
+  - Should now react to channel specific counts of users typing within a 9 second window
+  - Removed a bug that had multiple channels counting toward the same goal
+- Logging calls updated to be more uniform across all modules
+  - Log files are now:
+    - full_logs.log - All run-times, 10mb max, 5 file rotation
+    - single_logs.log - Single run-time, volatile file
+    - console logging is on by default
+- Moved jsonIO.py to ./utils as it is nothing but helper functions
+- Moved logging_init.py to ./utils as it is a helper function
 
 ##### Change Log v0.6.1 - Fickled Egg
 

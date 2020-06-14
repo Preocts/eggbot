@@ -9,10 +9,10 @@
 """
 import time
 import logging
-from . import jsonIO
+from utils import jsonIO
 from utils import eggUtils
 
-logger = logging.getLogger('default')  # Create module level logger
+logger = logging.getLogger(__name__)  # Create module level logger
 
 GUILD_TEMPLATE = {'restrictchannels': [],
                   'restrictusers': [],
@@ -303,7 +303,7 @@ class basicCommands:
                     return {
                         'status': False,
                         'response': f'Value "{text}" is not a number.'}
-                self.bcConfig['guilds'][guild]['commands'][cname][mod] += int(text)
+                self.bcConfig['guilds'][guild]['commands'][cname][mod] += int(text)  # noqa
             if tartype == 'str':
                 # This can be done in one line, but a long line
                 pt = self.bcConfig['guilds'][guild]['commands'][cname][mod]
@@ -324,7 +324,7 @@ class basicCommands:
                     return {
                         'status': False,
                         'response': f'Value "{text}" is not a number.'}
-                self.bcConfig['guilds'][guild]['commands'][cname][mod] = int(text)
+                self.bcConfig['guilds'][guild]['commands'][cname][mod] = int(text)  # noqa
             if tartype == 'str':
                 self.bcConfig['guilds'][guild]['commands'][cname][mod] = text
             return {
@@ -336,11 +336,11 @@ class basicCommands:
                 return {
                     'status': False,
                     'response': f'"-" flag cannot be used for {mod} key.'}
-            if text not in self.bcConfig['guilds'][guild]['commands'][cname][mod]:
+            if text not in self.bcConfig['guilds'][guild]['commands'][cname][mod]:  # noqa
                 return {
                     'status': False,
                     'response': f'"{text}" was not found in "{mod}".'}
-            ind = self.bcConfig['guilds'][guild]['commands'][cname][mod].index(text)
+            ind = self.bcConfig['guilds'][guild]['commands'][cname][mod].index(text)  # noqa
             self.bcConfig['guilds'][guild]['commands'][cname][mod].pop(ind)
 
             return {

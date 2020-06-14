@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger("default")  # Module logger
+logger = logging.getLogger(__name__)  # Create module level logger
 
 
 def isInt(checkvalue) -> bool:

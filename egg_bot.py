@@ -16,9 +16,10 @@ import json
 import logging
 import modules
 import asyncio
+from utils import logging_init
 from dotenv import load_dotenv
 
-logger = logging.getLogger("default")
+logger = logging.getLogger(__name__)  # Create module level logger
 
 load_dotenv()
 BOT_OWNER = os.getenv('BOT_OWNER')
@@ -31,6 +32,7 @@ botMods = []
 dClient = discord.Client(status='online',
                          activity=discord.Activity(type=2, name="everything."))
 
+
 # ON READY - connection established
 @dClient.event
 async def on_ready():
@@ -42,11 +44,13 @@ async def on_ready():
     #     logger.info(f'\t{guild}')
     return True
 
+
 # ON DISCONNECT - connection closed or lost
 @dClient.event
 async def on_disconnect():
     logger.info('Egg Dropped. Connection lost or reset by host')
     return
+
 
 # ON JOIN - Welcome the new user
 @dClient.event
@@ -65,6 +69,7 @@ async def on_member_join(member):
         except AttributeError:
             continue
     return
+
 
 # ON TYPING - things and stuff
 @dClient.event
@@ -206,7 +211,7 @@ def main():
         incomplete and saying: "Now it’s complete because it’s ended here."
     """
     loadCore()
-    modules.logging_init.logINIT(LOGLEVEL)
+    logging_init.config_logger('./config/logging_config.json', LOGLEVEL)
     logger.info('Loading secrets...')
     DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
     if not(DISCORD_TOKEN):

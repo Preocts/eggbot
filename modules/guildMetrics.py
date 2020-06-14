@@ -8,9 +8,9 @@
 """
 import logging
 import time
-from . import jsonIO
+from utils import jsonIO
 
-logger = logging.getLogger("default")  # Create module level logger
+logger = logging.getLogger(__name__)  # Create module level logger
 
 
 def initClass():
