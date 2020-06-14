@@ -226,11 +226,6 @@ def main():
     logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
     logger.info('Hatching onto Discord now.')
 
-    # import time
-    # classHandler("drop")
-    # time.sleep(3)
-    # exit()
-
     # dClient.run(DISCORD_TOKEN)
     loop = asyncio.get_event_loop()
     try:

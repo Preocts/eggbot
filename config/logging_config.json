@@ -31,6 +31,32 @@
             "encoding": "utf8"
         }
     },
+    "loggers": {
+        "protocol": {
+            "level": "ERROR",
+            "handlers": [
+                "console",
+                "single_run_handler",
+                "full_log_handler"
+            ]
+        },
+        "gateway": {
+            "level": "ERROR",
+            "handlers": [
+                "console",
+                "single_run_handler",
+                "full_log_handler"
+            ]
+        },
+        "client": {
+            "level": "ERROR",
+            "handlers": [
+                "console",
+                "single_run_handler",
+                "full_log_handler"
+            ]
+        }
+    },
     "root": {
         "level": "DEBUG",
         "handlers": [

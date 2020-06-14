@@ -231,10 +231,11 @@ class basicCommands:
 
         return {
             'status': True,
-            'reponse': f'"{cname}" is now set and ready to use.'}
+            'response': f'"{cname}" is now set and ready to use.'}
 
     def modCommand(self, guild: str, msg: str) -> dict:
-        """ Modify a command that already exists
+        """
+        Modify a command that already exists
 
         Args:
             guild (str): The ID of the guild
@@ -347,6 +348,32 @@ class basicCommands:
                 'status': True,
                 'response': f'"{mod}" Successfully modified.'}
 
+    def delCommand(self, guild: str, msg: str) -> dict:
+        """
+        Delete a command
+
+        Args:
+            guild (str): The ID of the guild
+            msg (str): The message content
+
+        Returns:
+            dict : {"status": bool, "response": str}
+
+        Raises:
+            None
+        """
+        logger.debug(f'delCommand: {guild} | {msg}')
+
+        self.checkGuild(guild)
+
+        # Command to delete
+        command = msg.split(' ')[1].lower()
+
+        if self.bcConfig['guilds'][guild]['commands'].get(command) is not None:
+            del self.bcConfig['guilds'][guild]['commands'][command]
+            return {'status': True, 'response': f'"{command}" deleted'}
+        return {'status': False, 'response': f'"{command}" not found'}
+
     def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
         """ Load a config into the class """
 
@@ -406,8 +433,36 @@ class basicCommands:
         """
         chtype = kwargs.get('chtype')
         message = kwargs.get('message')
+        message_slice = message.clean_content.split(' ')
         # This modules only deals with text channels
         if chtype != 'text':
+            return
+
+        # Check for basicCommand control commands
+        if "command!" in message_slice[0]:
+            control = message_slice[0].replace('command!', '')
+            results = None
+            if control.lower() == 'add':
+                results = self.addCommand(
+                    str(message.guild.id), message.clean_content)
+                logger.debug(results)
+                await message.channel.send(results['response'])
+            if control.lower() == 'mod':
+                results = self.modCommand(
+                    str(message.guild.id), message.clean_content)
+                logger.debug(results)
+                await message.channel.send(results['response'])
+            if control.lower() == 'del':
+                results = self.delCommand(
+                    str(message.guild.id), message.clean_content)
+                logger.debug(results)
+                await message.channel.send(results['response'])
+            if control.lower() == 'list':
+                pass
+            if control.lower() == 'help':
+                pass
+            if results is not None:
+                self.saveConfig()
             return
 
         results = self.commandCheck(str(message.guild.id),
