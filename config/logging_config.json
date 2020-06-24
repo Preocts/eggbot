@@ -3,7 +3,7 @@
     "disable_existing_loggers": false,
     "formatters": {
         "simple": {
-            "format": "%(asctime)s - %(module)s - %(levelname)s - %(message)s"
+            "format": "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
         }
     },
     "handlers": {
@@ -32,7 +32,7 @@
         }
     },
     "loggers": {
-        "protocol": {
+        "websockets.protocol": {
             "level": "ERROR",
             "handlers": [
                 "console",
@@ -40,7 +40,7 @@
                 "full_log_handler"
             ]
         },
-        "gateway": {
+        "websockets.client": {
             "level": "ERROR",
             "handlers": [
                 "console",
@@ -48,7 +48,23 @@
                 "full_log_handler"
             ]
         },
-        "client": {
+        "discord.gateway": {
+            "level": "ERROR",
+            "handlers": [
+                "console",
+                "single_run_handler",
+                "full_log_handler"
+            ]
+        },
+        "discord.http": {
+            "level": "ERROR",
+            "handlers": [
+                "console",
+                "single_run_handler",
+                "full_log_handler"
+            ]
+        },
+        "discord.client": {
             "level": "ERROR",
             "handlers": [
                 "console",
