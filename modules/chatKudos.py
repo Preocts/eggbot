@@ -126,20 +126,19 @@ class chatKudos:
         logger.debug('[FINISH] kudoMath')
         return
 
-    def generate_board(self, guild: str, message: str, client) -> str:
+    def generate_board(self, guild: str, message: str) -> str:
         """
         Generates a list of top score holders
 
         Args:
             [str] : Discord guild ID
             [str] : Discord clean message content that triggers this command
-            [obj] : Connected Discord client for name lookup
 
         Returns:
             [str] : Formatted response to send to channel
         """
         logger.debug(f'[START] generate_board: {guild}, {message}')
-        split = message.split(' ')
+        split = message.clean_content.split(' ')
         count = 10
         if len(split) > 1:
             try:
@@ -154,7 +153,7 @@ class chatKudos:
         while count > 0 and sorted_keys:
             key = sorted_keys.pop(-1)
             display_name = "Not_Found"
-            user = client.get_user(int(key))
+            user = message.guild.get_member(int(key))
             if user is not None:
                 display_name = user.display_name
             score_list.append(self.ckConfig[guild][key])
@@ -191,7 +190,6 @@ class chatKudos:
         if message is None:
             logger.debug('[FINISH] onMessage - no message')
             return
-        client = kwargs.get('client')
         guild = str(message.guild.id)
         user = str(message.author.id)
         self.checkConfig(guild)
@@ -212,9 +210,9 @@ class chatKudos:
                     if '+' not in next_word and '-' not in next_word:
                         continue
                     display_name = "Not_Found"
-                    user = client.get_user(int(target))
-                    if user is not None:
-                        display_name = user.display_name
+                    target_user = message.guild.get_member(mention.id)
+                    if target_user is not None:
+                        display_name = target_user.display_name
                     start_total = self.ckConfig[guild].get(target, 0)
                     self.kudoMath(
                         guild, user, target, next_word.count("+")
@@ -234,8 +232,7 @@ class chatKudos:
                         str(diff_total), display_name))
 
         if message.clean_content.split()[0] == 'kudo!board':
-            response = self.generate_board(
-                guild, message.clean_content, client)
+            response = self.generate_board(guild, message)
             if response:
                 await message.channel.send(response)
         return
