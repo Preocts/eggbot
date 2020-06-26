@@ -1,6 +1,21 @@
+##### Change Log v0.6.5 - Fickled Egg - Patch
+
+- Fixed a dozen bugs with Kudos module. Thanks Nay for field testing
+- Added missing changelog for 0.6.4 (it was a late night, okay?)
+- Kudo module will need user IDs filled into {"controls": "users": [] } list to be functional at this time
+- Future release will include permissions based on channel, role, and user
+- Future release will include chat driven control commands for changing this settings
+
+
 ##### Change Log v0.6.4 - Fickled Egg - Kudos
 
-- chatKudos module
+- chatKudos module : points to users for your own amusement and chaos
+  - @username++++ : adds four points
+  - @username---- : removes four points
+  - The number of + or - immediately following a mention is the number of points granted or removed
+  - kudo!board (N)
+    - Display top 10 point holders (default)
+    - Optional: provide N for specific number of results
 
 
 ##### Change Log v0.6.3 - Fickled Egg - Chat commands

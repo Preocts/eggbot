@@ -88,6 +88,10 @@ class chatKudos:
         """ Ensure the config is legit, add the guild if missing """
         if not(isinstance(self.ckConfig, dict)):
             logger.warning('Config file was not a dict. Fixing')
+            self.ckConfig = {}
+            self.saveConfig(self.activeConfig)
+
+        if self.ckConfig.get('controls') is None:
             self.ckConfig = {
                 'controls': {
                     'users': [],
@@ -95,9 +99,11 @@ class chatKudos:
                     'loss-message': "{} points from {}!"
                 }
             }
+            self.saveConfig(self.activeConfig)
         if self.ckConfig.get(guild) is None:
             logger.info(f'Adding guild to config: {guild}')
             self.ckConfig[guild] = {}
+            self.saveConfig(self.activeConfig)
         return
 
     def kudoMath(self, guild: str, user: str, target: str, amount: int):
@@ -113,7 +119,6 @@ class chatKudos:
         Returns:
             None
         """
-        self.checkConfig(guild)
         logger.debug(f'[START] kudoMath: {guild}, {user}, {target}')
         currentpoints = self.ckConfig[guild].get(target, 0)
         self.ckConfig[guild][target] = currentpoints + amount
@@ -162,9 +167,6 @@ class chatKudos:
         leader_board.append('```')
         return ''.join(leader_board)
 
-    def convert_to_displayname(self, userlist: tuple, client) -> tuple:
-        """ converts list of user IDs to display_names """
-
     async def onMessage(self, **kwargs) -> bool:
         """
         Hook method to be called from core script on Message event
@@ -180,39 +182,56 @@ class chatKudos:
             None
         """
         # Only Guild Chat (text) support
+        logger.debug('[START] onMessage')
         if not(kwargs.get('chtype') == 'text'):
+            logger.debug('[FINISH] onMessage - not chat channel')
             return
 
         message = kwargs.get('message')
         if message is None:
+            logger.debug('[FINISH] onMessage - no message')
             return
         client = kwargs.get('client')
         guild = str(message.guild.id)
         user = str(message.author.id)
+        self.checkConfig(guild)
         loss_response = self.ckConfig['controls']['loss-message']
         gain_response = self.ckConfig['controls']['gain-message']
         if user not in self.ckConfig['controls']['users']:
+            logger.debug('[FINISH] onMessage - user not allowed')
             return
         for mention in message.mentions:
-            tag = '<@' + str(mention.id) + '>'
-            for word in message.content.split(' '):
-                if tag in word:
-                    start_total = self.ckConfig[guild][user]
+            logger.debug(f'Found mention: {mention.id}')
+            target = str(mention.id)
+            for idx, word in enumerate(message.content.split(' ')):
+                if target in word.strip('<').strip('>').strip('#').strip('!'):
+                    try:
+                        next_word = message.content.split(' ')[idx + 1]
+                    except IndexError:
+                        continue
+                    if '+' not in next_word and '-' not in next_word:
+                        continue
+                    display_name = "Not_Found"
+                    user = client.get_user(int(target))
+                    if user is not None:
+                        display_name = user.display_name
+                    start_total = self.ckConfig[guild].get(target, 0)
                     self.kudoMath(
-                        guild, user, str(mention.id), word.count("+")
+                        guild, user, target, next_word.count("+")
                     )
                     self.kudoMath(
-                        guild, user, str(mention.id), -(word.count("-"))
+                        guild, user, target, -(next_word.count("-"))
                     )
-                    final_total = self.ckConfig[guild][user]
+                    final_total = self.ckConfig[guild].get(target, 0)
+                    diff_total = final_total - start_total
                     self.saveConfig(self.activeConfig)
-                    if start_total > final_total:
+                    if diff_total <= 0:
                         # Sad message here
                         await message.channel.send(loss_response.format(
-                            str(final_total), message.author.display_name))
+                            str(diff_total), display_name))
                         return
                     await message.channel.send(gain_response.format(
-                        str(final_total), message.author.display_name))
+                        str(diff_total), display_name))
 
         if message.clean_content.split()[0] == 'kudo!board':
             response = self.generate_board(
