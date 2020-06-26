@@ -1,3 +1,8 @@
+##### Change Log v0.6.4 - Fickled Egg - Kudos
+
+- chatKudos module
+
+
 ##### Change Log v0.6.3 - Fickled Egg - Chat commands
 
 - basicCommands changes/additions:
