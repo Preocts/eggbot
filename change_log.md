@@ -1,3 +1,11 @@
+##### Change Log v0.6.6 - Fickled Egg - Patch of Patch
+
+- Fixed display_name issue with Kudos. Was pulling a user object from client level instead of a member object from guild level. This caused them to not have a nickname.
+- Fixed a variable name re-use that was causing user names, not IDs, to be logged. Did not impact run-time.
+- **Space is required** between the @mention and the +s or -s.
+- Side-effect of this: "@preocts +-Hello-World++" is now a completely valid way to grant 1 point.
+  - Yes, this means that "++O--w--O++" looks fun, and does nothing in regards to points.
+
 ##### Change Log v0.6.5 - Fickled Egg - Patch
 
 - Fixed a dozen bugs with Kudos module. Thanks Nay for field testing
