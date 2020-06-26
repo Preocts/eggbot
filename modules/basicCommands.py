@@ -14,15 +14,6 @@ from utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
-GUILD_TEMPLATE = {'restrictchannels': [],
-                  'restrictusers': [],
-                  'commands': {}}
-COMMAND_KEYS = ['users', 'channels', 'roles', 'cooldown',
-                'lastran', 'text', 'help']
-COMMAND_DEFAULT = [[], [], [], 10, 0, '', '']
-COMMAND_DATATYPE = ['list', 'list', 'list',
-                    'int', 'int', 'str', 'str']
-
 
 def initClass():
     """ A fucntion to allow automated creation of a class instance """
@@ -34,6 +25,13 @@ class basicCommands:
     name = 'basicCommands'
     allowReload = True
     instCount = 0
+
+    # Default static defines
+    COMMAND_KEYS = ('users', 'channels', 'roles', 'cooldown',
+                    'lastran', 'text', 'help')
+    COMMAND_DEFAULT = ([], [], [], 10, 0, '', '')
+    COMMAND_DATATYPE = ('list', 'list', 'list',
+                        'int', 'int', 'str', 'str')
 
     def __init__(self, inFile: str = './config/basicCommands.json'):
         """ Defines __init__ """
@@ -100,61 +98,55 @@ class basicCommands:
 
     def commandCheck(self, guild: str, channel: str, roles: list,
                      user: str, message: str) -> dict:
-        """ Scans a provided message for a command and return if found
+        """
+        Scans a provided message for a command and return if found
 
-            This function takes a list of args and scans the message provided
-            for any matching commands in basicCommands.json (or active config).
-            If found and allowed, the function passes just the content of the
-            command back.
+        This function takes a list of args and scans the message provided
+        for any matching commands in basicCommands.json (or active config).
+        If found and allowed, the function passes just the content of the
+        command back.
 
-            Rules:
-                All commands are not case sensitive. !test == !TEST
+        Rules:
+            All commands are not case sensitive. !test == !TEST
 
-            Conditional checks. If any fail then return status = False
-                In order:
-                - Guild level checks:
-                  - Is the guild listed in the config
-                  - Is the channel listed as prohibited
-                  - Is the user listed as prohibited
-                  - Is there a matching command in the config
-                - Command level checks:
-                  - If defined, is this from an allowed ["channel"]
-                  - If defined, is this from an allowed ["user"]
-                  - If defined, is this from an allowed ["role"]
-                  - If defined, is the command throttled
-            If all of these pass you get Returns.
+        Conditional checks. If any fail then return status = False
+            In order:
+            - Guild level checks:
+                - Is the guild listed in the config
+                - Is the channel listed as prohibited
+                - Is the user listed as prohibited
+                - Is there a matching command in the config
+            - Command level checks:
+                - If defined, is this from an allowed ["channel"]
+                - If defined, is this from an allowed ["user"]
+                - If defined, is this from an allowed ["role"]
+                - If defined, is the command throttled
+        If all of these pass you get Returns.
 
-            Args:
-                guildID (str): The ID of the guild
-                channelID (str): The ID of the channel
-                roleIDs (List(str)): List of role IDs
-                userID (str): The ID of the user
-                message (str): The message to scan for a command.
+        Args:
+            guildID (str): The ID of the guild
+            channelID (str): The ID of the channel
+            roleIDs (List(str)): List of role IDs
+            userID (str): The ID of the user
+            message (str): The message to scan for a command.
 
-            Returns:
-                (dict) : Two results based on pass/fail
-                    {"status": True, "response": "command.content"}
-                    {"status": False, "response": "[reason]"}
+        Returns:
+            (dict) : Two results based on pass/fail
+                {"status": True, "response": "command.content"}
+                {"status": False, "response": "[reason]"}
 
-            Raises:
-                None
+        Raises:
+            None
         """
         logger.debug(f'{guild} | {channel} | {roles} | {user} | {message}')
         cData = None
         cName = None
-        clean_roles = self.parseRoles(roles)
-        self.checkGuild(guild)
 
         # While I'd like to assume my own configs are healthy and that nobody
         # would ever fuck with them... I'm not an ass and neither are you.
+        self.checkGuild(guild)
         try:
-            # Is this user prohibited?
-            if user in self.bcConfig['guilds'][guild]['restrictusers']:
-                return {'status': False, 'response': 'User Prohibited'}
-            # Is this channel prohibited?
-            if channel in self.bcConfig['guilds'][guild]['restrictchannels']:
-                return {'status': False, 'response': 'Channel Prohibited'}
-            # Is this a command?
+            # Is this a command
             for t in self.bcConfig['guilds'][guild]['commands']:
                 if message.lower().startswith(t, 0, len(t)):
                     cData = self.bcConfig['guilds'][guild]['commands'][t]
@@ -163,19 +155,19 @@ class basicCommands:
             if cName is None:
                 return {'status': False, 'response': 'No command found'}
 
-            # Channel restrictions?
+            # Channel restrictions
             if len(cData['channels']) and not(channel in cData['channels']):
                 return {'status': False, 'response': 'Channel restricted'}
 
-            # User restrictions?
+            # User restrictions
             if len(cData['users']) and not(user in cData['users']):
                 return {'status': False, 'response': 'User restricted'}
 
-            # Role restrictions?
-            if len(cData['roles']) and not(clean_roles in cData['roles']):
+            # Role restrictions
+            if len(cData['roles']):
                 return {'status': False, 'response': 'Role restricted'}
 
-            # Throttle restriction?
+            # Throttle restriction
             if (time.time() - cData['lastran']) < cData['cooldown']:
                 return {'status': False, 'response': 'Cooldown active'}
         except KeyError as msg:
@@ -221,8 +213,9 @@ class basicCommands:
                 'response': f'Command "{cname}" already exists.'}
 
         self.bcConfig['guilds'][guild]['commands'][cname] = {}
-        for key in COMMAND_KEYS:
-            keyValue = COMMAND_DEFAULT[COMMAND_KEYS.index(key)]
+        for key in basicCommands.COMMAND_KEYS:
+            keyValue = basicCommands.COMMAND_DEFAULT[
+                basicCommands.COMMAND_KEYS.index(key)]
             self.bcConfig['guilds'][guild]['commands'][cname][key] = keyValue
 
         # Set simple command
@@ -231,10 +224,11 @@ class basicCommands:
 
         return {
             'status': True,
-            'reponse': f'"{cname}" is now set and ready to use.'}
+            'response': f'"{cname}" is now set and ready to use.'}
 
     def modCommand(self, guild: str, msg: str) -> dict:
-        """ Modify a command that already exists
+        """
+        Modify a command that already exists
 
         Args:
             guild (str): The ID of the guild
@@ -284,13 +278,14 @@ class basicCommands:
             modtype = 'append'  # Adds to list, concats str, calc ints
 
         # Ensure we are modding a key that is valid
-        if mod not in COMMAND_KEYS:
+        if mod not in basicCommands.COMMAND_KEYS:
             return {
                 'status': False,
                 'response': f'Key "{mod}" is not a valid mod option.'}
 
         # Get the type for the targeted key
-        tartype = COMMAND_DATATYPE[COMMAND_KEYS.index(mod)]
+        tartype = basicCommands.COMMAND_DATATYPE[
+            basicCommands.COMMAND_KEYS.index(mod)]
 
         if modtype == "append":
             if tartype == 'list':
@@ -347,6 +342,143 @@ class basicCommands:
                 'status': True,
                 'response': f'"{mod}" Successfully modified.'}
 
+    def delCommand(self, guild: str, msg: str) -> dict:
+        """
+        Delete a command
+
+        Args:
+            guild (str): The ID of the guild
+            msg (str): The message content
+
+        Returns:
+            dict : {"status": bool, "response": str}
+
+        Raises:
+            None
+        """
+        logger.debug(f'delCommand: {guild} | {msg}')
+
+        self.checkGuild(guild)
+
+        # Command to delete
+        command = msg.split(' ')[1].lower()
+
+        if self.bcConfig['guilds'][guild]['commands'].get(command) is not None:
+            del self.bcConfig['guilds'][guild]['commands'][command]
+            return {'status': True, 'response': f'"{command}" deleted'}
+        return {'status': False, 'response': f'"{command}" not found'}
+
+    def commandList(self, guild: str, channel: str, roles: list,
+                    user: str, message: str) -> dict:
+        """
+        Lists commands available to the requesting user
+
+        Will not show commands that a user cannot access due to channel,
+        role, or user exclusive mods. Outputs a command separated string
+        nested in a code block. This system command has a self-defined one
+        minute (60 seconds) timeout between uses on a channel level.
+
+        Args:
+            guildID (str): The ID of the guild
+            channelID (str): The ID of the channel
+            roleIDs (List(str)): List of role IDs
+            userID (str): The ID of the user
+            message (str): The message to scan for a command.
+
+        Returns:
+            (dict) : Two results based on pass/fail
+                {"status": True, "response": "command.content"}
+                {"status": False, "response": "[reason]"}
+
+        Raises:
+            None
+        """
+        logger.debug(f'commandList Start: {guild}, {channel}, {roles}, '
+                     f'{user}, {message}')
+        self.checkGuild(guild)
+
+        # Check for listcontrol flag (do users need a role to run?)
+        if self.bcConfig['guilds'][guild]['listcontrol']:
+            allowedroles = self.bcConfig['guilds'][guild]['allowedroles']
+            if allowedroles and not(any(role in allowedroles for role in roles)):  # noqa
+                return {'status': False, 'response': 'Role restriction'}
+
+        # Check for cooldown on list command
+        cooldown = self.bcConfig['guilds'][guild]['listcooldown']
+        lastran = self.bcConfig['guilds'][guild]['listlastran']
+        if cooldown > 1 and (time.time() - lastran) < cooldown:
+            return {'status': False, 'response': 'Cooldown active'}
+        split_message = message.lower().split(' ')
+
+        # Pull the second word, if provided, or assign None
+        search_string = split_message[1] if len(split_message) > 1 else None
+        guild_commands = self.bcConfig['guilds'][guild]['commands']
+        command_list = []
+
+        for command, values in guild_commands.items():
+            # Channel restrictions?
+            if values['channels'] and not(channel in values['channels']):
+                continue
+            # User restrictions?
+            if values['users'] and not(user in values['users']):
+                continue
+            # Role restrictions?
+            if values['roles']:
+                if not(any(role in values['roles'] for role in roles)):
+                    continue
+            if search_string is not None:
+                if not(command.startswith(search_string)):
+                    continue
+            command_list.append(command)
+        if command_list:
+            self.bcConfig['guilds'][guild]['listlastran'] = time.time()
+        logger.debug('commandList Finish')
+        return {'status': True, 'response': command_list}
+
+    def commandHelp(self, guild: str, roles: list) -> dict:
+        """
+        Generates the help text for basicCommands
+
+        Checks the same permissions that control settting/modding commands
+        in the config (allowedroles). If the user does not hold the role
+        the command will be skipped. If the allowedroles list is empty then
+        anyone can run this command.
+
+        Args:
+            guild(str): The ID of the guild
+            roles (List()): List of role IDs
+
+        Returns:
+            (dict) : {"status": True, "response": "command.content"}
+        """
+        logger.debug(f'commandHelp Start: {guild}, {roles}')
+        self.checkGuild(guild)
+
+        # Check for listcontrol flag (do users need a role to run?)
+        if self.bcConfig['guilds'][guild]['listcontrol']:
+            allowedroles = self.bcConfig['guilds'][guild]['allowedroles']
+            if allowedroles and not(any(role in allowedroles for role in roles)):  # noqa
+                return {'status': False, 'response': 'Role restriction'}
+
+        response = "Basic Commands Module command list: ```" \
+            "+ command!list (search)\n" \
+            "\tList commands available in given channel. Search is optional\n" \
+            "+ command!add [command] [message]\n" \
+            "\tCreates a command that will display defined message\n" \
+            "+ command!del [command]\n" \
+            "\tDeletes command (there is no undo)\n" \
+            "+ command!mod [command] [-/+/-+] [flag] [value] \n" \
+            "\tModify or replace flags of a command\n" \
+            "\tValid flags are:\n" \
+            "\t - users : Limit use of command to only these IDs\n" \
+            "\t - channels: Limit use of command to only these channel IDs\n" \
+            "\t - roles: Limit use of command to only these role IDs\n" \
+            "\t - cooldown: Define how many seconds between each run of this command\n" \
+            "\t - text: Define what the command returns to chat\n" \
+            "+ command!help\n" \
+            "\tThis message```"
+        return {'status': True, 'response': response}
+
     def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
         """ Load a config into the class """
 
@@ -382,13 +514,21 @@ class basicCommands:
             What we want:
                 ['@everyone', 'Egg Tester', 'Owner']
         """
-
         clean_roles = []
         if len(discord_roles):
             for r in discord_roles:
                 clean_roles.append(str(r.id))
-        # logging.debug(f'parseRoles: {clean_roles}')
         return clean_roles
+
+    def guild_permissions(self, guild: str, user: str, channel: str) -> bool:
+        """ Checks guild level permissions for command use """
+        # Is this user prohibited
+        if user in self.bcConfig['guilds'][guild]['restrictusers']:
+            return {'status': False, 'response': 'User Prohibited'}
+        # Is this channel prohibited
+        if channel in self.bcConfig['guilds'][guild]['restrictchannels']:
+            return {'status': False, 'response': 'Channel Prohibited'}
+        return {'status': True, 'reponse': ''}
 
     async def onMessage(self, **kwargs) -> bool:
         """
@@ -404,23 +544,58 @@ class basicCommands:
         Raises:
             None
         """
+        # HOLD FOR RELEASE
+        return
+        
         chtype = kwargs.get('chtype')
         message = kwargs.get('message')
+        message_slice = message.clean_content.split(' ')
         # This modules only deals with text channels
         if chtype != 'text':
             return
+        guild = str(message.guild.id)
+        user = str(message.author.id)
+        channel = str(message.channel.id)
+        roles = self.parseRoles(message.author.roles)
+        msg = message.clean_content
 
-        results = self.commandCheck(str(message.guild.id),
-                                    str(message.channel.id),
-                                    message.author.roles,
-                                    str(message.author.id),
-                                    message.clean_content)
+        # Check against restrictchannels and restrictusers
+        # Do not pass go, do not run commands, pay me 200 dollars V:
+        if not(self.guild_permissions(guild, user, channel)['status']):
+            return
+
+        # Check for basicCommand control commands
+        if "command!" in message_slice[0]:
+            control = message_slice[0].replace('command!', '')
+            results = None
+            if control.lower() == 'add':
+                results = self.addCommand(guild, msg)
+            if control.lower() == 'mod':
+                results = self.modCommand(guild, msg)
+            if control.lower() == 'del':
+                results = self.delCommand(guild, msg)
+            if control.lower() == 'list':
+                results = self.commandList(guild, channel, roles, user, msg)
+                if results['status']:
+                    outmessage = 'Available commands for: ' + \
+                                 f'{message.author.display_name}'
+                    outmessage += f'```{", ".join(results["response"])}```'
+                    await message.channel.send(outmessage)
+                    return
+            if control.lower() == 'help':
+                results = self.commandHelp(guild, roles)
+            if results is not None:
+                logger.debug(results)
+                self.saveConfig()
+                await message.channel.send(results['response'])
+            return
+
+        results = self.commandCheck(guild, channel, roles, user, msg)
         if results['status']:
             await message.channel.send(results['response'])
         else:
             logger.debug(f'commandCheck False: {results["response"]}')
         return
-
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

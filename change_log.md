@@ -1,3 +1,31 @@
+##### Change Log v0.6.4 - Fickled Egg - Kudos
+
+- chatKudos module
+
+
+##### Change Log v0.6.3 - Fickled Egg - Chat commands
+
+- basicCommands changes/additions:
+  - command!add [commandname] [command text]
+    - Adds a command to the guild
+    - Used in guild chat only
+  - command!mod [commandname] [-/+/-+] [flag] [value]
+    - modifies flags for a command
+      - "-" remove or subtract
+      - "+" append or add
+      - "-+" replace completely
+    - Valid flags are currently
+      - users : Limit use of command to only these IDs
+      - channels: Limit use of command to only these channel IDs
+      - roles: Limit use of command to only these role IDs
+      - cooldown: Define how many seconds between each run of this command
+      - text: Define what the command returns to chat
+      - help: Not currently used
+  - command!del [commandname]
+    - Permanently deletes a command
+
+---
+
 ##### Change Log v0.6.2 - Fickled Egg
 
 - typingReact changes/addition:
@@ -11,6 +39,8 @@
     - console logging is on by default
 - Moved jsonIO.py to ./utils as it is nothing but helper functions
 - Moved logging_init.py to ./utils as it is a helper function
+
+---
 
 ##### Change Log v0.6.1 - Fickled Egg
 
