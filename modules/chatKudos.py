@@ -1,16 +1,19 @@
 """ Point system for in-chat acknowledgements
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
     Grant points that have no more meaning than what you give them. Display
     leaderboard. More to come.
 
     Checklist
     [x] capture ++++ after @
-    [] command options
+    [x] command options
        - kudo!board (number)  * show board, default 5 slots, max 20
+    [] Add max add/sub amount (Buzzkill)
+    [] Control commands
+
 """
 
 import logging

@@ -1,8 +1,8 @@
 """ Collect and process select metrics of a guild
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        preocts@preocts.com | Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
     Don't worry, this is mostly harmeless
 """

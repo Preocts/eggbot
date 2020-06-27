@@ -1,8 +1,8 @@
 """ Handle the consumption and processing of basic Channel commands
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
     A basic channel command is any command that has a static, or list fed,
     response and replies back into the chat where executed. Th
