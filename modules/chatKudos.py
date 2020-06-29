@@ -1,25 +1,30 @@
-""" Point system for in-chat acknowledgements
+""" Kudos system for Discord chat fun
 
     Created by Preocts
         Preocts#8196 Discord
         https://github.com/Preocts/Egg_Bot
 
     Grant points that have no more meaning than what you give them. Display
-    leaderboard. More to come.
+    leaderboard.
 
     Checklist:
+    [x] Load config or create new
+    [x] save config and create new file/path
     [x] Check for empty messages
     [x] Check for text channel messages only
     [x] Check if config has guild (build if needed)
     [x] Check if author.id is in config.guild.users
-    [] Alternative "all in" allows all users to run kudos
-    [] Scan message for kudo! commands
+    [x] Check if author.roles is in config.guild.roles
+    [x] Alternative "all in" allows all users to run kudos
+    [x] Scan message for kudo! commands
+        [x] kudo!help - display help
         [x] kudo!board (number) - show board, default 10 slots
         [x] kudo!set max [number] - set max +/- kudo amount
-        [x] kudo!set user (+/-) [@mention] - add/remove @user from control
-        [x] kudo!set message (+/-) [message content] - set gain/loss messages
-        [x] kudo!help - display help
-        [] kudo!set ?????? - toggle all users or limit users
+        [x] kudo!set user [@mention] - add/remove @user from control
+        [x] kudo!set role [#role] - add/remove #role from control
+        [x] kudo!set gain [message content] - set gain message
+        [x] kudo!set loss [message content] - set loss message
+        [x] kudo!set lock - toggle all users or limit users
     [x] Scan message for @mentions
     If found:
         [x] Return id, name, amount for each @mention in list
@@ -29,8 +34,9 @@
         [x] Info log line for later metrics [KUDO]
 """
 
+import json
 import logging
-from utils import jsonIO
+import pathlib
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)  # Create module level logger
@@ -44,18 +50,19 @@ def initClass():
 class chatKudos:
     """ Defines the chatKudos class """
     name = 'chatKudos'
+    version = 'v1.0.0'
     allowReload = False
     instCount = 0
     kudos = namedtuple('kudos', ['id', 'name', 'amount'])
 
-    def __init__(self, inFile: str = './config/chatKudos.json'):
+    def __init__(self, config_file: str = './config/chatKudos.json'):
         """ Defines __init__ """
-        logger.info(f'Initialize chatKudos: {inFile}')
+        logger.info(f'Initialize chatKudos: {config_file}')
         self.ckConfig = {}
         self.activeConfig = None
-        self.loadConfig(inFile)
+        self.loadConfig(config_file)
         chatKudos.instCount += 1
-        logger.info(f'Config loaded with {len(self.ckConfig)}')
+        logger.info(f'chatKudos loaded.')
         return
 
     def __str__(self):
@@ -78,29 +85,37 @@ class chatKudos:
         chatKudos.instCount -= 1
         return
 
-    def loadConfig(self, inFile: str = "./config/chatKudos.json") -> bool:
+    def loadConfig(self, file_: str = "./config/chatKudos.json"):
         """ Load a config into the class """
-
-        logger.debug(f'loadConfig: {inFile}')
+        logger.debug(f'[START] loadConfig : {file_}')
+        json_file = {}
         try:
-            self.ckConfig = jsonIO.loadConfig(inFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-            return {'status': False, 'response': 'Error loading config'}
-        self.activeConfig = inFile
-        logger.debug(f'loadConfig success: {inFile}')
-        return {'status': True, 'response': 'Config Loaded'}
+            with open(file_, 'r') as load_file:
+                json_file = json.load(load_file)
+        except json.decoder.JSONDecodeError:
+            logger.error('Config file empty or bad format. ', exc_info=True)
+        except FileNotFoundError:
+            logger.error(f'Config file not found: {file_}', exc_info=True)
 
-    def saveConfig(self, file: str = "./config/chatKudos.json") -> bool:
+        self.ckConfig = json_file
+        self.activeConfig = file_
+        logger.debug(f'[FINISH] loadConfig : {file_}')
+        return
+
+    def saveConfig(self, file_: str = "./config/chatKudos.json") -> bool:
         """ Save a config into the class """
-
-        logger.debug(f'saveConfig: {file}')
+        logger.debug(f'[START] saveConfig : {file_}')
+        path = file_.replace('\\', '/').split('/')
+        path.pop(-1)
+        path = pathlib.Path('/'.join(path))
+        path.mkdir(parents=True, exist_ok=True)
         try:
-            jsonIO.saveConfig(self.ckConfig, file)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-        logger.debug(f'saveConfig success: {file}')
-        return {'status': True, 'response': 'Config saved'}
+            with open(file_, 'w') as save_file:
+                save_file.write(json.dumps(self.ckConfig, indent=4))
+        except OSError:
+            logger.error(f'File not be saved: {file_}', exc_info=True)
+        logger.debug(f'[FINSIH] saveConfig : {file_}')
+        return
 
     def checkConfig(self, guild):
         """
@@ -122,11 +137,12 @@ class chatKudos:
                 'controls': {
                     'roles': [],
                     'users': [owner_id],
-                    'mysteryflag': False,
+                    'lock': False,
                     'max': -1,
                     'gain-message': '{points} points to {name}!',
                     'loss-message': '{points} points from {name}!'
-                }
+                },
+                'scores': {}
             }
             self.saveConfig(self.activeConfig)
 
@@ -245,7 +261,7 @@ class chatKudos:
         if len(message_pieces) == 1:
             logger.debug('[FINISH] parse_command : missing required options')
             return response
-        command = message_pieces[1]
+        command = message_pieces[1].lower()
         try:
             options = message_pieces[2:]
         except IndexError:
@@ -253,12 +269,25 @@ class chatKudos:
 
         if command == 'max' and options:
             response = self.set_max(guild_id, options[0])
-        if command == 'user' and message.mentions:
-            response = self.set_user(guild_id, message.mentions, options[0])
-        if command == 'message' and options:
-            response = self.set_message(guild_id, options)
-
+        if command == 'user':
+            response = self.set_lists(guild_id, message)
+        if command == 'role':
+            response = self.set_lists(guild_id, message)
+        if command == 'gain':
+            response = self.set_message(guild_id, options, 'gain')
+        if command == 'loss':
+            response = self.set_message(guild_id, options, 'loss')
+        if command == 'lock':
+            response = self.set_lock(guild_id)
         return response
+
+    def set_lock(self, guild_id: str) -> str:
+        """ CLI : Toggles the lock flag in config """
+        flag = not(self.ckConfig[guild_id]['controls']['lock'])
+        self.ckConfig[guild_id]['controls']['lock'] = flag
+        if flag:
+            return 'Lock is engaged. Only allowed users/roles can Kudos.'
+        return 'Lock is disengaged. Everyone can Kudos!'
 
     def set_max(self, guild_id: str, value: str) -> str:
         """ CLI : Sets the max point adjustment for Kudos """
@@ -273,43 +302,49 @@ class chatKudos:
         logger.debug('[FINSIH] set_max :')
         return response
 
-    def set_user(self, guild_id: str, mentions, action: str) -> str:
-        """ CLI : Add/Remove user ID from config users list """
-        logger.debug(f'[START] set_user : {guild_id}, {mentions}, {action}')
+    def set_lists(self, guild_id: str, message) -> str:
+        """ CLI : Add/Remove user/role ID from allow lists """
+        logger.debug(f'[START] set_lists : {guild_id}, {message}')
         results = []
         response = ''
-        for mention in mentions:
-            if action == '+':
-                if str(mention.id) not in self.ckConfig[guild_id]['controls']['users']:  # noqa
-                    self.ckConfig[guild_id]['controls']['users'].append(
-                        str(mention.id))
-            elif action == '-':
-                try:
-                    idx = self.ckConfig[guild_id]['controls']['users'].index(
-                        str(mention.id))
-                except ValueError:
-                    pass
+        # Search for user mentions
+        for mention in message.mentions:
+            if str(mention.id) in self.ckConfig[guild_id]['controls']['users']:
+                idx = self.ckConfig[guild_id]['controls']['users'].index(
+                    str(mention.id))
                 self.ckConfig[guild_id]['controls']['users'].pop(idx)
-            else:
+                results.append('**-**' + mention.display_name)
                 continue
-            results.append(mention.display_name)
+            self.ckConfig[guild_id]['controls']['users'].append(
+                str(mention.id))
+            results.append('**+**' + mention.display_name)
+
+        # Search for role mentions
+        for mention in message.role_mentions:
+            if str(mention.id) in self.ckConfig[guild_id]['controls']['roles']:
+                idx = self.ckConfig[guild_id]['controls']['roles'].index(
+                    str(mention.id))
+                self.ckConfig[guild_id]['controls']['roles'].pop(idx)
+                results.append('**-**' + mention.name)
+                continue
+            self.ckConfig[guild_id]['controls']['roles'].append(
+                str(mention.id))
+            results.append('**+**' + mention.name)
+
         if results:
-            if action == '+':
-                response = 'Added: ' + ', '.join(results)
-            else:
-                response = 'Removed: ' + ', '.join(results)
-        logger.debug(f'[FINISH] set_user : {response}')
+            response = 'Allow list changes: ' + ', '.join(results)
+        logger.debug(f'[FINISH] set_lists : {response}')
         return response
 
-    def set_message(self, guild_id: str, values: str) -> str:
+    def set_message(self, guild_id: str, values: str, msg_type: str) -> str:
         """ CLI : Update reply messages for kudo gain/loss """
-        logger.debug(f'[START] set_message : {guild_id}, {values}')
+        logger.debug(f'[START] set_message : {guild_id}, {values}, {msg_type}')
         response = ''
-        new_message = ' '.join(values[1:])
-        if values[0] == '+':
+        new_message = ' '.join(values)
+        if msg_type == 'gain':
             self.ckConfig[guild_id]['controls']['gain-message'] = new_message
             response = f'New gain message set: "{new_message}"'
-        elif values[0] == '-':
+        if msg_type == 'loss':
             self.ckConfig[guild_id]['controls']['loss-message'] = new_message
             response = f'New loss message set: "{new_message}"'
         logger.debug(f'[FINISH] set_message : {response}')
@@ -318,22 +353,39 @@ class chatKudos:
     def format_help(self) -> str:
         """ CLI : Returns pretty format of help """
         help_lines = [
-            'kudo!help',
-            '\tDisplay this help',
-            'kudo!board (# of results)',
+            f'Chat Kudos {chatKudos.version} help: Basics',
+
+            '```@mention +++ @mention ---',
+            '\tGrants or removes kudos from mentioned user',
+            '\nkudo!board (# of results)',
             '\tShow Top Scores board, defaults to 10 results',
-            'kudo!set ??????',
-            '\t*Toggle* : Allow all users access or restrict to user list',
-            'kudo!set max [#]',
+            '\nkudo!help',
+            '\tDisplay this help```',
+            'Chat Kudos help: Config Options',
+
+            '```Only allowed users can access config options.',
+            'Server owner is always allowed.',
+
+            '\nkudo!set max [#]',
             '\tSets maximum +/- kudo amount per request (BuzzKill mode)',
             '\tSet this to 0 or -1 to remove restriction',
-            'kudo!set user [+/-] [@mention]',
-            '\tAdd (+) or Remove (-) @user from allowed users',
-            'kudo!set message [+/-] [message content]',
-            '\tSet gain/loss message when kudos are given or taken',
-            '\tSetting this to be empty will silence in-chat responses'
+
+            '\nkudo!set gain [message to display on gain]',
+            'kudo!set loss [message to display on loss]',
+            '\tSet gain or loss message that is displayed',
+            '\t"{points}" will be replaced with # of points',
+            '\t"{name}" will be replaced with user\'s display name',
+
+            '\nkudo!set user [@mention] (@mention)...',
+            'kudo!set role [@role_name] (@role_name)...',
+            '\tAdd/remove @user(s)/@roles to the allow lists',
+            '\tAdds if not on the list, removes if already on list',
+
+            '\nkudo!set lock',
+            '\tTurns lock on or off. When locked only allowed users/roles '
+            'can use Kudos. Server owner always has access.```'
         ]
-        return 'Chat Kudos help:\n```' + '\n'.join(help_lines) + '```'
+        return '\n'.join(help_lines)
 
     async def onMessage(self, **kwargs) -> bool:
         """
@@ -362,24 +414,39 @@ class chatKudos:
         self.checkConfig(message.guild)
         guild_id = str(message.guild.id)
         user_id = str(message.author.id)
-
+        user_roles = set([role.id for role in message.author.roles])
+        config_roles = set(self.ckConfig[guild_id]['controls']['roles'])
         loss_response = self.ckConfig[guild_id]['controls']['loss-message']
         gain_response = self.ckConfig[guild_id]['controls']['gain-message']
+        allowed_user = False
+        allowed_role = False
 
-        if user_id not in self.ckConfig[guild_id]['controls']['users']:
-            logger.debug('[FINISH] onMessage : User not in allowed list')
+        if user_roles.intersection(config_roles):
+            allowed_role = True
+
+        if user_id in self.ckConfig[guild_id]['controls']['users']:
+            allowed_user = True
+
+        if self.ckConfig[guild_id]['controls']['lock'] and not(
+                any([allowed_role, allowed_user])):
+            logger.debug('[FINISH] onMessage : User/Role not in allowed list')
             return
 
         ##########################
         # Module Command Catches #
         ##########################
         response = ""
-        if message.clean_content.split()[0] == 'kudo!set':
-            response = self.parse_command(message)
-        if message.clean_content.split()[0] == 'kudo!help':
+        first_word = message.clean_content.split()[0].lower()
+        if first_word == 'kudo!help':
             response = self.format_help()
-        if message.clean_content.split()[0] == 'kudo!board':
+            # This has a unique hanndler as we want to send this to DM
+            await message.author.create_dm()
+            await message.author.dm_channel.send(response)
+            response = ""
+        if first_word == 'kudo!board':
             response = self.generate_board(message)
+        if first_word == 'kudo!set' and allowed_user:
+            response = self.parse_command(message)
         if response:
             await message.channel.send(response)
             self.saveConfig(self.activeConfig)
