@@ -1,8 +1,8 @@
 """ Helper functions for loading and saving to a given json config
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
 """
 import json

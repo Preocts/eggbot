@@ -5,33 +5,8 @@
     that is being watched by the bot.
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
-
-    Common Use Examples:
-    ---
-    Initialize: (loads config)
-        SB = shoulderBird.shoulderBird("FileNameOptional")
-
-    Create/Update a search:
-        results = SB.putBird("guild", "user", "RegEx Search String")
-
-    Add/Remove ignore name:
-        results = SB.gagBird("guild", "user")
-
-    Delete a search:
-        results = SB.delBird("guild", "user")
-
-    Toggle a search on/off (returns new state):
-        results = SB.toggleBird("guild", "user")
-
-    Scan a message for a matching search:
-        results = SB.birdCall("guild", "user", "Message String")
-        # If results["status"] is True then results["response"] will be
-        # the user of who had a matching search.
-
-    Save Config:
-        SB.saveConfig("FileNameOptional")
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 """
 import logging
 from utils import eggUtils

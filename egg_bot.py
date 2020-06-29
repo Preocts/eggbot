@@ -2,9 +2,8 @@
 Egg Bot, Discord Modular Bot
 
 Created by Preocts
-preocts@preocts.com | Preocts#8196 Discord
-
-https://github.com/Preocts/Egg_Bot
+    Preocts#8196 Discord
+    https://github.com/Preocts/Egg_Bot
 
 """
 

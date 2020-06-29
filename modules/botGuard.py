@@ -9,8 +9,8 @@
     a bot with that ID.
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 """
 
 import logging

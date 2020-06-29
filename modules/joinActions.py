@@ -2,8 +2,8 @@
     joinActions is a module for Egg_Bot for welcome messages
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
     Someone joins the guild, we might want to:
         - Assign a role to this lovely person

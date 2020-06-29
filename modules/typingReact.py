@@ -1,8 +1,8 @@
 """ Fun things that happen when everyone gets involved
 
     Created by Preocts
-    preocts@preocts.com | Preocts#8196 Discord
-    https://github.com/Preocts/Egg_Bot
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
     #BlameNay
 """
