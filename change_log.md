@@ -1,3 +1,10 @@
+##### Change Log v0.6.7 - Fickled Egg - Kudos and tweaks
+
+- Adjusted some internal formatting of modules
+- Released Chat Kudos v1.0.0
+  - https://github.com/Preocts/Egg_Bot/blob/source/docs/chatKudos.md
+
+
 ##### Change Log v0.6.6 - Fickled Egg - Patch of Patch
 
 - Fixed display_name issue with Kudos. Was pulling a user object from client level instead of a member object from guild level. This caused them to not have a nickname.
