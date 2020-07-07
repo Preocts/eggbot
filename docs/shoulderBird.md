@@ -48,9 +48,27 @@ Fair warning, I'm aware that this might not scale gracefully. This was designed 
 
 ---
 
+## Okay, but how does the Regex part work?
+
+Shoulder Bird scans incoming messages and uses a custom regex expression which is word-bound at the beginning and the end. This is the base regex expression:
+
+```python
+findRg = re.compile(r'\b{}\b'.format(rx), re.I)
+```
+
+If your nickname in a chat is, for example, "Egg" and you want to be pinged when anyone says your nickname then you can start with a basic regex search:
+
+```
+sb!set MyGuild_Name = (egg)
+```
+
+*Keep in mind that we are removing case sensitivity so keep your searches lowercase for expected results.*
+
+You can get as complex with regex as you like. There are many tools out there to help you build an expression that matches everything you want.
+
 ---
 
-## Adding Kudos to your Discord.py bot
+## Adding Shoulder Bird to your Discord.py bot
 
 While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method. 
 
