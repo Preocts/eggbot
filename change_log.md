@@ -1,3 +1,18 @@
+##### Change Log v0.6.8 - Fickled Egg - ShoulderBird v1.0.0
+- ShoulderBird gets a refactor and updated to a full release version
+- [x] Update load/save to be standalone (remove json_io)
+- [x] Remove eggUtil dependency
+- [x] Clean up Docstrings
+- [x] Config Health Check
+- [x] Streamline commands
+  - [x] sb!on
+  - [x] sb!off
+  - [x] sb!ignore [name#0000/id]
+  - [x] sb!set [guild name/id] = [regex]
+  - [x] sb!list
+  - [x] sb!delete
+  - [x] sb!help
+
 ##### Change Log v0.6.7 - Fickled Egg - Kudos and tweaks
 
 - Adjusted some internal formatting of modules

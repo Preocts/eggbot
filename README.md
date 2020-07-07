@@ -51,3 +51,4 @@ ToDo: More instructions to be written
 ## Released Modules
 
 * [Chat Kudos](https://github.com/Preocts/Egg_Bot/blob/source/docs/chatKudos.md)
+* [Shoulder Bird](https://github.com/Preocts/Egg_Bot/blob/source/docs/shoulderBird.md)
