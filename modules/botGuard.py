@@ -1,20 +1,43 @@
-"""
-    botGuard only allows specific bots to join a guild
+""" botGuard only allows specific bots to join a guild
+
+    Created by Preocts
+        Preocts#8196 Discord
+        https://github.com/Preocts/Egg_Bot
 
     When a bot joins the guild this module will check an allow list for
-    the bot's ID. If not found the bot will be immediately kicked.
+    the bot's ID. If not found the bot will be immediately kicked provided
+    the bot running this module has permissions to do so.
 
     A message will be posted to a selected channel telling members of the
     action, providing the bot's ID, and mentioning how to allow list
     a bot with that ID.
 
-    Created by Preocts
-        Preocts#8196 Discord
-        https://github.com/Preocts/Egg_Bot
+    Checklist:
+
+    - [x] Load config or create new
+    - [x] Save config and create new file/path
+    - [x] Check if config has guild (build defaults if needed)
+    - [x] Active toggle
+    - Control commands - Guild owner access only
+      - [] guard!help : Display help
+      - [-] guard!on : Turn gaurd on
+      - [-] guard!off : Turn guard off
+      - [-] guard!list [member id] : Add/Remove provided ID
+      - [-] guard!channel [#channel] : Set sqwuak channel
+      - [-] guard!deny [messge] : Set denied entry message
+      - [-] guard!allow [message] : Set allowed entry message
+      - [] Using an option alone (no input) should echo current settings
+    - [] onJoin action
+      - [x] Check if joining member is a bot (discord.member.bot)
+      - If bot:
+        - [x] Kick if discord.member.id not on allow list
+        - [x] Announce action in announce_channel of config
+        - [] If channel is not set, DM guild owner
 """
 
+import json
 import logging
-from utils import jsonIO
+import pathlib
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -24,46 +47,60 @@ def initClass():
     return botGuard()
 
 
+def debug_logger(func):
+    """ Small wrapper to log entry and exit values """
+
+    def wrapper(*args, **kwargs):
+        logger.debug(f'[START] {func.__name__} : {args}, {kwargs}')
+        return_value = func(*args, **kwargs)
+        logger.debug(f'[FINISH] {func.__name__} : {return_value}')
+        return return_value
+    return wrapper
+
+
 class botGuard:
     """
     Defines the BotGuard Object
 
     Config format:
     {
-        "guild" {
-            "active": (bool),
-            "allowed": [ (int) IDs ],
-            "channel": (int) ChannelID,
-            "content": (str) "Message when a bot is kicked"
+        "discord.guild.id" {
+            "owner": "discord.member.id"
+            "active": true,
+            "allowed": [ "discord.member.id" ],
+            "channel": "discord.channel.id",
+            "content_deny": "Message when a bot is kicked",
+            "content_allow": "Message when a bot is allowed"
         }
     }
     """
 
-    name = "botGuard"
+    name = 'botGuard'
+    version = 'v1.0'
     allowReload = True
     instCount = 0
 
-    def __init__(self, inFile: str = "./config/botGuard.json"):
+    def __init__(self, inFile: str = "./config/botGuard.json") -> None:
         """INIT"""
         logging.info(f'Start: Initializing botGuard: {inFile}')
         self.bgConfig = {}
         self.activeConfig = ""
         self.loadConfig(inFile)
         botGuard.instCount += 1
-        logger.info(f'Config loaded with {len(self.bgConfig)}')
+        logger.info(f'Config loaded with {len(self.bgConfig)} guild entries')
         return
 
-    def __str__(self):
+    def __str__(self) -> None:
         return str(self.bgConfig)
 
-    def __bool__(self):
+    def __bool__(self) -> None:
         if len(self.bgConfig):
             return True
         return False
 
     __nonzero__ = __bool__
 
-    def __del__(self):
+    def __del__(self) -> None:
         """ Save configs on exit """
         if self.activeConfig is None:
             logger.warn('Lost activeConfig name while closing, not good.')
@@ -73,173 +110,137 @@ class botGuard:
         botGuard.instCount -= 1
         return
 
-    def loadConfig(self, inFile: str = "./config/botGuard.json") -> bool:
+    @debug_logger
+    def loadConfig(self, file_: str = "./config/botGuard.json") -> None:
         """ Load a config into the class """
-
-        logger.debug(f'loadConfig: {inFile}')
+        json_file = {}
         try:
-            self.bgConfig = jsonIO.loadConfig(inFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-            return {"status": False, "response": "Error loading config"}
-        self.activeConfig = inFile
-        logger.debug(f'loadConfig success: {inFile}')
-        return {"status": True, "response": "Config Loaded"}
+            with open(file_, 'r') as load_file:
+                json_file = json.load(load_file)
+        except json.decoder.JSONDecodeError:
+            logger.error('Config file empty or bad format. ', exc_info=True)
+        except FileNotFoundError:
+            logger.error(f'Config file not found: {file_}', exc_info=True)
 
-    def saveConfig(self, outFile: str = "./config/botGuard.json") -> bool:
+        self.bgConfig = json_file
+        self.activeConfig = file_
+        return
+
+    @debug_logger
+    def saveConfig(self, file_: str = "./config/botGuard.json") -> bool:
         """ Save a config into the class """
-
-        logger.debug(f'saveConfig: {outFile}')
+        path = file_.replace('\\', '/').split('/')
+        path.pop(-1)
+        path = pathlib.Path('/'.join(path))
+        path.mkdir(parents=True, exist_ok=True)
         try:
-            jsonIO.saveConfig(self.bgConfig, outFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-        logger.debug(f'saveConfig success: {outFile}')
-        return {"status": True, "response": "Config saved"}
+            with open(file_, 'w') as save_file:
+                save_file.write(json.dumps(self.bgConfig, indent=4))
+        except OSError:
+            logger.error(f'File not be saved: {file_}', exc_info=True)
+        return
 
-    def addGuild(self, guild: str, active: bool = True) -> bool:
-        """
-        Adds a guild entry to the config. This will overwrite exiting values
+    @debug_logger
+    def config_check(self, guild) -> None:
+        """ Ensures the config is healthy, builds guild if needed
 
         Args:
-            guild (str): Guild ID to add
-            active (boolean): If False the config will not be used.
-
-        Returns:
-            True
-
-        Raises:
-            None
+            [discord.guild] : Discord Guild class
         """
-        logger.debug(f'Creating: {guild} | {active}')
-        self.bgConfig[guild] = {
-            "active": active,
-            "allowed": [],
-            "channel": 0,
-            "content_deny": "",
-            "content_allow": ""
-        }
-        return True
+        guild_id = str(guild.id)
+        owner_id = str(guild.owner_id)
+        if not(isinstance(self.bgConfig, dict)):
+            logger.warning('Config file was not a json. Fixing')
+            self.bgConfig = {}
 
-    def addAllow(self, guild: str, bot: str) -> dict:
-        """
-        Adds a bot ID to the list of allowed bots for a guild
+        if self.bgConfig.get(guild_id) is None:
+            logger.info('Adding guild to config with defaults '
+                        f'{guild_id}, {guild.name}')
+            self.bgConfig[guild] = {
+                'owner': owner_id,
+                'active': False,
+                'allowed': [],
+                'channel': '',
+                'content_deny': 'Some bot with id ({id}) joined and I was not '
+                'told! I have kicked it out. Now clap :clap:',
+                'content_allow': 'The bot with id ({id}) you told me about is '
+                'here now. Just an FYI.'
+            }
+            self.saveConfig(self.activeConfig)
+        return
+
+    @debug_logger
+    def active_toggle(self, guild, state: bool) -> str:
+        """ Toggles the active flag for a guild
 
         Args:
-            guild (str): Guild ID to edit
-            bot (str): User ID of the bot to allow
-
-        Returns:
-            dict : {"status": bool, "response": str}
-
-        Raises:
-            None
+            [discord.guild] : Discord Guild class
+            [bool] : What state the flag is to be set
         """
+        response = "Bot Guard is now **inactive** for this guild."
+        self.bgConfig[str(guild.id)]["active"] = state
+        if self.bgConfig[str(guild.id)]["active"]:
+            response = "Bot Guard is now **active** for this guild."
+        return response
 
-        logger.debug(f'addAllow: {guild} | {bot}')
+    @debug_logger
+    def update_allowed(self, message) -> str:
+        """ Adds or removes a bot ID to the list of allowed bots for a guild
+
+        Args:
+            [discord.message] : Incoming message containing command
+        """
+        # guard!list [channelID]
+        gid = str(message.guild.id)
+        channel_id = message.clean_content.split(' ')
+        channel_id = channel_id[1] if len(channel_id) > 1 else ""
         try:
-            int(bot)
+            int(channel_id)
         except ValueError:
-            logger.warning(f'Incorrect ID Format provided: {bot}')
-            return {"status": False, "response": "Incorrect ID format"}
-        # Check if we already have this bot, pass gracefully
-        if not(bot in self.bgConfig[guild]["allowed"]):
-            self.bgConfig[guild]["allowed"].append(bot)
-        return {"status": True, "response": "Bot added to allow list"}
+            err = 'Incorrect command format, Member ID invalid'
+            return err
+        if channel_id in self.bgConfig[gid]['allowed']:
+            # Exists, remove by index
+            idx = self.bgConfig[gid]['allowed'].index(channel_id)
+            self.bgConfig[gid]['allowed'].pop(idx)
+            response = f'Bot account removed from allow list: {channel_id}'
+        else:
+            # Append to list
+            self.bgConfig[gid]['allowed'].append(channel_id)
+            response = f'Bot account added to allow list: {channel_id}'
+        return response
 
-    def removeAllow(self, guild: str, bot: str) -> dict:
-        """
-        Removes a bot ID to the list of allowed bots for a guild
-
-        Args:
-            guild (str): Guild ID to edit
-            bot (str): User ID of the bot to remove
-
-        Returns:
-            dict : {"status": bool, "response": str}
-
-        Raises:
-            None
-        """
-
-        logger.debug(f'removeAllow: {guild} | {bot}')
-        try:
-            int(bot)
-        except ValueError:
-            logger.warning(f'Incorrect ID Format provided: {bot}')
-            return {"status": False, "response": "Incorrect ID format"}
-        # Check if we have this bot to remove, pass gracefully
-        if bot in self.bgConfig[guild]["allowed"]:
-            loc = self.bgConfig[guild]["allowed"].index(bot)
-            self.bgConfig[guild]["allowed"].pop(loc)
-        return {"status": True, "response": "Bot added to allow list"}
-
-    def alertChannel(self, guild: str, channel: str) -> dict:
-        """
-        Sets the channel used to send alerts when another bot joins
+    @debug_logger
+    def set_channel(self, message) -> str:
+        """ Sets the channel used to send alerts when another bot joins
 
         Args:
-            guild (str): Guild ID to edit
-            channel (str): Channel ID to sent message to
-
-        Returns:
-            dict : {"status": bool, "response": str}
-
-        Raises:
-            None
+            [discord.message] : Incoming message containing command
         """
+        # guard!channel [#channel]
+        gid = str(message.guild.id)
+        response = 'Channel not found, be sure to #Channel when setting.'
+        for channel in message.channel_mentions:
+            self.bgConfig[gid]['channel'] = str(channel.id)
+            response = f'Channel set to {channel.name}'
+            break
+        return response
 
-        logger.debug(f'alertChannel: {guild} | {channel}')
-        try:
-            int(channel)
-        except ValueError:
-            logger.warning(f'Incorrect ID Format provided: {channel}')
-            return {"status": False, "response": "Incorrect ID format"}
-        self.bgConfig[guild]["channel"] = channel
-        return {"status": True, "response": f"{channel} set for messages"}
-
-    def denyMessage(self, guild: str, message: str) -> dict:
-        """
-        Sets the message displayed when a bot is kicked
-
-        Empty messages are skipped. Use for "silent" operation
+    @debug_logger
+    def set_content(self, message, on_action: str) -> str:
+        """ Sets the message displayed when a bot is allowed or denied
 
         Args:
-            guild (str): Guild ID to edit
-            message (str): Message to display on kick
-
-        Returns:
-            dict : {"status": bool, "response": str}
-
-        Raises:
-            None
+            [discord.message] : Incoming message containing command
+            [str] : Action this message for.
+                Can be 'content_deny' or 'content_allow'
         """
+        gid = str(message.guild.id)
+        content = ' '.join(message.content.split(' ')[1:])
+        self.bgConfig[gid][on_action] = content
+        return f'Message now set to: {content}'
 
-        logger.debug(f'denyMessage: {guild} | {message}')
-        self.bgConfig[guild]["content_deny"] = message
-        return {"status": True, "response": "Message set for Denied"}
-
-    def allowMessage(self, guild: str, message: str) -> dict:
-        """
-        Sets the message displayed when a bot joins and is allowed
-
-        Empty messages are skipped. Use for "silent" operation
-
-        Args:
-            guild (str): Guild ID to edit
-            message (str): Message to display on join
-
-        Returns:
-            dict : {"status": bool, "response": str}
-
-        Raises:
-            None
-        """
-
-        logger.debug(f'allowMessage: {guild} | {message}')
-        self.bgConfig[guild]["content_allow"] = message
-        return {"status": True, "response": "Message set for Allowed"}
-
+    @debug_logger
     def checkList(self, guild: str, bot: str) -> dict:
         """
         Checks the provided bot ID against allow list
@@ -262,68 +263,49 @@ class botGuard:
         Raises:
             None
         """
-        logger.debug(f'checkList: {guild} | {bot}')
-        # Is the guild configured?
-        if not(guild in self.bgConfig.keys()):
-            # Create an inactive entry
-            logger.info('Guild not setup in botGuard. Correcting...')
-            self.addGuild(guild, False)
-            return {"status": True, "channel": 0, "response": ""}
-
         # Is the guild active?
-        if not(self.bgConfig[guild]["active"]):
+        if not(self.bgConfig[guild]['active']):
             logger.info('Bot joined an inactive guild')
-            return {"status": True, "channel": 0, "response": ""}
-
+            return {'status': True,
+                    'channel': int(self.bgConfig[guild]['channel']),
+                    'response': ''}
         # Is the bot allowed?
-        if bot in self.bgConfig[guild]["allowed"]:
-            # Yup. *notices your backstage pass* OwO
+        if bot in self.bgConfig[guild]['allowed']:
+            # Yup. *notices your backstage pass* OwO what's this?
             logger.info('Bot was allowed to join')
-            return {"status": True,
-                    "channel": int(self.bgConfig[guild]["channel"]),
-                    "response": self.bgConfig[guild]["content_allow"]}
-        else:
-            # Nope. owo ... I won't miss *pulls trigger*
-            logger.warning('Bot joined that was not allowed.')
-            return {"status": False,
-                    "channel": int(self.bgConfig[guild]["channel"]),
-                    "response": self.bgConfig[guild]["content_deny"]}
+            return {'status': True,
+                    'channel': int(self.bgConfig[guild]['channel']),
+                    'response': self.bgConfig[guild]['content_allow']}
+        # Nope. OwO I won't miss binch *pulls trigger*
+        logger.warning('Bot joined that was not allowed.')
+        return {'status': False,
+                'channel': int(self.bgConfig[guild]['channel']),
+                'response': self.bgConfig[guild]['content_deny']}
 
-    async def onJoin(self, **kwargs) -> bool:
+    @debug_logger
+    async def onJoin(self, **kwargs) -> None:
         """
         Hook method to be called from core script on Join event
 
         Keyword Args:
             member (discord.member): a discord.member class
-
-        Returns:
-            (boolean)
-
-        Raises:
-            None
         """
         member = kwargs.get('member')
-
-        # Is this join a bot? Handle it *gun cocks*
+        self.config_check(member.guild)
+        # Is this join a bot?
         if not(member.bot):
-            return True
+            return
+        # Handle it *gun cocks*
         logger.info('Bot join detected...')
         bgResults = self.checkList(str(member.guild.id), str(member.id))
-        if not(bgResults["status"]):
+        if not(bgResults['status']):
             # This bot is not allowed
-            await member.kick(reason="This bot was not approved to join.")
-            ch = member.guild.get_channel(bgResults["channel"])
-            await ch.send(bgResults["response"])
-            await ch.send('If this bot is desired, please add this '
-                          f'ID to the allow list: {member.id}')
-            return False
-        else:
-            # This bot is allowed
-            ch = member.guild.get_channel(bgResults["channel"])
-            await ch.send(bgResults["response"])
-            await ch.send('If this bot was not desired, please remove '
-                          f'this ID from the allow list: {member.id}')
-            return True
+            await member.kick(reason='This bot was not approved to join.')
+        if not bgResults['response']:
+            return
+        ch = member.guild.get_channel(bgResults['channel'])
+        await ch.send(bgResults['response'])
+        return
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs
