@@ -30,9 +30,9 @@
     - [x] onJoin action
       - [x] Check if joining member is a bot (discord.member.bot)
       - If bot:
-        - [-] Kick if discord.member.id not on allow list
-        - [-] Announce action in announce_channel of config
-        - [-] If channel is not set, DM guild owner
+        - [x] Kick if discord.member.id not on allow list
+        - [x] Announce action in announce_channel of config
+        - [x] If channel is not set, DM guild owner
 """
 
 import json

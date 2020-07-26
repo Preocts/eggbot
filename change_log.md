@@ -1,4 +1,29 @@
+##### Change Log v0.6.9 - Fickled Egg - Bot Guard v1.0.0
+
+- Bot Guard gets a redesign and updated to a full release version
+- [x] Load config or create new
+- [x] Save config and create new file/path
+- [x] Check if config has guild (build defaults if needed)
+- [x] Active toggle
+- [x] Control commands
+  - [x] Guild owner access only
+  - [x] guard!help : Display help
+  - [x] guard!on : Turn gaurd on
+  - [x] guard!off : Turn guard off
+  - [x] guard!allow [member id] : Add/Remove provided ID
+  - [x] guard!channel [#channel] : Set sqwuak channel
+  - [x] guard!fail [messge] : Set denied entry message
+  - [x] guard!pass [message] : Set allowed entry message
+- [x] onJoin action
+  - [x] Check if joining member is a bot (discord.member.bot)
+  - If bot:
+    - [x] Kick if discord.member.id not on allow list
+    - [x] Announce action in announce_channel of config
+    - [x] If channel is not set, DM guild owner
+
+
 ##### Change Log v0.6.8 - Fickled Egg - ShoulderBird v1.0.0
+
 - ShoulderBird gets a refactor and updated to a full release version
 - [x] Update load/save to be standalone (remove json_io)
 - [x] Remove eggUtil dependency
