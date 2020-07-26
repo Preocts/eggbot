@@ -8,7 +8,7 @@ Preocts#8196 Discord | [Github](https://github.com/Preocts/Egg_Bot)
 
 **Requirements**
 - [Python 3.8.1](https://www.python.org/)
-- [discordpy v1.3.2](https://github.com/Rapptz/discord.py)
+- [discordpy v1.3.4](https://github.com/Rapptz/discord.py)
 - [pyhton-dotenv](https://github.com/theskumar/python-dotenv)
 
 ---
@@ -44,7 +44,7 @@ DISCORD_TOKEN={API Secret Here}
 BOT_OWNER={Your Discord ID here}
 ```
 
-ToDo: More instructions to be written
+TODO: More instructions to be written
 
 ---
 
@@ -52,3 +52,4 @@ ToDo: More instructions to be written
 
 * [Chat Kudos](https://github.com/Preocts/Egg_Bot/blob/source/docs/chatKudos.md)
 * [Shoulder Bird](https://github.com/Preocts/Egg_Bot/blob/source/docs/shoulderBird.md)
+* [Bot Guard](https://github.com/Preocts/Egg_Bot/blob/source/docs/botGuard.md)
