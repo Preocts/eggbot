@@ -15,8 +15,8 @@ import json
 import logging
 import modules
 import asyncio
-from utils import logging_init
 from dotenv import load_dotenv
+from eggbot.utils import logging_init
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
