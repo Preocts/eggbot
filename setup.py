@@ -12,7 +12,6 @@ setuptools.setup(
     description='A module based Discord bot',
     long_description=open('README.md').read(),
     install_requires=[
-        "python-dotenv >= 0.13.0",
         "discord.py >= 1.3.4"
     ],
     scripts=['src/eggbot/egg_bot.py']

@@ -1,7 +1,9 @@
 {
+    "discord_api_key": "[Your API secret key here]",
+    "owner": "[Your Discord ID]",
     "CoreConfig": {
-        "Version": "0.6.9",
-        "VersionName": "Fickled Egg",
-        "Debug_Level": "INFO"
+        "Version": "0.7.0",
+        "VersionName": "Fractured Egg",
+        "Debug_Level": "DEBUG"
     }
 }

@@ -15,13 +15,15 @@ import json
 import logging
 import modules
 import asyncio
-from dotenv import load_dotenv
 from eggbot.utils import logging_init
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
+
 load_dotenv()
-BOT_OWNER = os.getenv('BOT_OWNER')
+DISCORD_API = None
+BOT_OWNER = None
 VERSION = None
 VERSION_NAME = None
 LOGLEVEL = None
@@ -137,16 +139,12 @@ async def on_message(message):
     return
 
 
-def loadCore(inputFile: str = './config/eggbot.json') -> bool:
+def loadCore() -> None:
+    """ Loads eggbot.json from config files, set globals """
+    inputFile = eggUtils.abs_path(__file__) + '/config/eggbot.json'
     with open(inputFile) as file:
         try:
             configs = json.load(file)
-            global VERSION
-            VERSION = configs["CoreConfig"]["Version"]
-            global VERSION_NAME
-            VERSION_NAME = configs["CoreConfig"]["VersionName"]
-            global LOGLEVEL
-            LOGLEVEL = configs["CoreConfig"]["Debug_Level"]
         except json.decoder.JSONDecodeError:
             logger.critical('Configuration file empty or formatted '
                             'incorrectly, that\'s sad')
@@ -154,6 +152,18 @@ def loadCore(inputFile: str = './config/eggbot.json') -> bool:
         except OSError:
             logger.critical('Something went wrong loading configuations...')
             logger.critical('', exc_info=True)
+            exit()
+    global VERSION
+    VERSION = configs['CoreConfig']['Version']
+    global VERSION_NAME
+    VERSION_NAME = configs['CoreConfig']['VersionName']
+    global LOGLEVEL
+    LOGLEVEL = configs['CoreConfig']['Debug_Level']
+    global DISCORD_API 
+    DISCORD_API = configs['discord_api_key']
+    global BOT_OWNER
+    BOT_OWNER = configs['owner']
+    return    
 
 
 def loadClasses():
@@ -209,38 +219,26 @@ def main():
         Arrakis teaches the attitude of the knife — chopping off what’s
         incomplete and saying: "Now it’s complete because it’s ended here."
     """
+    logger.info('Loading config...')
     loadCore()
-    logging_init.config_logger('./config/logging_config.json', LOGLEVEL)
-    logger.info('Loading secrets...')
-    DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-    if not(DISCORD_TOKEN):
-        logger.critical('Failed to load secrets. Closing')
-        exit()
-    logger.info('Secrets loaded, assets contained, plans are hatching...')
+    c_file = eggUtils.abs_path(__file__) + '/config/logging_config.json'
+    logging_init.config_logger(c_file, LOGLEVEL)
+    logger.info('Config loaded, assets contained, plans are hatching...')
     logger.info('Cracking the module carton open for more supplies...')
     loadClasses()
     logger.info('Loaded yolk configuration file.')
-    logger.debug(f'{VERSION} {VERSION_NAME} {LOGLEVEL}')
-    logger.info('Hatch cycle started.')
-    logger.info(f'Shell version: {VERSION}, {VERSION_NAME}')
+    logger.info(f'Eggbot version: {VERSION}')
+    logger.info(f'Eggbot version name: {VERSION_NAME}')
+    logger.info(f'Logging level: {LOGLEVEL}')
+    logger.info('Hatch cycle started...')
     logger.info('Hatching onto Discord now.')
 
-    # dClient.run(DISCORD_TOKEN)
-    loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(dClient.start(DISCORD_TOKEN))
-    except KeyboardInterrupt:
-        logging.info('KeyboardInterrupt detected. Logging out')
-        loop.run_until_complete(dClient.logout())
-        # cancel all tasks lingering
-    finally:
-        loop.close()
-
+    dClient.run(DISCORD_TOKEN)
     return
 
 
 if __name__ == '__main__':
-    exit(main())
+    main()
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs
