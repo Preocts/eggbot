@@ -29,8 +29,11 @@ LOGLEVEL = None
 
 # Global List of Classes from modules
 bot_classes = []
+intents = discord.Intents.default()
+intents.members = True
 dClient = discord.Client(status='online',
-                         activity=discord.Activity(type=2, name="everything."))
+                         activity=discord.Activity(type=2, name="everything."),
+                         intents=intents)
 
 
 # ON READY - connection established
@@ -239,9 +242,8 @@ def main():
     logger.info(f'Logging level: {LOGLEVEL}')
     logger.info('Hatch cycle started...')
     logger.info('Hatching onto Discord now.')
-    dropClasses()
-    exit()
     dClient.run(DISCORD_API)
+    dropClasses()
     return
 
 
