@@ -6,9 +6,11 @@
 
     Don't worry, this is mostly harmeless
 """
-import logging
+import json
 import time
-from utils import jsonIO
+import logging
+import pathlib
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -25,13 +27,13 @@ class guildMetrics:
     allowReload = False
     instCount = 0
 
-    def __init__(self, inFile: str = "./config/guildMetrics.json"):
-        logger.info(f'Initialize guildMetrics: {inFile}')
+    def __init__(self):
+        logger.info('Initialize guildMetrics')
         self.gmConfig = {}
         self.activeConfig = None
         self.saveRate = 60
         self.lastSave = time.time()
-        self.loadConfig(inFile)
+        self.loadConfig()
         guildMetrics.instCount += 1
         logger.info(f'Config loaded with {len(self.gmConfig)} records.')
         return
@@ -48,11 +50,7 @@ class guildMetrics:
 
     def __del__(self):
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/guildMetrics_DUMP.json')
-            self.activeConfig = "./config/guildMetrics_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         guildMetrics.instCount -= 1
         return
 
@@ -127,32 +125,36 @@ class guildMetrics:
         self.gmConfig["guilds"][guildID]["members"][userID] = user
         if (time.time() - self.lastSave) >= self.saveRate:
             self.lastSave = time.time()
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
         return True
 
-    def loadConfig(self, inFile: str = "./config/guildMetrics.json") -> bool:
+    def loadConfig(self) -> None:
         """ Load a config into the class """
-
-        logger.debug(f'loadConfig: {inFile}')
+        file_ = eggUtils.abs_path(__file__) + '/config/guildMetrics.json'
+        json_file = {}
         try:
-            self.gmConfig = jsonIO.loadConfig(inFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-            return {"status": False, "response": "Error loading config"}
-        self.activeConfig = inFile
-        logger.debug(f'loadConfig success: {inFile}')
-        return {"status": True, "response": "Config Loaded"}
+            with open(file_, 'r') as load_file:
+                json_file = json.load(load_file)
+        except json.decoder.JSONDecodeError:
+            logger.error('Config file empty or bad format. ', exc_info=True)
+        except FileNotFoundError:
+            logger.error(f'Config file not found: {file_}', exc_info=True)
 
-    def saveConfig(self, outFile: str = "./config/guildMetrics.json") -> bool:
+        self.gmConfig = json_file
+        self.activeConfig = file_
+        return
+
+    def saveConfig(self) -> bool:
         """ Save a config into the class """
-
-        logger.debug(f'saveConfig: {outFile}')
+        file_ = eggUtils.abs_path(__file__) + '/config/guildMetrics.json'
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        path.mkdir(parents=True, exist_ok=True)
         try:
-            jsonIO.saveConfig(self.gmConfig, outFile, raw=False)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-        logger.debug(f'saveConfig success: {outFile}')
-        return {"status": True, "response": "Config saved"}
+            with open(file_, 'w') as save_file:
+                save_file.write(json.dumps(self.gmConfig, indent=4))
+        except OSError:
+            logger.error(f'File not be saved: {file_}', exc_info=True)
+        return
 
     async def onMessage(self, **kwargs) -> bool:
         """

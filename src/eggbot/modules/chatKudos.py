@@ -37,6 +37,7 @@
 import json
 import logging
 import pathlib
+from eggbot.utils import eggUtils
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)  # Create module level logger
@@ -55,14 +56,14 @@ class chatKudos:
     instCount = 0
     kudos = namedtuple('kudos', ['id', 'name', 'amount'])
 
-    def __init__(self, config_file: str = './config/chatKudos.json'):
+    def __init__(self):
         """ Defines __init__ """
-        logger.info(f'Initialize chatKudos: {config_file}')
+        logger.info('Initialize chatKudos')
         self.ckConfig = {}
         self.activeConfig = None
-        self.loadConfig(config_file)
+        self.loadConfig()
         chatKudos.instCount += 1
-        logger.info(f'chatKudos loaded.')
+        logger.info('chatKudos loaded.')
         return
 
     def __str__(self):
@@ -77,16 +78,13 @@ class chatKudos:
 
     def __del__(self):
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/chatKudos_DUMP.json')
-            self.activeConfig = "./config/chatKudos_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         chatKudos.instCount -= 1
         return
 
-    def loadConfig(self, file_: str = "./config/chatKudos.json"):
+    def loadConfig(self):
         """ Load a config into the class """
+        file_ = eggUtils.abs_path(__file__) + '/config/chatKudos.json'
         logger.debug(f'[START] loadConfig : {file_}')
         json_file = {}
         try:
@@ -102,12 +100,11 @@ class chatKudos:
         logger.debug(f'[FINISH] loadConfig : {file_}')
         return
 
-    def saveConfig(self, file_: str = "./config/chatKudos.json") -> bool:
+    def saveConfig(self) -> bool:
         """ Save a config into the class """
+        file_ = eggUtils.abs_path(__file__) + '/config/chatKudos.json'
         logger.debug(f'[START] saveConfig : {file_}')
-        path = file_.replace('\\', '/').split('/')
-        path.pop(-1)
-        path = pathlib.Path('/'.join(path))
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
         path.mkdir(parents=True, exist_ok=True)
         try:
             with open(file_, 'w') as save_file:
@@ -129,7 +126,7 @@ class chatKudos:
         if not(isinstance(self.ckConfig, dict)):
             logger.warning('Config file was not a dict. Fixing')
             self.ckConfig = {}
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
 
         if self.ckConfig.get(guild_id) is None:
             logger.info(f'Adding guild to config: {guild_id}, {guild.name}')
@@ -144,11 +141,11 @@ class chatKudos:
                 },
                 'scores': {}
             }
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
 
         if owner_id not in self.ckConfig[guild_id]['controls']['users']:
             self.ckConfig[guild_id]['controls']['users'].append(owner_id)
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
 
         return
 
@@ -247,7 +244,7 @@ class chatKudos:
         logger.debug(f'[START] kudoMath : {guild}, {target}, {amount}')
         currentpoints = self.ckConfig[guild]['scores'].get(target, 0)
         self.ckConfig[guild]['scores'][target] = currentpoints + amount
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         logger.debug(f'[FINISH] kudoMath : {amount}')
         return amount
 
@@ -449,7 +446,7 @@ class chatKudos:
             response = self.parse_command(message)
         if response:
             await message.channel.send(response)
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
 
         ########################
         # Scan and apply Kudos #

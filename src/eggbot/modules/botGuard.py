@@ -38,6 +38,7 @@
 import json
 import logging
 import pathlib
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -80,12 +81,12 @@ class botGuard:
     allowReload = True
     instCount = 0
 
-    def __init__(self, inFile: str = "./config/botGuard.json") -> None:
+    def __init__(self) -> None:
         """INIT"""
-        logging.info(f'Start: Initializing botGuard: {inFile}')
+        logging.info('Start: Initializing botGuard')
         self.bgConfig = {}
         self.activeConfig = ""
-        self.loadConfig(inFile)
+        self.loadConfig()
         botGuard.instCount += 1
         logger.info(f'Config loaded with {len(self.bgConfig)} guild entries')
         return
@@ -102,17 +103,14 @@ class botGuard:
 
     def __del__(self) -> None:
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/botGuard_DUMP.json')
-            self.activeConfig = "./config/botGuard_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         botGuard.instCount -= 1
         return
 
     @debug_logger
-    def loadConfig(self, file_: str = "./config/botGuard.json") -> None:
+    def loadConfig(self) -> None:
         """ Load a config into the class """
+        file_ = eggUtils.abs_path(__file__) + '/config/botGuard.json'
         json_file = {}
         try:
             with open(file_, 'r') as load_file:
@@ -127,11 +125,10 @@ class botGuard:
         return
 
     @debug_logger
-    def saveConfig(self, file_: str = "./config/botGuard.json") -> bool:
+    def saveConfig(self) -> bool:
         """ Save a config into the class """
-        path = file_.replace('\\', '/').split('/')
-        path.pop(-1)
-        path = pathlib.Path('/'.join(path))
+        file_ = eggUtils.abs_path(__file__) + '/config/botGuard.json'
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
         path.mkdir(parents=True, exist_ok=True)
         try:
             with open(file_, 'w') as save_file:
@@ -166,7 +163,7 @@ class botGuard:
                 'content_allow': 'The bot with id ({id}) you told me about is '
                 'here now. Just an FYI.'
             }
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
         return
 
     @debug_logger
@@ -377,7 +374,7 @@ class botGuard:
         if command is None:
             return
         response = command[0](*command[1:])
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         if response:
             await message.channel.send(response)
         return

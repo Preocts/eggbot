@@ -13,15 +13,14 @@ import sys
 import discord
 import json
 import logging
-import modules
-import asyncio
+import importlib
 from eggbot.utils import logging_init
 from eggbot.utils import eggUtils
+
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
 
-load_dotenv()
 DISCORD_API = None
 BOT_OWNER = None
 VERSION = None
@@ -29,7 +28,7 @@ VERSION_NAME = None
 LOGLEVEL = None
 
 # Global List of Classes from modules
-botMods = []
+bot_classes = []
 dClient = discord.Client(status='online',
                          activity=discord.Activity(type=2, name="everything."))
 
@@ -58,13 +57,13 @@ async def on_disconnect():
 async def on_member_join(member):
     """ Handle the event of a user joining the guild """
 
-    global botMods
+    global bot_classes
     logger.info(f'Member Join: Display Name: {member.display_name}'
                 f' | User ID: {member.id}'
                 f' | Account Created: {member.created_at}'
                 f' | Guild: {member.guild.name}')
 
-    for mods in botMods:
+    for mods in bot_classes:
         try:
             await mods.onJoin(member=member)
         except AttributeError:
@@ -75,8 +74,8 @@ async def on_member_join(member):
 # ON TYPING - things and stuff
 @dClient.event
 async def on_typing(channel, user, when):
-    global botMods
-    for mods in botMods:
+    global bot_classes
+    for mods in bot_classes:
         try:
             # I REALLY do not want to pass dClient here....
             await mods.onTyping(
@@ -93,7 +92,7 @@ async def on_typing(channel, user, when):
 async def on_message(message):
     """ Event triggers on every new message bot can see """
 
-    global botMods
+    global bot_classes
     # Ignore messages by bot account
     if message.author == dClient.user:
         return False
@@ -128,7 +127,7 @@ async def on_message(message):
         # if message.clean_content == "egg!testjoin":
         #     await on_member_join(dClient.get_guild(621085335979294740).get_member(int(BOT_OWNER)))  # noqa: E501
 
-    for mods in botMods:
+    for mods in bot_classes:
         try:
             await mods.onMessage(
                 chtype=channelType,
@@ -159,45 +158,50 @@ def loadCore() -> None:
     VERSION_NAME = configs['CoreConfig']['VersionName']
     global LOGLEVEL
     LOGLEVEL = configs['CoreConfig']['Debug_Level']
-    global DISCORD_API 
+    global DISCORD_API
     DISCORD_API = configs['discord_api_key']
     global BOT_OWNER
     BOT_OWNER = configs['owner']
-    return    
+    return
 
 
-def loadClasses():
-    """
-    Handles the classes for the bot
+def find_modules() -> tuple:
+    """ Searches the ./modules directory for loadable modules """
+    module_list = []
+    mypath = eggUtils.abs_path(__file__) + "/modules"
+    for file in os.listdir(mypath):
+        if file.endswith('.py') and not(file.startswith('__')):
+            importlib.import_module("eggbot.modules." + file[:-3])
+            module_list.append(file[:-3])
+    return tuple(module_list)
+
+
+def load_classes(module_list: tuple):
+    """ Handles the classes for the bot
 
     This should only be run if no classes are initialized. Otherwise, This
     will create duplicate instances which will lead to unexpected behavior.
-
-    Args:
-
-    Returns:
-
-    Raises:
     """
+    global bot_classes
+    count = 0
 
-    global botMods
-
-    for mod in modules.MODULE_NAMES:
+    for mod in module_list:
         try:
             logger.info(f'Loading initClass() for: {mod}...')
-            botMods.append(sys.modules["modules." + mod].initClass())
+            bot_classes.append(sys.modules["eggbot.modules." + mod].initClass())  # noqa
             logger.info(f'Successfully loaded initClass() for: {mod}')
         except AttributeError:
             logger.info(f'No initClass() found for: {mod}')
+        count += 1
 
-    logger.info(f'Loaded {len(botMods)} mods for Egg_Bot')
+    logger.info(f'Loaded {count} modules for Egg_Bot')
     return
 
 
 def reloadClasses():
     """ Reload classes that allow a forced reload """
-    global botMods
-    for mod in botMods:
+    global bot_classes
+    for mod in bot_classes:
         try:
             if mod.allowReload:
                 mod.loadConfig(mod.activeConfig)
@@ -208,9 +212,9 @@ def reloadClasses():
 
 def dropClasses():
     """ Drops (destroys) all class instances. """
-    global botMods
-    for x in range(0, len(botMods)):
-        botMods[x] = None
+    global bot_classes
+    for x in range(0, len(bot_classes)):
+        bot_classes[x] = None
     return
 
 
@@ -224,16 +228,20 @@ def main():
     c_file = eggUtils.abs_path(__file__) + '/config/logging_config.json'
     logging_init.config_logger(c_file, LOGLEVEL)
     logger.info('Config loaded, assets contained, plans are hatching...')
+    logger.info('Checking for any extra modules...')
+    module_list = find_modules()
+    logger.info(f'Found {len(module_list)} in the fridge behind the milk.')
     logger.info('Cracking the module carton open for more supplies...')
-    loadClasses()
+    load_classes(module_list)
     logger.info('Loaded yolk configuration file.')
     logger.info(f'Eggbot version: {VERSION}')
     logger.info(f'Eggbot version name: {VERSION_NAME}')
     logger.info(f'Logging level: {LOGLEVEL}')
     logger.info('Hatch cycle started...')
     logger.info('Hatching onto Discord now.')
-
-    dClient.run(DISCORD_TOKEN)
+    dropClasses()
+    exit()
+    dClient.run(DISCORD_API)
     return
 
 

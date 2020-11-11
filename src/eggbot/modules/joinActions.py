@@ -19,8 +19,10 @@
     We also want to set a welcome message, default role, invite roles,
     and toggle messages
 """
+import json
 import logging
-from utils import jsonIO
+import pathlib
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -37,12 +39,12 @@ class joinActions:
     allowReload = True
     instCount = 0
 
-    def __init__(self, inFile: str = "./config/joinActions.json"):
+    def __init__(self):
         """ Define __init__ """
-        logger.info(f'Initialize joinActions: {inFile}')
+        logger.info('Initialize joinActions')
         self.jaConfig = {}
         self.activeConfig = ''
-        self.loadConfig(inFile)
+        self.loadConfig()
         joinActions.instCount += 1
         logger.info(f'Config loaded with {len(self.jaConfig)}')
         return
@@ -59,11 +61,7 @@ class joinActions:
 
     def __del__(self):
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/joinActions_DUMP.json')
-            self.activeConfig = "./config/joinActions_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         joinActions.instCount -= 1
         return
 
@@ -210,7 +208,7 @@ class joinActions:
                 logger.debug(f'Update: Updating join action index: {i}')
                 self.jaConfig[guild][i] = config
                 return {"status": True, "response": "Join action updated"}
-        logger.warning(f'Something went wrong: name missing')
+        logger.warning('Something went wrong: name missing')
         return {"status": False, "response": "Something went wrong"}
 
     def delete(self, guild: str, name: str) -> dict:
@@ -240,29 +238,33 @@ class joinActions:
         logger.debug('Delete: Name not found')
         return {"status": False, "response": "Join action name not found"}
 
-    def loadConfig(self, inFile: str = "./config/joinActions.json") -> bool:
+    def loadConfig(self) -> None:
         """ Load a config into the class """
-
-        logger.debug(f'loadConfig: {inFile}')
+        file_ = eggUtils.abs_path(__file__) + '/config/joinActions.json'
+        json_file = {}
         try:
-            self.jaConfig = jsonIO.loadConfig(inFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-            return {"status": False, "response": "Error loading config"}
-        self.activeConfig = inFile
-        logger.debug(f'loadConfig success: {inFile}')
-        return {"status": True, "response": "Config Loaded"}
+            with open(file_, 'r') as load_file:
+                json_file = json.load(load_file)
+        except json.decoder.JSONDecodeError:
+            logger.error('Config file empty or bad format. ', exc_info=True)
+        except FileNotFoundError:
+            logger.error(f'Config file not found: {file_}', exc_info=True)
 
-    def saveConfig(self, outFile: str = "./config/joinActions.json") -> bool:
+        self.jaConfig = json_file
+        self.activeConfig = file_
+        return
+
+    def saveConfig(self) -> bool:
         """ Save a config into the class """
-
-        logger.debug(f'saveConfig: {outFile}')
+        file_ = eggUtils.abs_path(__file__) + '/config/joinActions.json'
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        path.mkdir(parents=True, exist_ok=True)
         try:
-            jsonIO.saveConfig(self.jaConfig, outFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-        logger.debug(f'loadConfig success: {outFile}')
-        return {"status": True, "response": "Config saved"}
+            with open(file_, 'w') as save_file:
+                save_file.write(json.dumps(self.jaConfig, indent=4))
+        except OSError:
+            logger.error(f'File not be saved: {file_}', exc_info=True)
+        return
 
     def getJoinMessage(self, guild: str, user: str) -> dict:
         """

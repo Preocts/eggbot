@@ -15,6 +15,7 @@ import re
 import json
 import logging
 import pathlib
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -22,15 +23,6 @@ logger = logging.getLogger(__name__)  # Create module level logger
 def initClass():
     """ A fucntion to allow automated creation of a class instance """
     return shoulderBird()
-
-
-def isInt(checkvalue) -> bool:
-    """ Helper function for checking if a value is an integer """
-    try:
-        int(checkvalue)
-    except ValueError:
-        return False
-    return True
 
 
 class shoulderBird:
@@ -64,12 +56,12 @@ class shoulderBird:
     # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
     #            Standard Eggbot module setup
     # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
-    def __init__(self, inFile: str = "./config/shoulderBird.json"):
+    def __init__(self):
         """INIT"""
-        logging.info(f'Start: Initializing shoulderBird: {inFile}')
+        logging.info('Start: Initializing shoulderBird')
         self.sbConfig = {}
         self.activeConfig = ""
-        self.loadConfig(inFile)
+        self.loadConfig()
         shoulderBird.instCount += 1
         logger.info(f'Config loaded with {len(self.sbConfig)}')
         return
@@ -86,17 +78,13 @@ class shoulderBird:
 
     def __del__(self):
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/shoulderBird_DUMP.json')
-            self.activeConfig = "./config/shoulderBird_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         shoulderBird.instCount -= 1
         return
 
-    def loadConfig(self, file_: str = "./config/shoulderBird.json"):
-        """ Load a config into the class instance"""
-        logger.debug(f'[START] loadConfig : {file_}')
+    def loadConfig(self) -> None:
+        """ Load a config into the class """
+        file_ = eggUtils.abs_path(__file__) + '/config/shoulderBird.json'
         json_file = {}
         try:
             with open(file_, 'r') as load_file:
@@ -108,22 +96,18 @@ class shoulderBird:
 
         self.sbConfig = json_file
         self.activeConfig = file_
-        logger.debug(f'[FINISH] loadConfig : {file_}')
         return
 
-    def saveConfig(self, file_: str = "./config/shoulderBird.json") -> bool:
-        """ Save a config into the class instance"""
-        logger.debug(f'[START] saveConfig : {file_}')
-        path = file_.replace('\\', '/').split('/')
-        path.pop(-1)
-        path = pathlib.Path('/'.join(path))
+    def saveConfig(self) -> bool:
+        """ Save a config into the class """
+        file_ = eggUtils.abs_path(__file__) + '/config/shoulderBird.json'
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
         path.mkdir(parents=True, exist_ok=True)
         try:
             with open(file_, 'w') as save_file:
                 save_file.write(json.dumps(self.sbConfig, indent=4))
         except OSError:
             logger.error(f'File not be saved: {file_}', exc_info=True)
-        logger.debug(f'[FINSIH] saveConfig : {file_}')
         return
 
     # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
@@ -143,7 +127,7 @@ class shoulderBird:
                 "ignore": [],
                 "reminder": 0
             }
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         logger.debug('[FINISH] configCheck : ')
         return
 
@@ -437,30 +421,30 @@ class shoulderBird:
             guildID = None
             for g in dClient.guilds:
                 # Provided a guild ID
-                if isInt(cmdTarg) and g.id == int(cmdTarg):
+                if eggUtils.isInt(cmdTarg) and g.id == int(cmdTarg):
                     guildID = str(g.id)
                     break
                 # Provided a guild Name
-                if not(isInt(cmdTarg)) and g.name == cmdTarg:
+                if not(eggUtils.isInt(cmdTarg)) and g.name == cmdTarg:
                     guildID = str(g.id)
                     break
             if guildID is None and len(cmdTarg) != 0:
                 return f'Error: I\'m not that guild: {cmdTarg}'
 
             result = self.putBird(guildID, message)
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
             return result['response']
 
         if cmdTrig == 'sb!on':
             # Turn on all birds for user
             result = self.toggleBird(str(message.author.id), True)
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
             return result['response']
 
         if cmdTrig == 'sb!off':
             # Turn on all birds for user
             result = self.toggleBird(str(message.author.id), False)
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
             return result['response']
 
         if cmdTrig == 'sb!ignore':
@@ -476,11 +460,11 @@ class shoulderBird:
             targID = None
             for user in dClient.users:
                 # Provided a user ID
-                if isInt(cmdBody) and user.id == int(cmdBody):
+                if eggUtils.isInt(cmdBody) and user.id == int(cmdBody):
                     targID = str(user.id)
                     break
                 # Provided a user Name
-                if not(isInt(cmdBody)) and user.name == cmdBody:
+                if not(eggUtils.isInt(cmdBody)) and user.name == cmdBody:
                     targID = str(user.id)
                     break
             if targID is None:
@@ -488,13 +472,13 @@ class shoulderBird:
                         'providing either their Username without the #0000 ' \
                         'or their user ID.'
             result = self.gagBird(str(message.author.id), targID)
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
             return result['response']
 
         if cmdTrig == 'sb!delete':
             # sb!remove
             result = self.delBird(str(message.author.id))
-            self.saveConfig(self.activeConfig)
+            self.saveConfig()
             return result['response']
 
         if cmdTrig == 'sb!list':

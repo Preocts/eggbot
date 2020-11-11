@@ -6,9 +6,11 @@
 
     #BlameNay
 """
-import logging
+import json
 import time
-from utils import jsonIO
+import logging
+import pathlib
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -25,12 +27,12 @@ class typingReact:
     allowReload = True
     instCount = 0
 
-    def __init__(self, inFile: str = "./config/typingReact.json"):
-        logger.info(f'Initialize typingReact: {inFile}')
+    def __init__(self):
+        logger.info('Initialize typingReact')
         self.trConfig = {}
         self.activeConfig = None
         self.tracktyping = []
-        self.loadConfig(inFile)
+        self.loadConfig()
         self.lastin = 0
         typingReact.instCount += 1
         logger.info('Config loaded.')
@@ -48,11 +50,7 @@ class typingReact:
 
     def __del__(self):
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/typingReact_DUMP.json')
-            self.activeConfig = "./config/typingReact_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         typingReact.instCount -= 1
         return
 
@@ -100,29 +98,33 @@ class typingReact:
         }
         return True
 
-    def loadConfig(self, inFile: str = "./config/typingReact.json") -> bool:
+    def loadConfig(self) -> None:
         """ Load a config into the class """
-
-        logger.debug(f'loadConfig: {inFile}')
+        file_ = eggUtils.abs_path(__file__) + '/config/typingReact.json'
+        json_file = {}
         try:
-            self.trConfig = jsonIO.loadConfig(inFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-            return {"status": False, "response": "Error loading config"}
-        self.activeConfig = inFile
-        logger.debug(f'loadConfig success: {inFile}')
-        return {"status": True, "response": "Config Loaded"}
+            with open(file_, 'r') as load_file:
+                json_file = json.load(load_file)
+        except json.decoder.JSONDecodeError:
+            logger.error('Config file empty or bad format. ', exc_info=True)
+        except FileNotFoundError:
+            logger.error(f'Config file not found: {file_}', exc_info=True)
 
-    def saveConfig(self, outFile: str = "./config/typingReact.json") -> bool:
+        self.trConfig = json_file
+        self.activeConfig = file_
+        return
+
+    def saveConfig(self) -> bool:
         """ Save a config into the class """
-
-        logger.debug(f'saveConfig: {outFile}')
+        file_ = eggUtils.abs_path(__file__) + '/config/typingReact.json'
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        path.mkdir(parents=True, exist_ok=True)
         try:
-            jsonIO.saveConfig(self.trConfig, outFile, raw=False)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-        logger.debug(f'saveConfig success: {outFile}')
-        return {"status": True, "response": "Config saved"}
+            with open(file_, 'w') as save_file:
+                save_file.write(json.dumps(self.trConfig, indent=4))
+        except OSError:
+            logger.error(f'File not be saved: {file_}', exc_info=True)
+        return
 
     async def onMessage(self, **kwargs):
         """ TO DO: Few basic commands controlled by guild owner/allowed """

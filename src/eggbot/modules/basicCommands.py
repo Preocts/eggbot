@@ -8,9 +8,10 @@
     response and replies back into the chat where executed. Th
 """
 import time
+import json
 import logging
-from utils import jsonIO
-from utils import eggUtils
+import pathlib
+from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -33,12 +34,12 @@ class basicCommands:
     COMMAND_DATATYPE = ('list', 'list', 'list',
                         'int', 'int', 'str', 'str')
 
-    def __init__(self, inFile: str = './config/basicCommands.json'):
+    def __init__(self):
         """ Defines __init__ """
-        logger.info(f'Initialize basicCommands: {inFile}')
+        logger.info('Initialize basicCommands')
         self.bcConfig = {}
         self.activeConfig = None
-        self.loadConfig(inFile)
+        self.loadConfig()
         basicCommands.instCount += 1
         logger.info(f'Config loaded with {len(self.bcConfig)}')
         return
@@ -55,11 +56,7 @@ class basicCommands:
 
     def __del__(self):
         """ Save configs on exit """
-        if self.activeConfig is None:
-            logger.warn('Lost activeConfig name while closing, not good.')
-            logger.info('Dump file attempt: ./config/basicCommands_DUMP.json')
-            self.activeConfig = "./config/basicCommands_DUMP.json"
-        self.saveConfig(self.activeConfig)
+        self.saveConfig()
         basicCommands.instCount -= 1
         return
 
@@ -462,7 +459,7 @@ class basicCommands:
 
         response = "Basic Commands Module command list: ```" \
             "+ command!list (search)\n" \
-            "\tList commands available in given channel. Search is optional\n" \
+            "\tList commands available in channel. Search is optional\n" \
             "+ command!add [command] [message]\n" \
             "\tCreates a command that will display defined message\n" \
             "+ command!del [command]\n" \
@@ -473,35 +470,43 @@ class basicCommands:
             "\t - users : Limit use of command to only these IDs\n" \
             "\t - channels: Limit use of command to only these channel IDs\n" \
             "\t - roles: Limit use of command to only these role IDs\n" \
-            "\t - cooldown: Define how many seconds between each run of this command\n" \
+            "\t - cooldown: How many seconds between each run of command\n" \
             "\t - text: Define what the command returns to chat\n" \
             "+ command!help\n" \
             "\tThis message```"
         return {'status': True, 'response': response}
 
-    def loadConfig(self, inFile: str = "./config/basicCommands.json") -> bool:
-        """ Load a config into the class """
-
-        logger.debug(f'loadConfig: {inFile}')
+    def loadConfig(self):
+        """ Load a config into the class instance"""
+        file_ = eggUtils.abs_path(__file__) + '/config/basicCommands.json'
+        logger.debug(f'[START] loadConfig : {file_}')
+        json_file = {}
         try:
-            self.bcConfig = jsonIO.loadConfig(inFile)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-            return {'status': False, 'response': 'Error loading config'}
-        self.activeConfig = inFile
-        logger.debug(f'loadConfig success: {inFile}')
-        return {'status': True, 'response': 'Config Loaded'}
+            with open(file_, 'r') as load_file:
+                json_file = json.load(load_file)
+        except json.decoder.JSONDecodeError:
+            logger.error('Config file empty or bad format. ', exc_info=True)
+        except FileNotFoundError:
+            logger.error(f'Config file not found: {file_}', exc_info=True)
 
-    def saveConfig(self, file: str = "./config/basicCommands.json") -> bool:
-        """ Save a config into the class """
+        self.bcConfig = json_file
+        self.activeConfig = file_
+        logger.debug(f'[FINISH] loadConfig : {file_}')
+        return
 
-        logger.debug(f'saveConfig: {file}')
+    def saveConfig(self) -> bool:
+        """ Save a config into the class instance"""
+        file_ = eggUtils.abs_path(__file__) + '/config/basicCommands.json'
+        logger.debug(f'[START] saveConfig : {file_}')
+        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        path.mkdir(parents=True, exist_ok=True)
         try:
-            jsonIO.saveConfig(self.bcConfig, file)
-        except jsonIO.JSON_Config_Error:
-            logger.error('Failed loading config file!', exc_info=True)
-        logger.debug(f'saveConfig success: {file}')
-        return {'status': True, 'response': 'Config saved'}
+            with open(file_, 'w') as save_file:
+                save_file.write(json.dumps(self.bcConfig, indent=4))
+        except OSError:
+            logger.error(f'File not be saved: {file_}', exc_info=True)
+        logger.debug(f'[FINSIH] saveConfig : {file_}')
+        return
 
     def parseRoles(self, discord_roles):
         """ Creates a easier to read list of user roles.
@@ -546,7 +551,7 @@ class basicCommands:
         """
         # HOLD FOR RELEASE
         return
-        
+
         chtype = kwargs.get('chtype')
         message = kwargs.get('message')
         message_slice = message.clean_content.split(' ')
