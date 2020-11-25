@@ -1,0 +1,22 @@
+{
+    "403703188982595595": {
+        "123151368885239809": {
+            "regex": "(pre(|oct|octs)|oct(|s)|egg)",
+            "toggle": true,
+            "ignore": []
+        },
+        "203200143049228289": {
+            "regex": "nay(|omii|o|nay|maii|omaise|onaise|may)",
+            "toggle": true,
+            "ignore": []
+        }
+    },
+    "621085335979294740": {
+        "123151368885239809": {
+            "regex": "(egg)",
+            "toggle": true,
+            "ignore": [],
+            "reminder": 0
+        }
+    }
+}

@@ -11,7 +11,7 @@ import time
 import json
 import logging
 import pathlib
-from eggbot.utils import eggUtils
+from eggbot.utils import modulehelper
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
@@ -37,11 +37,28 @@ class basicCommands:
     def __init__(self):
         """ Defines __init__ """
         logger.info('Initialize basicCommands')
-        self.bcConfig = {}
-        self.activeConfig = None
-        self.loadConfig()
+
+        if basicCommands.instCount:
+            msg = 'There is already an instance of this module running... ' \
+                  'Ensure you destroy any existing instances before ' \
+                  'creating a new one.'
+            logger.critical(msg)
+            raise modulehelper.EggModuleException(msg)
+
+        self.__loaded = True
+        self.activeConfig = './modules/config/basicCommands.json'
+        self.bcConfig = modulehelper.loadjson(self.activeConfig)
+
+        if not self.bcConfig:
+            # TODO Rebuild a config
+            pass
+
+        if self.bcConfig.get('loadfail'):
+            self.__loaded = False
+
         basicCommands.instCount += 1
-        logger.info(f'Config loaded with {len(self.bcConfig)}')
+
+        logger.info('Config loaded for basicCommands')
         return
 
     def __str__(self):
@@ -56,10 +73,14 @@ class basicCommands:
 
     def __del__(self):
         """ Save configs on exit """
-        self.saveConfig()
+        modulehelper.savejson(self.activeConfig, self.bcConfig)
         basicCommands.instCount -= 1
         return
 
+
+###############################################################################
+# This is where we draw the line
+###############################################################################
     def checkConfig(self):
         """ Ensures config state is correctly formated """
         if 'restrictguilds' not in self.bcConfig.keys():
@@ -161,7 +182,7 @@ class basicCommands:
                 return {'status': False, 'response': 'User restricted'}
 
             # Role restrictions
-            if len(cData['roles']):
+            if len(cData['roles']) and not(set(roles).intersection(set(cData['roles']))):  # noqa
                 return {'status': False, 'response': 'Role restricted'}
 
             # Throttle restriction
@@ -476,38 +497,6 @@ class basicCommands:
             "\tThis message```"
         return {'status': True, 'response': response}
 
-    def loadConfig(self):
-        """ Load a config into the class instance"""
-        file_ = eggUtils.abs_path(__file__) + '/config/basicCommands.json'
-        logger.debug(f'[START] loadConfig : {file_}')
-        json_file = {}
-        try:
-            with open(file_, 'r') as load_file:
-                json_file = json.load(load_file)
-        except json.decoder.JSONDecodeError:
-            logger.error('Config file empty or bad format. ', exc_info=True)
-        except FileNotFoundError:
-            logger.error(f'Config file not found: {file_}', exc_info=True)
-
-        self.bcConfig = json_file
-        self.activeConfig = file_
-        logger.debug(f'[FINISH] loadConfig : {file_}')
-        return
-
-    def saveConfig(self) -> bool:
-        """ Save a config into the class instance"""
-        file_ = eggUtils.abs_path(__file__) + '/config/basicCommands.json'
-        logger.debug(f'[START] saveConfig : {file_}')
-        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
-        path.mkdir(parents=True, exist_ok=True)
-        try:
-            with open(file_, 'w') as save_file:
-                save_file.write(json.dumps(self.bcConfig, indent=4))
-        except OSError:
-            logger.error(f'File not be saved: {file_}', exc_info=True)
-        logger.debug(f'[FINSIH] saveConfig : {file_}')
-        return
-
     def parseRoles(self, discord_roles):
         """ Creates a easier to read list of user roles.
 
@@ -525,7 +514,7 @@ class basicCommands:
                 clean_roles.append(str(r.id))
         return clean_roles
 
-    def guild_permissions(self, guild: str, user: str, channel: str) -> bool:
+    def guild_permissions(self, guild: str, user: str, channel: str, roles: str) -> bool:
         """ Checks guild level permissions for command use """
         # Is this user prohibited
         if user in self.bcConfig['guilds'][guild]['restrictusers']:
@@ -533,6 +522,9 @@ class basicCommands:
         # Is this channel prohibited
         if channel in self.bcConfig['guilds'][guild]['restrictchannels']:
             return {'status': False, 'response': 'Channel Prohibited'}
+        # Is the role allowed?
+        if not(set(roles).intersection(set(self.bcConfig['guilds'][guild]['allowedroles']))):
+            return {'status': False, 'response': 'Role Prohibited'}
         return {'status': True, 'reponse': ''}
 
     async def onMessage(self, **kwargs) -> bool:
@@ -549,9 +541,7 @@ class basicCommands:
         Raises:
             None
         """
-        # HOLD FOR RELEASE
-        return
-
+        # Parse needed pieces of information from incoming hook
         chtype = kwargs.get('chtype')
         message = kwargs.get('message')
         message_slice = message.clean_content.split(' ')
@@ -566,7 +556,9 @@ class basicCommands:
 
         # Check against restrictchannels and restrictusers
         # Do not pass go, do not run commands, pay me 200 dollars V:
-        if not(self.guild_permissions(guild, user, channel)['status']):
+        check_results = self.guild_permissions(guild, user, channel, roles)
+        if not(check_results['status']):
+            logger.debug(check_results)
             return
 
         # Check for basicCommand control commands

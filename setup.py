@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='eggbot',
-    version='0.1.0',
+    version='0.0.7',
     author='Preocts',
     author_email='preocts@preocts.com',
     package_dir={'': 'src'},
