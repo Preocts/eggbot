@@ -31,6 +31,7 @@ Types of changes
 
 ### Changed
 
+- Makefile adjustments for dependencies, clean, and new pacakge
 - Basic Commands module (./modules/basicCommands.py)
   - If the config file cannot be loaded or is invalid, the module does not load
   - If the config file is blank or missing a new template is created

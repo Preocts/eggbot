@@ -1,19 +1,17 @@
-"""
-Egg Bot, Discord Modular Bot
+""" Egg Bot, Discord Modular Bot
 
 Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
-
 """
 
-# Additional imports
 import os
 import sys
-import discord
 import json
 import logging
 import importlib
+
+import discord
 
 
 logger = logging.getLogger(__name__)  # Create module level logger
@@ -219,13 +217,16 @@ def dropClasses():
     return
 
 
-def main():
-    """
-        Arrakis teaches the attitude of the knife — chopping off what’s
-        incomplete and saying: "Now it’s complete because it’s ended here."
+def main() -> None:
+    """ Main Point of Entry
+
+    Any setup, configuration, or async setups must happen before the main
+    run loop prior to the exit.
     """
     logger.info('Loading config...')
+
     loadCore()
+
     c_file = eggUtils.abs_path(__file__) + '/config/logging_config.json'
     logging_init.config_logger(c_file, LOGLEVEL)
     logger.info('Config loaded, assets contained, plans are hatching...')

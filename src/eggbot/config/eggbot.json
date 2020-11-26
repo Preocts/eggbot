@@ -1,9 +1,15 @@
 {
-    "discord_api_key": "",
-    "owner": "123151368885239809",
-    "CoreConfig": {
-        "Version": "0.7.0",
-        "VersionName": "Fractured Egg",
-        "Debug_Level": "DEBUG"
-    }
+    "version": "0.7.0",
+    "version_name": "Fractured Egg",
+    "debug_level": "DEBUG",
+    "echo_metrics": false,
+    "echo_logs": true,
+    "listening_to": [
+        "everything",
+        "you breathe",
+        "the wubwubs",
+        "the sound of beating drums",
+        "nothing at all",
+        "Preocts complain"
+    ]
 }
