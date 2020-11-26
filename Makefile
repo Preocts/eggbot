@@ -1,4 +1,4 @@
-.PHONY: clean-pyc clean-build venv dependancies
+.PHONY: venv
 
 clean-build:
 	rm --force --recursive build/
@@ -7,11 +7,11 @@ clean-build:
 
 venv:
 	python3.8 -m venv venv
+	./venv/bin/pip install --upgrade pip
+	./venv/bin/pip install --upgrade setuptools
+	./venv/bin/pip install --upgrade wheel
 
 dependancies:
-	pip install --upgrade pip
-	pip install --upgrade setuptools
-	pip install --upgrade wheel
 	pip install -r requirements.txt
 
 dev-dependancies:

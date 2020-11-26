@@ -14,8 +14,6 @@ import discord
 import json
 import logging
 import importlib
-from eggbot.utils import logging_init
-from eggbot.utils import eggUtils
 
 
 logger = logging.getLogger(__name__)  # Create module level logger

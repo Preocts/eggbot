@@ -8,31 +8,15 @@
     response and replies back into the chat where executed. Th
 """
 import time
-import json
 import logging
-import pathlib
+
 from eggbot.utils import modulehelper
 
 logger = logging.getLogger(__name__)  # Create module level logger
 
 
-def initClass():
-    """ A fucntion to allow automated creation of a class instance """
-    return basicCommands()
-
-
 class basicCommands:
     """ Defines the basicCommands class """
-    name = 'basicCommands'
-    allowReload = True
-    instCount = 0
-
-    # Default static defines
-    COMMAND_KEYS = ('users', 'channels', 'roles', 'cooldown',
-                    'lastran', 'text', 'help')
-    COMMAND_DEFAULT = ([], [], [], 10, 0, '', '')
-    COMMAND_DATATYPE = ('list', 'list', 'list',
-                        'int', 'int', 'str', 'str')
 
     def __init__(self):
         """ Defines __init__ """
