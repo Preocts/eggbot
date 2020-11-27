@@ -13,26 +13,24 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [Unreleased]
+## [0.0.1-alpha] - 2020-11-26
 
-## [0.7.0] - 2020-11-24
-
-### Removed
-
-- Extra logging module that hopelessly complicated the logging process
-- ./utils/eggUtils.py - There are better ways than what was being done
+## This is a rebuild change and is currently non-functional.
 
 ### Added
 
-- Default logging setup in eggbot.py to simplify the logging process
-- ./utils/modulehelper.py
-  - loadjson() and savejson() to assist with configs in modules
-  - EggModuleException() class for raising exceptions in the modules
+- core_entities.py, CoreConfig class for loading, saving, and CRUD actions on JSON configutation files.
+  - Unit tests complete, passing
+- ./utils/logdec.py, Log decorator for debug output
+  - Logs all arguments entering a wrapped function
+  - Logs returned value on exit of wrapped function
+  - Unit tests completed, passing
 
 ### Changed
 
-- Basic Commands module (./modules/basicCommands.py)
-  - If the config file cannot be loaded or is invalid, the module does not load
-  - If the config file is blank or missing a new template is created
+- egg_bot.py, completely broken with this push
+- Makefile adjustments for dependencies, clean, test, and package creation
 
-## [Released]
+### Removed
+
+- Everything not listed here

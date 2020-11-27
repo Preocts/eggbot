@@ -1,9 +1,4 @@
 {
-    "discord_api_key": "",
-    "owner": "123151368885239809",
-    "CoreConfig": {
-        "Version": "0.7.0",
-        "VersionName": "Fractured Egg",
-        "Debug_Level": "DEBUG"
-    }
+    "version": "0.0.1-alpha",
+    "version_name": "Project Eggbot"
 }
