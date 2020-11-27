@@ -3,7 +3,7 @@ import pathlib
 import random
 import unittest
 
-from src.eggbot import core_entities
+from eggbot import core_entities
 
 
 class TestCoreConfig(unittest.TestCase):
