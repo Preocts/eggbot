@@ -1,7 +1,7 @@
 """ Ensure decorators return the expected results from decorated func """
 import unittest
 
-from src.eggbot.utils import logdec
+from eggbot.utils import logdec
 
 
 class TestLogDecorators(unittest.TestCase):

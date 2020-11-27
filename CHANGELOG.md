@@ -13,10 +13,17 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
-## [0.0.2-alpha] - 2020-11-
+## [0.0.2-alpha] - 2020-11-26
 
+### Added
 
+- eggbot_core.py, New core bot file started
+  - Unit tests started, passing/incomplete
 
+### Changed
+
+- Structure, Directory restructure
+- README, Enviromental variable references 
 
 ## [0.0.1-alpha] - 2020-11-26
 

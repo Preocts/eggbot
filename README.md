@@ -15,6 +15,16 @@ Find me on Discord, just mention this repo: Preocts#8196
 - [discordpy>=1.5.1](https://github.com/Rapptz/discord.py)
 - [pyhton-dotenv>=0.15.0](https://github.com/theskumar/python-dotenv)
 
+**Enviromental Variable Requirements**
+
+These are needed in either a `.env` file located in the `./eggbot` folder or to be set as an env variable through your launching/deployment scripts.
+
+```
+discord_api_key=[Discord Token]
+owner_id=[Your Discord ID]
+```
+
+
 ---
 
 ## Rebuild time
