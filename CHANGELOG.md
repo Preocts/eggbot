@@ -27,6 +27,8 @@ Types of changes
 
 ## [0.0.1-alpha] - 2020-11-26
 
+## [0.0.1-alpha] - 2020-11-26
+
 ## This is a rebuild change and is currently non-functional.
 
 ### Added
