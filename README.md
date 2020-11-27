@@ -1,5 +1,7 @@
 # Egg_Bot
 
+[![Build Status](https://travis-ci.org/Preocts/Egg_Bot.svg?branch=main)](https://travis-ci.org/Preocts/Egg_Bot)
+
 Primary Author: Preocts 
 
 Find me on Discord, just mention this repo: Preocts#8196
