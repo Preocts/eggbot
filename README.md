@@ -9,7 +9,7 @@ Find me on Discord, just mention this repo: Preocts#8196
 ---
 
 **Requirements**
-- [Python >= 3.8](https://www.python.org/)
+- [Python>=3.8](https://www.python.org/)
 - [discordpy>=1.5.1](https://github.com/Rapptz/discord.py)
 - [pyhton-dotenv>=0.15.0](https://github.com/theskumar/python-dotenv)
 
