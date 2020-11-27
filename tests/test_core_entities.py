@@ -12,8 +12,6 @@ class TestCoreConfig(unittest.TestCase):
         config = core_entities.CoreConfig()
         self.assertIsInstance(config, core_entities.CoreConfig)
         self.assertIsInstance(config.config, dict)
-        self.assertIsInstance(config.api_token, str)
-        self.assertIsInstance(config.owner_id, str)
 
     def test_abs(self):
         config = core_entities.CoreConfig()

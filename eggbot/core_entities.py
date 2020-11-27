@@ -22,21 +22,11 @@ class CoreConfig(object):
     def __init__(self, **kwargs):
         self.__abs_path = f'{os.path.sep}'.join(
             __file__.split(os.path.sep)[0:-1]) + "/"
-        self.__api_token = os.environ.get('discord_api_key')
-        self.__owner_id = os.environ.get('owner_id')
         self.__config = {}
 
     @property
     def abs_path(self) -> str:
         return self.__abs_path
-
-    @property
-    def api_token(self) -> str:
-        return self.__api_token
-
-    @property
-    def owner_id(self) -> str:
-        return self.__owner_id
 
     @property
     def config(self) -> dict:
