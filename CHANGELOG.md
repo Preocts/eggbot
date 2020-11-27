@@ -13,6 +13,11 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.2-alpha] - 2020-11-
+
+
+
+
 ## [0.0.1-alpha] - 2020-11-26
 
 ## This is a rebuild change and is currently non-functional.

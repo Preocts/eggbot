@@ -1,6 +1,8 @@
 # Egg_Bot
 
-Primary Author: Preocts, Preocts#8196 Discord 
+Primary Author: Preocts 
+
+Find me on Discord, just mention this repo: Preocts#8196
 
 [Github](https://github.com/Preocts/Egg_Bot)
 
