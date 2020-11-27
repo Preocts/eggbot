@@ -1,15 +1,4 @@
 {
-    "version": "0.7.0",
-    "version_name": "Fractured Egg",
-    "debug_level": "DEBUG",
-    "echo_metrics": false,
-    "echo_logs": true,
-    "listening_to": [
-        "everything",
-        "you breathe",
-        "the wubwubs",
-        "the sound of beating drums",
-        "nothing at all",
-        "Preocts complain"
-    ]
+    "version": "0.0.1-alpha",
+    "version_name": "Project Eggbot"
 }
