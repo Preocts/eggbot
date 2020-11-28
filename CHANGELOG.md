@@ -25,11 +25,14 @@ Types of changes
 - Install instructions for README.md
 - setup.py file for install and testing
 - Makefile configurations for install, update, package, and testing
+- MANIFEST.in for package data
 
 ### Changed
 - Added `owner_id` to default configuration json. Future me will figure out how to populate it.
 - [test] Tweaks to `test_core_entities.py` to account for above change
+- [test] Corrected use of depreciated `Equals` assert
 - Updated trivis.yaml for new install and testing requirements
+- Corrected double // in default pathing for default configuration files
 
 ### Removed
 - Removed methods `api_token` and `owner_id` from core_entities.CoreConfig class
