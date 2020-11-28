@@ -1,6 +1,6 @@
 # This log was retired on 2020.11.24
 
-## New log is found at `changelog.md`
+# New log is found here: [CHANGELOG.md](CHANGELOG.md)
 
 ##### Change Log v0.6.9 - Fickled Egg - Bot Guard v1.0.0
 

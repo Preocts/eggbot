@@ -1,4 +1,5 @@
 """ Test core entity objects """
+import os
 import pathlib
 import random
 import unittest
@@ -20,6 +21,11 @@ class TestCoreConfig(unittest.TestCase):
         self.assertTrue(config.abs_path.startswith(compare_path[0]))
         self.assertIn(config.abs_path, compare_path)
 
+    def test_cwd(self):
+        config = core_entities.CoreConfig()
+        self.assertIsInstance(config.cwd, str)
+        self.assertEqual(config.cwd, os.getcwd())
+
     def test_load(self):
         config = core_entities.CoreConfig()
 
@@ -29,7 +35,7 @@ class TestCoreConfig(unittest.TestCase):
         self.assertFalse(config.config)
 
         # Valid relative but invalid JSON
-        config.load('egg_bot.py')
+        config.load('README.md')
         self.assertIsInstance(config.config, dict)
         self.assertFalse(config.config)
 
@@ -69,7 +75,7 @@ class TestCoreConfig(unittest.TestCase):
 
     def test_save(self):
         args_list = [
-            ('/config/eggbot.json', False),
+            (),
             (pathlib.Path('./tests/files/mock_config.json').absolute(), True)
         ]
         random.seed()

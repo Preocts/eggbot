@@ -1,0 +1,44 @@
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+=                               Active                                 -
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+=                               Future                                 -
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+[_] Replace os with Pathlib
+[_] Version bumping script to capture updates 
+    - setup.py 
+    -./config/eggbot_core.json
+[_] README.md for configuration folder
+[_] Load/Save configuration should raise if error
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+=                              Complete                                -
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+2020-11-27 Configuration location:
+
+Configuration files are currently nested in with the module directories. 
+These should be at the top level of the project. This will provide
+
+- Visibility
+- Reliable path for accessing
+- Backup processes
+
+Acceptance Criteria:
+
+[x] Configurations are stored in the ./ of the working directory.
+    - ./config, Core configurations
+    - ./config/modules, Module level configuration
+[x] core_entities config loader can find these files
+[x] `pip install .` can find those files
+    - MANIFEST.in - Empty
+[x] `pip install -e .` can find those files
+    - MANIFEST.in - Empty
+[x] Files are copied into ./dist on `make package`
+    - Makefile - Done
+    - Does this only move the eggbot directory or are we pulling the
+      src directory as well?  - Yes
+[x] All unit tests pass

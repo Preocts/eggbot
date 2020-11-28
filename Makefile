@@ -42,9 +42,12 @@ test: ## Run all tests found in the /tests directory.
 	python -m unittest discover -s tests
 
 package: clean-build ## Creates a package for testing
+	mkdir vendors
 	mkdir dist
-	pip install -r requirements.txt -t ./dist
+	pip install -r requirements.txt -t ./vendors
+	cp -r vendors/* ./dist/
 	cp -r ./src/eggbot ./dist
+	cp -r ./config/ ./dist/
 	mv ./dist/eggbot/__main__.py ./dist/main.py
 	test -f ./src/eggbot/.env && cp ./src/eggbot/.env ./dist/.env
 	(cd ./dist && zip -r ../artifact.zip .)

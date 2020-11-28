@@ -22,7 +22,7 @@ def read(*names, **kwargs):
 
 setup(
     name='Egg_Bot_Preocts',
-    version='0.0.3',
+    version='0.0.4',
     license='GNU General Public License',
     description='A module based Discord bot written in Python',
     author='Preocts',
@@ -36,7 +36,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'start-eggbot = eggbot.eggbot_core:main',
+            'start-eggbot = eggbot.__main__:main',
         ]
     },
     include_package_data=True
