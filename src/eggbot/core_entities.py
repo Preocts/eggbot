@@ -32,7 +32,7 @@ class CoreConfig(object):
     def config(self) -> dict:
         return dict(self.__config)
 
-    def load(self, filepath: str = '/config/eggbot.json',
+    def load(self, filepath: str = 'config/eggbot.json',
              abs_path: bool = False) -> bool:
         """ Loads a config json
 
@@ -66,7 +66,7 @@ class CoreConfig(object):
 
         return True
 
-    def save(self, filepath: str = '/config/eggbot.json',
+    def save(self, filepath: str = 'config/eggbot.json',
              abs_path: bool = False) -> bool:
         """ Saves a config json
 
