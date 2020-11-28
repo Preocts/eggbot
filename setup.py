@@ -36,7 +36,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'start-eggbot = eggbot.eggbot_core:main',
+            'start-eggbot = eggbot.__main__:main',
         ]
     },
     include_package_data=True
