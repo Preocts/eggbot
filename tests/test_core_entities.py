@@ -56,11 +56,11 @@ class TestCoreConfig(unittest.TestCase):
         self.assertNotIn(12345, config.config.keys())
         self.assertFalse(config.create(key, 'Test Value'))
 
-        self.assertEquals(config.read(key), 'Test Value')
+        self.assertEqual(config.read(key), 'Test Value')
         self.assertIsNone(config.read(key + '00'))
 
         self.assertTrue(config.update(key, 'New Value'))
-        self.assertEquals(config.config.get(key), 'New Value')
+        self.assertEqual(config.config.get(key), 'New Value')
         self.assertFalse(config.update(key + '00', 'New Value'))
         self.assertNotIn(key + '00', config.config.keys())
 
