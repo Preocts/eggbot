@@ -21,10 +21,15 @@ Types of changes
   - import `os`, `discord`, and `dotenv`
   - Logging output for load_config()
   - main() now exists and the bot actually connects to Discord. We're done, right?
+- __main__.py for single point of entry
+- Install instructions for README.md
+- setup.py file for install and testing
+- Makefile configurations for install, update, package, and testing
 
 ### Changed
 - Added `owner_id` to default configuration json. Future me will figure out how to populate it.
 - [test] Tweaks to `test_core_entities.py` to account for above change
+- Updated trivis.yaml for new install and testing requirements
 
 ### Removed
 - Removed methods `api_token` and `owner_id` from core_entities.CoreConfig class
