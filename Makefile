@@ -1,49 +1,50 @@
-.PHONY: dependancies clean
+.PHONY: update-deps init update install clean clean-pyc clean-build clean-test test package
 
-# Install requirement packages for development
-dependancies:
-	pip install --upgrade pip
-	pip install --upgrade setuptools
-	pip install --upgrade wheel
-	pip install -r requirements.txt
+update-deps:
+	pip-compile --upgrade --generate-hashes
+	pip-compile --upgrade --generate-hashes --output-file dev-requirements.txt dev-requirements.in
 
-# Install development packages for linting and tests
-dev-dependancies:
-	pip install -r dev-requirements.txt
+install:
+	pip install --upgrade pip setuptools wheel
+	pip install --upgrade -r requirements.txt  -r dev-requirements.txt
+	pip install --editable .
+
+init:
+	pip install pip-tools
+	rm -rf .tox
+
+update: init update-deps install
 
 # Run all cleaning steps
 clean: clean-build clean-pyc clean-test
 
-# Remove build artifacts
-clean-build:
-	rm -f artifact.zip
-	rm -fr build/
-	rm -fr dist/
-	rm -fr .eggs/
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
-
-# Remove pyc artifacts
-clean-pyc:
+clean-pyc: ## Remove python artifacts.
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
-# Remove test artifacts
-clean-test:
+clean-build: ## Remove build artifacts.
+	rm -f artifact.zip
+	rm -rf dist/
+	rm -rf *.egg-info
+	rm -rf vendors/
+	rm -rf lambda-artifact.zip
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
+
+clean-test: ## Remove test artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 
-# Creates a package for testing
-package: clean-build
+test: ## Run all tests found in the /tests directory.
+	python -m unittest discover -s tests
+
+package: clean-build ## Creates a package for testing
 	mkdir dist
 	pip install -r requirements.txt -t ./dist
-	cp -r ./src/eggbot/* ./dist
+	cp -r ./src/eggbot ./dist
+	mv ./dist/eggbot/__main__.py ./dist/main.py
 	test -f ./src/eggbot/.env && cp ./src/eggbot/.env ./dist/.env
 	(cd ./dist && zip -r ../artifact.zip .)
-
-# Run tests
-run-test:
-	python -m unittest discover -s tests

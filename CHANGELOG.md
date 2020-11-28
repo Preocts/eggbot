@@ -13,6 +13,31 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.3-alpha] - 2020.11.27
+
+### Added
+- ### eggbot_core.py
+  - global `DISCORD_TOKEN` - it holds the secret loaded from environmental variable.
+  - import `os`, `discord`, and `dotenv`
+  - Logging output for load_config()
+  - main() now exists and the bot actually connects to Discord. We're done, right?
+- __main__.py for single point of entry
+- Install instructions for README.md
+- setup.py file for install and testing
+- Makefile configurations for install, update, package, and testing
+- MANIFEST.in for package data
+
+### Changed
+- Added `owner_id` to default configuration json. Future me will figure out how to populate it.
+- [test] Tweaks to `test_core_entities.py` to account for above change
+- [test] Corrected use of depreciated `Equals` assert
+- Updated trivis.yaml for new install and testing requirements
+- Corrected double // in default pathing for default configuration files
+
+### Removed
+- Removed methods `api_token` and `owner_id` from core_entities.CoreConfig class
+
+
 ## [0.0.2-alpha] - 2020-11-26
 
 ### Added

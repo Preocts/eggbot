@@ -12,8 +12,6 @@ class TestCoreConfig(unittest.TestCase):
         config = core_entities.CoreConfig()
         self.assertIsInstance(config, core_entities.CoreConfig)
         self.assertIsInstance(config.config, dict)
-        self.assertIsInstance(config.api_token, str)
-        self.assertIsInstance(config.owner_id, str)
 
     def test_abs(self):
         config = core_entities.CoreConfig()
@@ -58,11 +56,11 @@ class TestCoreConfig(unittest.TestCase):
         self.assertNotIn(12345, config.config.keys())
         self.assertFalse(config.create(key, 'Test Value'))
 
-        self.assertEquals(config.read(key), 'Test Value')
+        self.assertEqual(config.read(key), 'Test Value')
         self.assertIsNone(config.read(key + '00'))
 
         self.assertTrue(config.update(key, 'New Value'))
-        self.assertEquals(config.config.get(key), 'New Value')
+        self.assertEqual(config.config.get(key), 'New Value')
         self.assertFalse(config.update(key + '00', 'New Value'))
         self.assertNotIn(key + '00', config.config.keys())
 

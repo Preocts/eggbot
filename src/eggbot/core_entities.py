@@ -22,8 +22,6 @@ class CoreConfig(object):
     def __init__(self, **kwargs):
         self.__abs_path = f'{os.path.sep}'.join(
             __file__.split(os.path.sep)[0:-1]) + "/"
-        self.__api_token = os.environ.get('discord_api_key')
-        self.__owner_id = os.environ.get('owner_id')
         self.__config = {}
 
     @property
@@ -31,18 +29,10 @@ class CoreConfig(object):
         return self.__abs_path
 
     @property
-    def api_token(self) -> str:
-        return self.__api_token
-
-    @property
-    def owner_id(self) -> str:
-        return self.__owner_id
-
-    @property
     def config(self) -> dict:
         return dict(self.__config)
 
-    def load(self, filepath: str = '/config/eggbot.json',
+    def load(self, filepath: str = 'config/eggbot.json',
              abs_path: bool = False) -> bool:
         """ Loads a config json
 
@@ -76,7 +66,7 @@ class CoreConfig(object):
 
         return True
 
-    def save(self, filepath: str = '/config/eggbot.json',
+    def save(self, filepath: str = 'config/eggbot.json',
              abs_path: bool = False) -> bool:
         """ Saves a config json
 
