@@ -13,6 +13,21 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.4-alpha] - 2020.11.28
+
+### Added
+- .cwd property to core_entities.CoreConfig()
+
+### Changed
+- Default core configuration file location moved to root of working directory
+- rename: eggbot.json <---> eggbot_core.json
+- Adjusted setup.py entry point to use __main__.py
+- Updated `package` for Makefile to move configs in with .zip properly
+
+### Deprecated
+- .abs_path property for core_entities.CoreConfig()
+  - Was referencing config files, turns out that's bad. No need for this.
+
 ## [0.0.3-alpha] - 2020.11.27
 
 ### Added

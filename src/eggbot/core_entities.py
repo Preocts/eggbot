@@ -4,9 +4,10 @@ Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-import os
 import json
+import os
 import logging
+import pathlib
 import typing
 
 import dotenv
@@ -21,7 +22,8 @@ class CoreConfig(object):
 
     def __init__(self, **kwargs):
         self.__abs_path = f'{os.path.sep}'.join(
-            __file__.split(os.path.sep)[0:-1]) + "/"
+            __file__.split(os.path.sep)[0:-1])
+        self.__cwd = os.getcwd()
         self.__config = {}
 
     @property
@@ -29,10 +31,14 @@ class CoreConfig(object):
         return self.__abs_path
 
     @property
+    def cwd(self) -> str:
+        return self.__cwd
+
+    @property
     def config(self) -> dict:
         return dict(self.__config)
 
-    def load(self, filepath: str = 'config/eggbot.json',
+    def load(self, filepath: str = './config/eggbot_core.json',
              abs_path: bool = False) -> bool:
         """ Loads a config json
 
@@ -44,7 +50,9 @@ class CoreConfig(object):
                 relative to this module
         """
         self.__config = {}
-        path = filepath if abs_path else ''.join([self.abs_path, filepath])
+        rel_path = pathlib.Path(self.cwd).joinpath(filepath)
+        path = filepath if abs_path else rel_path.resolve()
+
         try:
             with open(path, 'r') as input_file:
                 self.__config = json.loads(input_file.read())
@@ -66,7 +74,7 @@ class CoreConfig(object):
 
         return True
 
-    def save(self, filepath: str = 'config/eggbot.json',
+    def save(self, filepath: str = './config/eggbot_core.json',
              abs_path: bool = False) -> bool:
         """ Saves a config json
 
@@ -79,7 +87,8 @@ class CoreConfig(object):
                 absolute path. Otherwise the path is considered
                 relative to this module
         """
-        path = filepath if abs_path else ''.join([self.abs_path, filepath])
+        rel_path = pathlib.Path(self.cwd).joinpath(filepath)
+        path = filepath if abs_path else rel_path.resolve()
         try:
             with open(path, 'w') as out_file:
                 out_file.write(json.dumps(self.__config, indent=4))
