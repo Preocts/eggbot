@@ -39,4 +39,5 @@ setup(
             'start-eggbot = eggbot.eggbot_core:main',
         ]
     },
+    include_package_data=True
 )
