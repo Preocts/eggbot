@@ -1,3 +1,6 @@
 pylint
 flake8
 autopep8
+coverage
+black
+tox

@@ -9,5 +9,5 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 from eggbot.eggbot_core import main
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
