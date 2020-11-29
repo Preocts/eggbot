@@ -1,7 +1,15 @@
+import asyncio
 import unittest
 from unittest.mock import patch
 
 from eggbot import eggbot_core as ec
+
+
+def run_loop(func, *args, **kwargs):
+    """ Hack to test async functions """
+    loop = asyncio.get_event_loop()
+    result = loop.run_until_complete(func(*args, **kwargs))
+    return result
 
 
 class TestEggbotCore(unittest.TestCase):
@@ -29,10 +37,23 @@ class TestEggbotCore(unittest.TestCase):
         mock_client.run.assert_called()
         mock_client.run.assert_called_with(ec.DISCORD_TOKEN)
 
-    async def test_join_event(self):
-        mock_member = unittest.mock.Mock()
-        await self.assertIsNone(ec.on_member_join(mock_member))
+    def test_join_event(self):
+        with patch("eggbot.eggbot_core.discord_client") as mock:
+            mock.user.id = "123456789"
+            mock_member = unittest.mock.Mock()
+            mock_member.id = "987654321"
+            self.assertTrue(run_loop(ec.on_member_join, mock_member))
 
-    async def test_message_event(self):
-        mock_message = unittest.mock.Mock()
-        await self.assertIsNone(ec.on_message(mock_message))
+            mock_member.id = "123456789"
+            self.assertFalse(run_loop(ec.on_member_join, mock_member))
+
+    def test_message_event(self):
+        with patch("eggbot.eggbot_core.discord_client") as mock:
+            mock.user.id = "123456789"
+            mock_message = unittest.mock.Mock()
+            mock_message.author.id = "987654321"
+            self.assertTrue(run_loop(ec.on_message, mock_message))
+
+            mock_message.author.id = "123456789"
+            self.assertFalse(run_loop(ec.on_message, mock_message))
+

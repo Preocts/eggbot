@@ -47,15 +47,22 @@ def load_config() -> bool:
 
 
 @discord_client.event
-async def on_member_join(member) -> None:
+async def on_member_join(member) -> bool:
     """ Triggered on all join events """
-    return None
+    if member.id == discord_client.user.id:
+        logger.warning("on_member_join(), Saw ourselves join, that's weird.")
+        return False
+    return True
 
 
 @discord_client.event
-async def on_message(message) -> None:
+async def on_message(message) -> bool:
     """ Triggered on all message events """
-    return None
+    if message.author.id == discord_client.user.id:
+        logger.debug("on_message(), Ignoring ourselves.")
+        return False
+
+    return True
 
 
 def main() -> None:

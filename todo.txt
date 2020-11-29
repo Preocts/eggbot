@@ -24,9 +24,9 @@ Acceptance Criteria:
     - remove event
 [X] Add new global for eventsub
 [X] Event for Join and Message exist
-[_] Event do not respond to bot account or self
+[X] Event do not respond to bot account or self
 [_] Event calls modules that are listed in event sub object
-[X] Event return None
+[X] Event return True
 [_] All unit tests pass
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
