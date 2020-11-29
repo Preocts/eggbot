@@ -8,7 +8,6 @@ from eggbot import core_entities
 
 
 class TestCoreConfig(unittest.TestCase):
-
     def test_exist(self):
         config = core_entities.CoreConfig()
         self.assertIsInstance(config, core_entities.CoreConfig)
@@ -30,12 +29,12 @@ class TestCoreConfig(unittest.TestCase):
         config = core_entities.CoreConfig()
 
         # Missing file
-        config.load('invalid.file')
+        config.load("invalid.file")
         self.assertIsInstance(config.config, dict)
         self.assertFalse(config.config)
 
         # Valid relative but invalid JSON
-        config.load('README.md')
+        config.load("README.md")
         self.assertIsInstance(config.config, dict)
         self.assertFalse(config.config)
 
@@ -45,30 +44,30 @@ class TestCoreConfig(unittest.TestCase):
         self.assertTrue(config.config)
 
         # Valid absolute
-        filepath = pathlib.Path('./tests/files/mock_config.json').absolute()
+        filepath = pathlib.Path("./tests/files/mock_config.json").absolute()
         config.load(filepath, True)
         self.assertIsInstance(config.config, dict)
         self.assertTrue(config.config)
 
     def test_config_crud(self):
         random.seed()
-        key = f'unitTest{random.randint(1000,10000)}'
+        key = f"unitTest{random.randint(1000,10000)}"
         config = core_entities.CoreConfig()
         config.load()
 
-        self.assertTrue(config.create(key, 'Test Value'))
+        self.assertTrue(config.create(key, "Test Value"))
         self.assertIn(key, config.config.keys())
-        self.assertFalse(config.create(12345, 'Test Value'))
+        self.assertFalse(config.create(12345, "Test Value"))
         self.assertNotIn(12345, config.config.keys())
-        self.assertFalse(config.create(key, 'Test Value'))
+        self.assertFalse(config.create(key, "Test Value"))
 
-        self.assertEqual(config.read(key), 'Test Value')
-        self.assertIsNone(config.read(key + '00'))
+        self.assertEqual(config.read(key), "Test Value")
+        self.assertIsNone(config.read(key + "00"))
 
-        self.assertTrue(config.update(key, 'New Value'))
-        self.assertEqual(config.config.get(key), 'New Value')
-        self.assertFalse(config.update(key + '00', 'New Value'))
-        self.assertNotIn(key + '00', config.config.keys())
+        self.assertTrue(config.update(key, "New Value"))
+        self.assertEqual(config.config.get(key), "New Value")
+        self.assertFalse(config.update(key + "00", "New Value"))
+        self.assertNotIn(key + "00", config.config.keys())
 
         self.assertTrue(config.delete(key))
         self.assertNotIn(key, config.config.keys())
@@ -76,10 +75,10 @@ class TestCoreConfig(unittest.TestCase):
     def test_save(self):
         args_list = [
             (),
-            (pathlib.Path('./tests/files/mock_config.json').absolute(), True)
+            (pathlib.Path("./tests/files/mock_config.json").absolute(), True),
         ]
         random.seed()
-        key = f'unitTest{random.randint(1000,10000)}'
+        key = f"unitTest{random.randint(1000,10000)}"
 
         config = core_entities.CoreConfig()
 
@@ -87,7 +86,7 @@ class TestCoreConfig(unittest.TestCase):
             print(f"Testing with: {args}")
             config.load(*args)
             self.assertNotIn(key, config.config.keys())
-            self.assertTrue(config.create(key, 'Test Value'))
+            self.assertTrue(config.create(key, "Test Value"))
             self.assertTrue(config.save(*args))
             config.load(*args)
             self.assertIn(key, config.config.keys())
