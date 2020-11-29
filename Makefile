@@ -42,7 +42,7 @@ blacken: ## Run Black against code
 	black --line-length 79 ./src/eggbot
 	black --line-length 79 ./tests
 
-test: blacken ## Run all tests found in the /tests directory.
+test: ## Run all tests found in the /tests directory.
 	python -m unittest discover -s tests
 	coverage run -m unittest discover -s tests
 	coverage report --include "*/eggbot/*"

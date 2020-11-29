@@ -1,12 +1,40 @@
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                               Active                                 -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+2020-11-28 Event Framework (0.0.5-alpha)
 
+For this implementation we want the event listeners to consume the event
+and then send the event to any module listed in an object. The object
+will need to return an iterate of module entry-points that want the
+event.
+
+A future feature will create the population of this object.
+
+Acceptance Criteria:
+
+[~] Test driven development
+[x] Event sub object allows operations:
+    - add sub to event
+    - list events by sub
+    - remove sub to event
+    - remove from all events
+    - create event
+    - get subs by event
+    - get events
+    - remove event
+[X] Add new global for eventsub
+[X] Event for Join and Message exist
+[_] Event do not respond to bot account or self
+[_] Event calls modules that are listed in event sub object
+[X] Event return None
+[_] All unit tests pass
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                               Future                                 -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+[_] Add unit tests to mock failed file reads in core_entites
+[_] Queue for event actions
 [_] Replace os with Pathlib
 [_] Version bumping script to capture updates 
     - setup.py 

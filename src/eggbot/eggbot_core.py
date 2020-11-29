@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)  # Logger
 # TODO: Configure basic logger and file logger
 
 eggbot_config = core_entities.CoreConfig()  # Configuration for bot
+eventsub = core_entities.EventSub()  # Event Pub/Sub framework
 
 dotenv.load_dotenv  # Load .env if exist
 
@@ -43,6 +44,18 @@ def load_config() -> bool:
         "Configuration file loaded with " f"{len(eggbot_config.config)} keys."
     )
     return True
+
+
+@discord_client.event
+async def on_member_join(member) -> None:
+    """ Triggered on all join events """
+    return None
+
+
+@discord_client.event
+async def on_message(message) -> None:
+    """ Triggered on all message events """
+    return None
 
 
 def main() -> None:

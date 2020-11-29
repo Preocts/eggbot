@@ -13,6 +13,14 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.5-alpha] - 2020.11.29
+
+### Added
+- EventSub() to core_entities
+- Global for EventSub() object to eggbot_core called "eventpub"
+
+
+
 ## [0.0.4-alpha] - 2020.11.28
 
 ### Added
