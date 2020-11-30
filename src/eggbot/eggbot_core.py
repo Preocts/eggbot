@@ -49,18 +49,34 @@ def load_config() -> bool:
 @discord_client.event
 async def on_member_join(member) -> bool:
     """ Triggered on all join events """
+    global eventsub
     if member.id == discord_client.user.id:
         logger.warning("on_member_join(), Saw ourselves join, that's weird.")
         return False
+    if member.bot:
+        logger.info("on_member_join(), Bot join detected, ignoring.")
+        return False
+
+    for subbed in eventsub.event_list("on_join"):
+        subbed(member)
+
     return True
 
 
 @discord_client.event
 async def on_message(message) -> bool:
     """ Triggered on all message events """
+    global eventsub
     if message.author.id == discord_client.user.id:
         logger.debug("on_message(), Ignoring ourselves.")
         return False
+
+    if message.author.bot:
+        logger.info("on_message(), Bot chat, ignoring.")
+        return False
+
+    for subbed in eventsub.event_list("on_message"):
+        subbed(message)
 
     return True
 

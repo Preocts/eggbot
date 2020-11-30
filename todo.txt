@@ -25,7 +25,7 @@ Acceptance Criteria:
 [X] Add new global for eventsub
 [X] Event for Join and Message exist
 [X] Event do not respond to bot account or self
-[_] Event calls modules that are listed in event sub object
+[~] Event calls modules that are listed in event sub object
 [X] Event return True
 [_] All unit tests pass
 
@@ -41,6 +41,7 @@ Acceptance Criteria:
     -./config/eggbot_core.json
 [_] README.md for configuration folder
 [_] Load/Save configuration should raise if error
+[_] Discord object logger for debug
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                              Complete                                -
