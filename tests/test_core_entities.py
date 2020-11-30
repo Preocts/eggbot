@@ -71,6 +71,7 @@ class TestCoreConfig(unittest.TestCase):
 
         self.assertTrue(config.delete(key))
         self.assertNotIn(key, config.config.keys())
+        self.assertFalse(config.delete(key))
 
     def test_save(self):
         args_list = [
