@@ -24,10 +24,13 @@ class TestEggbotCore(unittest.TestCase):
         self.assertTrue(ec.load_config())
         self.assertIsInstance(ec.eggbot_config, ec.core_entities.CoreConfig)
         self.assertIsNotNone(ec.eggbot_config.config)
+        with patch("eggbot.eggbot_core.eggbot_config") as mock:
+            mock.config = {}
+            self.assertFalse(ec.load_config())
 
     @patch("eggbot.eggbot_core.discord_client")
     def test_main(self, mock_client):
-        """ Should exit clean after doing things 
+        """ Should exit clean after doing things
 
         Discord client async loop is mocked and not run but is tested that
         a call was made.

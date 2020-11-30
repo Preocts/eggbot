@@ -1,33 +1,7 @@
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                               Active                                 -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-2020-11-28 Event Framework (0.0.5-alpha)
 
-For this implementation we want the event listeners to consume the event
-and then send the event to any module listed in an object. The object
-will need to return an iterate of module entry-points that want the
-event.
-
-A future feature will create the population of this object.
-
-Acceptance Criteria:
-
-[~] Test driven development
-[x] Event sub object allows operations:
-    - add sub to event
-    - list events by sub
-    - remove sub to event
-    - remove from all events
-    - create event
-    - get subs by event
-    - get events
-    - remove event
-[X] Add new global for eventsub
-[X] Event for Join and Message exist
-[X] Event do not respond to bot account or self
-[~] Event calls modules that are listed in event sub object
-[X] Event return True
-[_] All unit tests pass
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                               Future                                 -
@@ -46,6 +20,34 @@ Acceptance Criteria:
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                              Complete                                -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+2020-11-28 Event Framework (0.0.5-alpha)
+
+For this implementation we want the event listeners to consume the event
+and then send the event to any module listed in an object. The object
+will need to return an iterate of module entry-points that want the
+event.
+
+A future feature will create the population of this object.
+
+Acceptance Criteria:
+
+[X] Test driven development
+[x] Event sub object allows operations:
+    - add sub to event
+    - list events by sub
+    - remove sub to event
+    - remove from all events
+    - create event
+    - get subs by event
+    - get events
+    - remove event
+[X] Add new global for eventsub
+[X] Event for Join and Message exist
+[X] Event do not respond to bot account or self
+[X] Event calls modules that are listed in event sub object
+[X] Event return True
+[X] All unit tests pass
 
 2020-11-27 Configuration location:
 

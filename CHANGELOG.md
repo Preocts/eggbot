@@ -18,8 +18,8 @@ Types of changes
 ### Added
 - EventSub() to core_entities
 - Global for EventSub() object to eggbot_core called "eventpub"
-
-
+- Event function for on_member_join
+- Event function for on_message
 
 ## [0.0.4-alpha] - 2020.11.28
 
