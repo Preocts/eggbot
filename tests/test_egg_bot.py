@@ -30,7 +30,7 @@ class TestEggbotCore(unittest.TestCase):
 
     @patch("eggbot.eggbot_core.discord_client")
     def test_main(self, mock_client):
-        """ Should exit clean after doing things
+        """Should exit clean after doing things
 
         Discord client async loop is mocked and not run but is tested that
         a call was made.
