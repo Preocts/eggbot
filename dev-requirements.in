@@ -4,3 +4,4 @@ autopep8
 coverage
 black
 tox
+pytest

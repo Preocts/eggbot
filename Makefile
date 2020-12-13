@@ -37,14 +37,14 @@ clean-test: ## Remove test artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
+	find . -name '.pytest_cache' -exec rm -fr {} +
 
 blacken: ## Run Black against code
 	black --line-length 79 ./src/eggbot
 	black --line-length 79 ./tests
 
 test: ## Run all tests found in the /tests directory.
-	python -m unittest discover -s tests
-	coverage run -m unittest discover -s tests
+	coverage run -m pytest tests/
 	coverage report --include "*/eggbot/*" --show-missing
 
 package: clean-build ## Creates a package for testing
@@ -55,5 +55,4 @@ package: clean-build ## Creates a package for testing
 	cp -r ./src/eggbot ./dist
 	cp -r ./config/ ./dist/
 	mv ./dist/eggbot/__main__.py ./dist/main.py
-	test -f ./src/eggbot/.env && cp ./src/eggbot/.env ./dist/.env
 	(cd ./dist && zip -r ../artifact.zip .)
