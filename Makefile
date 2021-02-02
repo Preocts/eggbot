@@ -1,19 +1,8 @@
-.PHONY: update-deps init update install clean clean-pyc clean-build clean-test test package
+.PHONY: dev-install clean clean-pyc clean-build clean-test tests package
 
-update-deps:
-	pip-compile --upgrade --generate-hashes
-	pip-compile --upgrade --generate-hashes --output-file dev-requirements.txt dev-requirements.in
-
-install:
+dev-install:
 	pip install --upgrade pip setuptools wheel
 	pip install --upgrade -r requirements.txt  -r dev-requirements.txt
-	pip install --editable .
-
-init:
-	pip install pip-tools
-	rm -rf .tox
-
-update: init update-deps install
 
 # Run all cleaning steps
 clean: clean-build clean-pyc clean-test
@@ -39,11 +28,7 @@ clean-test: ## Remove test artifacts
 	rm -fr htmlcov/
 	find . -name '.pytest_cache' -exec rm -fr {} +
 
-blacken: ## Run Black against code
-	black --line-length 79 ./src/eggbot
-	black --line-length 79 ./tests
-
-test: ## Run all tests found in the /tests directory.
+tests: ## Run all tests found in the /tests directory.
 	coverage run -m pytest tests/
 	coverage report --include "*/eggbot/*" --show-missing
 
