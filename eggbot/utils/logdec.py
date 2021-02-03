@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Decorators for logging function entrance and exit
 
 Author  : Preocts, preocts@preocts.com

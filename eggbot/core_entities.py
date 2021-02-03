@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 """ Entity objects for the core bot
 
 Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+from __future__ import annotations
+
 import json
 import os
 import logging
@@ -11,6 +14,7 @@ import pathlib
 
 from typing import Any
 from typing import Callable
+from typing import Optional
 
 import dotenv
 
@@ -19,15 +23,27 @@ logger = logging.getLogger(__name__)
 dotenv.load_dotenv()
 
 
-class CoreConfig(object):
-    """ Core configuration handler """
+class CoreConfig:
+    """ Core configuration handler, singleton class """
 
-    def __init__(self, **kwargs):
+    __core_config: Optional[CoreConfig] = None
+
+    @staticmethod
+    def get_instance() -> CoreConfig:
+        """ Get instance of singleton class """
+        if not CoreConfig.__core_config:
+            CoreConfig()
+        return CoreConfig.__core_config
+
+    def __init__(self):
+        if CoreConfig.__core_config:
+            raise Exception("Singleton class. Use .get_instance() instead")
         self.__abs_path = f"{os.path.sep}".join(
-            __file__.split(os.path.sep)[0:-1]
+            __file__.split(os.path.sep)[0:-2]
         )
         self.__cwd = os.getcwd()
         self.__config = {}
+        CoreConfig.__core_config = self
 
     @property
     def abs_path(self) -> str:
@@ -109,6 +125,10 @@ class CoreConfig(object):
             logger.error("", exc_info=True)
             return False
         return True
+
+    def unload(self) -> None:
+        """ Unloads config without saving """
+        self.__config = {}
 
     def read(self, key: str) -> Any:
         """ Reads values by key from config. Returns None if not exists """

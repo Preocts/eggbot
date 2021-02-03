@@ -1,33 +1,45 @@
+# -*- coding: utf-8 -*-
 """ Test core entity objects """
 import os
 import pathlib
 import random
 import unittest
 
-from eggbot import core_entities
+from eggbot.core_entities import CoreConfig
 
 
 class TestCoreConfig(unittest.TestCase):
+    def test_singleton(self):
+        """ Once instance to rule them all """
+        config = CoreConfig.get_instance()
+        with self.assertRaises(Exception):
+            _ = CoreConfig()
+        second_config = CoreConfig.get_instance()
+        self.assertIs(config, second_config)
+
     def test_exist(self):
-        config = core_entities.CoreConfig()
-        self.assertIsInstance(config, core_entities.CoreConfig)
+        """ Unit Test """
+        config = CoreConfig.get_instance()
+        self.assertIsInstance(config, CoreConfig)
         self.assertIsInstance(config.config, dict)
 
     def test_abs(self):
-        config = core_entities.CoreConfig()
-        compare_path = core_entities.__file__
+        """ Unit Test """
+        config = CoreConfig.get_instance()
+        compare_path = __file__
         self.assertIsInstance(config.abs_path, str)
         self.assertTrue(config.abs_path.startswith(compare_path[0]))
         self.assertIn(config.abs_path, compare_path)
 
     def test_cwd(self):
-        config = core_entities.CoreConfig()
+        """ Unit Test """
+        config = CoreConfig.get_instance()
         self.assertIsInstance(config.cwd, str)
         self.assertEqual(config.cwd, os.getcwd())
 
     def test_load(self):
-        config = core_entities.CoreConfig()
-
+        """ Unit Test """
+        config = CoreConfig.get_instance()
         # Missing file
         config.load("invalid.file")
         self.assertIsInstance(config.config, dict)
@@ -50,9 +62,10 @@ class TestCoreConfig(unittest.TestCase):
         self.assertTrue(config.config)
 
     def test_config_crud(self):
+        """ Unit Test """
         random.seed()
-        key = f"unitTest{random.randint(1000,10000)}"
-        config = core_entities.CoreConfig()
+        key = f"unitTest{random.randint(1000,10000)}"  # nosec
+        config = CoreConfig.get_instance()
         config.load()
 
         self.assertTrue(config.create(key, "Test Value"))
@@ -74,17 +87,17 @@ class TestCoreConfig(unittest.TestCase):
         self.assertFalse(config.delete(key))
 
     def test_save(self):
+        """ Unit Test """
         args_list = [
             (),
             (pathlib.Path("./tests/files/mock_config.json").absolute(), True),
         ]
         random.seed()
-        key = f"unitTest{random.randint(1000,10000)}"
+        key = f"unitTest{random.randint(1000,10000)}"  # nosec
 
-        config = core_entities.CoreConfig()
+        config = CoreConfig.get_instance()
 
         for args in args_list:
-            print(f"Testing with: {args}")
             config.load(*args)
             self.assertNotIn(key, config.config.keys())
             self.assertTrue(config.create(key, "Test Value"))
@@ -95,4 +108,9 @@ class TestCoreConfig(unittest.TestCase):
             self.assertTrue(config.save(*args))
             config.load(*args)
             self.assertNotIn(key, config.config.keys())
-            print("Completed")
+
+    def test_unload(self):
+        """ Empty current config """
+        config = CoreConfig.get_instance()
+        config.unload()
+        self.assertEqual(config.config, {})
