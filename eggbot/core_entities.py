@@ -13,8 +13,8 @@ import logging
 import pathlib
 
 from typing import Any
-from typing import Callable
 from typing import Optional
+from typing import Callable
 
 import dotenv
 
@@ -28,16 +28,20 @@ class CoreConfig:
 
     __core_config: Optional[CoreConfig] = None
 
-    @staticmethod
-    def get_instance() -> CoreConfig:
-        """ Get instance of singleton class """
-        if not CoreConfig.__core_config:
-            CoreConfig()
-        return CoreConfig.__core_config
+    def __call__(cls) -> Optional[CoreConfig]:
+        """ Override init to create singleton """
+        if not cls.__core_config:
+            cls.__core_config = super().__init__()
+        return cls.__core_config
+
+    # @classmethod
+    # def get_instance(cls) -> Optional[CoreConfig]:
+    #     """ Get instance of singleton class """
+    #     if not cls.__core_config:
+    #         CoreConfig()
+    #     return cls.__core_config
 
     def __init__(self):
-        if CoreConfig.__core_config:
-            raise Exception("Singleton class. Use .get_instance() instead")
         self.__abs_path = f"{os.path.sep}".join(
             __file__.split(os.path.sep)[0:-2]
         )
@@ -73,7 +77,7 @@ class CoreConfig:
         """
         self.__config = {}
         rel_path = pathlib.Path(self.cwd).joinpath(filepath)
-        path = filepath if abs_path else rel_path.resolve()
+        path = filepath if abs_path else str(rel_path.resolve())
 
         try:
             with open(path, "r") as input_file:
@@ -116,7 +120,7 @@ class CoreConfig:
                 relative to this module
         """
         rel_path = pathlib.Path(self.cwd).joinpath(filepath)
-        path = filepath if abs_path else rel_path.resolve()
+        path = filepath if abs_path else str(rel_path.resolve())
         try:
             with open(path, "w") as out_file:
                 out_file.write(json.dumps(self.__config, indent=4))
@@ -184,10 +188,6 @@ class EventSub(object):
         Returns:
             Bool - False if failed to create (check logs)
         """
-        if not isinstance(target, Callable):
-            logger.error(f".sub(), [target] is not callable: {type(target)}")
-            return False
-
         if not self._pubsub.get(event):
             self._pubsub[event] = set()  # Ensure we have a key
 
@@ -199,7 +199,7 @@ class EventSub(object):
 
         return True
 
-    def sub_delete(self, target: callable, event: str) -> bool:
+    def sub_delete(self, target: Callable, event: str) -> bool:
         """Unsubscribe a target from an event
 
         Args:
@@ -221,7 +221,7 @@ class EventSub(object):
 
         return True
 
-    def sub_wipe(self, target: callable) -> bool:
+    def sub_wipe(self, target: Callable) -> bool:
         """Removes target from all subscriptions
 
         Args:
@@ -237,7 +237,7 @@ class EventSub(object):
 
         return True
 
-    def sub_list(self, target: callable) -> tuple:
+    def sub_list(self, target: Callable) -> tuple:
         """ Returns a list of events that target is subbed to """
         sub_list = []
         for event in self.event_list_all():

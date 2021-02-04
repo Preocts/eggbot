@@ -29,7 +29,7 @@ discord_client = discord.Client(status="online", intents=intents)
 
 def load_config() -> bool:
     """ Load configuration """
-    eggbot_config = CoreConfig.get_instance()
+    eggbot_config = CoreConfig()
     logger.info("Opening configuration...")
     eggbot_config.load()
     if not eggbot_config.config:

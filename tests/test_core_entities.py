@@ -11,21 +11,21 @@ from eggbot.core_entities import CoreConfig
 class TestCoreConfig(unittest.TestCase):
     def test_singleton(self):
         """ Once instance to rule them all """
-        config = CoreConfig.get_instance()
-        with self.assertRaises(Exception):
-            _ = CoreConfig()
-        second_config = CoreConfig.get_instance()
+        config = CoreConfig()
+        # with self.assertRaises(Exception):
+        #     _ = CoreConfig()
+        second_config = CoreConfig()
         self.assertIs(config, second_config)
 
     def test_exist(self):
         """ Unit Test """
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
         self.assertIsInstance(config, CoreConfig)
         self.assertIsInstance(config.config, dict)
 
     def test_abs(self):
         """ Unit Test """
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
         compare_path = __file__
         self.assertIsInstance(config.abs_path, str)
         self.assertTrue(config.abs_path.startswith(compare_path[0]))
@@ -33,13 +33,13 @@ class TestCoreConfig(unittest.TestCase):
 
     def test_cwd(self):
         """ Unit Test """
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
         self.assertIsInstance(config.cwd, str)
         self.assertEqual(config.cwd, os.getcwd())
 
     def test_load(self):
         """ Unit Test """
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
         # Missing file
         config.load("invalid.file")
         self.assertIsInstance(config.config, dict)
@@ -65,7 +65,7 @@ class TestCoreConfig(unittest.TestCase):
         """ Unit Test """
         random.seed()
         key = f"unitTest{random.randint(1000,10000)}"  # nosec
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
         config.load()
 
         self.assertTrue(config.create(key, "Test Value"))
@@ -95,7 +95,7 @@ class TestCoreConfig(unittest.TestCase):
         random.seed()
         key = f"unitTest{random.randint(1000,10000)}"  # nosec
 
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
 
         for args in args_list:
             config.load(*args)
@@ -111,6 +111,6 @@ class TestCoreConfig(unittest.TestCase):
 
     def test_unload(self):
         """ Empty current config """
-        config = CoreConfig.get_instance()
+        config = CoreConfig()
         config.unload()
         self.assertEqual(config.config, {})
