@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Ensure decorators return the expected results from decorated func """
 import unittest
 

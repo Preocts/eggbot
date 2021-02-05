@@ -9,18 +9,14 @@ import os
 import logging
 
 import discord
-import dotenv
 
-from eggbot.core_entities import CoreConfig
+from eggbot.core_entities import coreConfig
 from eggbot.core_entities import EventSub
 
 
-logger = logging.getLogger(__name__)
-event_subs = EventSub()
-
-dotenv.load_dotenv  # Load .env if exist
-
+EVENTSUBS = EventSub()
 DISCORD_TOKEN = os.environ.get("discord_api_key")
+logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -29,7 +25,7 @@ discord_client = discord.Client(status="online", intents=intents)
 
 def load_config() -> bool:
     """ Load configuration """
-    eggbot_config = CoreConfig()
+    eggbot_config = coreConfig()
     logger.info("Opening configuration...")
     eggbot_config.load()
     if not eggbot_config.config:
@@ -37,7 +33,7 @@ def load_config() -> bool:
         # TODO: Add method to pull file path for output
         return False
     logger.info(
-        "Configuration file loaded with " f"{len(eggbot_config.config)} keys."
+        "Configuration file loaded with %d keys.", len(eggbot_config.config)
     )
     return True
 
@@ -45,7 +41,6 @@ def load_config() -> bool:
 @discord_client.event
 async def on_member_join(member) -> bool:
     """ Triggered on all join events """
-    global event_subs
     if member.id == discord_client.user.id:
         logger.warning("on_member_join(), Saw ourselves join, that's weird.")
         return False
@@ -53,7 +48,7 @@ async def on_member_join(member) -> bool:
         logger.info("on_member_join(), Bot join detected, ignoring.")
         return False
 
-    for subbed in event_subs.event_list("on_join"):
+    for subbed in EVENTSUBS.event_list("on_join"):
         subbed(member)
 
     return True
@@ -70,18 +65,16 @@ async def on_message(message) -> bool:
         logger.info("on_message(), Bot chat, ignoring.")
         return False
 
-    for subbed in event_subs.event_list("on_message"):
+    for subbed in EVENTSUBS.event_list("on_message"):
         subbed(message)
 
     return True
 
 
 def main() -> None:
-    global DISCORD_TOKEN
+    """ Main entry point """
     load_config()
-
     discord_client.run(DISCORD_TOKEN)
-    pass
 
 
 # May Bartmoss have mercy on your data for running this bot.

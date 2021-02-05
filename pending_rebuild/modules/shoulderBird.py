@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     ShoulderBird is tool that add DM pings on keyword from chat
 
@@ -26,7 +27,7 @@ def initClass():
 
 
 class shoulderBird:
-    """ ShoulderBird scans incomming discord.onmessage events for keywords
+    """ShoulderBird scans incomming discord.onmessage events for keywords
 
     Keywords are defined from the configuration file loaded on the
     initialization of a class instance. Guilds and users are stored by
@@ -58,12 +59,12 @@ class shoulderBird:
     # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
     def __init__(self):
         """INIT"""
-        logging.info('Start: Initializing shoulderBird')
+        logging.info("Start: Initializing shoulderBird")
         self.sbConfig = {}
         self.activeConfig = ""
         self.loadConfig()
         shoulderBird.instCount += 1
-        logger.info(f'Config loaded with {len(self.sbConfig)}')
+        logger.info(f"Config loaded with {len(self.sbConfig)}")
         return
 
     def __str__(self):
@@ -84,15 +85,15 @@ class shoulderBird:
 
     def loadConfig(self) -> None:
         """ Load a config into the class """
-        file_ = eggUtils.abs_path(__file__) + '/config/shoulderBird.json'
+        file_ = eggUtils.abs_path(__file__) + "/config/shoulderBird.json"
         json_file = {}
         try:
-            with open(file_, 'r') as load_file:
+            with open(file_, "r") as load_file:
                 json_file = json.load(load_file)
         except json.decoder.JSONDecodeError:
-            logger.error('Config file empty or bad format. ', exc_info=True)
+            logger.error("Config file empty or bad format. ", exc_info=True)
         except FileNotFoundError:
-            logger.error(f'Config file not found: {file_}', exc_info=True)
+            logger.error(f"Config file not found: {file_}", exc_info=True)
 
         self.sbConfig = json_file
         self.activeConfig = file_
@@ -100,14 +101,14 @@ class shoulderBird:
 
     def saveConfig(self) -> bool:
         """ Save a config into the class """
-        file_ = eggUtils.abs_path(__file__) + '/config/shoulderBird.json'
-        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        file_ = eggUtils.abs_path(__file__) + "/config/shoulderBird.json"
+        path = pathlib.Path("/".join(file_.split("/")[:-1]))
         path.mkdir(parents=True, exist_ok=True)
         try:
-            with open(file_, 'w') as save_file:
+            with open(file_, "w") as save_file:
                 save_file.write(json.dumps(self.sbConfig, indent=4))
         except OSError:
-            logger.error(f'File not be saved: {file_}', exc_info=True)
+            logger.error(f"File not be saved: {file_}", exc_info=True)
         return
 
     # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
@@ -115,24 +116,24 @@ class shoulderBird:
     # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
     def configCheck(self, guild: str, user: str):
         """ Ensures the config is healthy """
-        logger.debug(f'[START] configCheck : {guild}, {user}')
-        if not(isinstance(self.sbConfig, dict)):
+        logger.debug(f"[START] configCheck : {guild}, {user}")
+        if not (isinstance(self.sbConfig, dict)):
             self.sbConfig = {}
-        if not(guild in self.sbConfig):
+        if not (guild in self.sbConfig):
             self.sbConfig[guild] = {}
-        if not(user in self.sbConfig[guild]):
+        if not (user in self.sbConfig[guild]):
             self.sbConfig[guild][user] = {
                 "regex": "",
                 "toggle": True,
                 "ignore": [],
-                "reminder": 0
+                "reminder": 0,
             }
         self.saveConfig()
-        logger.debug('[FINISH] configCheck : ')
+        logger.debug("[FINISH] configCheck : ")
         return
 
     def getBirds(self, guild: str) -> dict:
-        """ Fetch all defined Birds from the config file
+        """Fetch all defined Birds from the config file
 
         Args:
             [str] : Guild ID to pull results from
@@ -140,15 +141,15 @@ class shoulderBird:
         Returns:
             [dict] : {"status": [bool], "response": [str]}
         """
-        logger.debug(f'[START] getBirds : {guild}')
-        if ((guild in self.sbConfig) and len(self.sbConfig[guild])):
-            logger.debug(f'[FINISH] getBirds : {len(self.sbConfig[guild])}')
+        logger.debug(f"[START] getBirds : {guild}")
+        if (guild in self.sbConfig) and len(self.sbConfig[guild]):
+            logger.debug(f"[FINISH] getBirds : {len(self.sbConfig[guild])}")
             return {"status": True, "response": self.sbConfig[guild]}
-        logger.debug('[FINISH] getBirds : Guild not found or empty')
+        logger.debug("[FINISH] getBirds : Guild not found or empty")
         return {"status": False, "response": "Guild not found or empty"}
 
     def getBird(self, guild: str, user: str) -> dict:
-        """ Fetch a single defined Bird from the config file
+        """Fetch a single defined Bird from the config file
 
         Args:
             [str] : Guild ID to pull results from
@@ -157,19 +158,21 @@ class shoulderBird:
         Returns:
             [dict] : {"status": [bool], "response": [str]}
         """
-        logger.debug(f'[START] getBird : {guild}, {user}')
+        logger.debug(f"[START] getBird : {guild}, {user}")
         response = None
-        if ((guild in self.sbConfig) and len(self.sbConfig[guild])):
+        if (guild in self.sbConfig) and len(self.sbConfig[guild]):
             if user in self.sbConfig[guild]:
-                response = (self.sbConfig[guild][user]["regex"],
-                            self.sbConfig[guild][user]["toggle"])
-                logger.debug(f'[FINISH] getBird : {response}')
+                response = (
+                    self.sbConfig[guild][user]["regex"],
+                    self.sbConfig[guild][user]["toggle"],
+                )
+                logger.debug(f"[FINISH] getBird : {response}")
                 return {"status": True, "response": response}
-        logger.debug('[FINISH] getBird : Guild or user not found')
+        logger.debug("[FINISH] getBird : Guild or user not found")
         return {"status": False, "response": "Guild or user not found"}
 
     def listBirds(self, user) -> dict:
-        """ List all of the birds a user has set
+        """List all of the birds a user has set
 
         Args:
             [str] : User ID to pull results for
@@ -177,18 +180,18 @@ class shoulderBird:
         Returns:
             [dict] : {'status': [bool], 'response': [list]}
         """
-        logger.debug(f'[START] listBirds : {user}')
+        logger.debug(f"[START] listBirds : {user}")
         birdlist = []
         for guild, values in self.sbConfig.items():
             if user in values:
-                birdlist.append([guild, self.sbConfig[guild][user]['regex']])
-        logger.debug(f'[FINISH] listBirds : {len(birdlist)}')
+                birdlist.append([guild, self.sbConfig[guild][user]["regex"]])
+        logger.debug(f"[FINISH] listBirds : {len(birdlist)}")
         if birdlist:
-            return {'status': True, 'response': birdlist}
-        return {'status': False, 'response': 'No birds found.'}
+            return {"status": True, "response": birdlist}
+        return {"status": False, "response": "No birds found."}
 
     def putBird(self, guild, message) -> dict:
-        """ Stores a Bird into the loaded config
+        """Stores a Bird into the loaded config
 
         Args:
             [str] : Discord Guild ID
@@ -197,18 +200,18 @@ class shoulderBird:
         Returns:
             [dict] : {'status': [bool], 'response': [str]}
         """
-        logger.debug(f'[START] putBird : {message.clean_content}')
+        logger.debug(f"[START] putBird : {message.clean_content}")
         user = str(message.author.id)
         # messsage format : "sb!set [guild] = [regex]"
-        regex = message.clean_content.split('=')[1:][0].strip()  # Just [regex]
+        regex = message.clean_content.split("=")[1:][0].strip()  # Just [regex]
 
         self.configCheck(guild, user)
-        self.sbConfig[guild][user]['regex'] = regex
-        logger.debug('[FINISH] putBird : ')
-        return {'status': True, 'response': 'Bird has been stored in config'}
+        self.sbConfig[guild][user]["regex"] = regex
+        logger.debug("[FINISH] putBird : ")
+        return {"status": True, "response": "Bird has been stored in config"}
 
     def delBird(self, user: str) -> dict:
-        """ Removes users Birds from the loaded config (no undo)
+        """Removes users Birds from the loaded config (no undo)
 
         Args:
             [str] : User ID to delete
@@ -216,19 +219,19 @@ class shoulderBird:
         Returns:
             [dict] : {"status": [bool], "response": [str]}
         """
-        logger.debug(f'[START] delBird : {user}')
+        logger.debug(f"[START] delBird : {user}")
         response = None
         for guild, values in self.sbConfig.items():
             if user in values:
                 del self.sbConfig[guild][user]
                 response = "Birds have been deleted"
-        logger.debug(f'[FINISH] delBird : {response}')
+        logger.debug(f"[FINISH] delBird : {response}")
         if response is None:
             return {"status": False, "response": "No birds were found"}
         return {"status": True, "response": "Birds have been deleted"}
 
     def toggleBird(self, user: str, state: bool) -> dict:
-        """ Toggles ShoulderBird in all guilds for a user to given bool
+        """Toggles ShoulderBird in all guilds for a user to given bool
 
         This used to be an actual toggle, maybe one day it will be again. For
         brevity, sb!toggle was replaced with sb!on and sb!off in v1.0.0.
@@ -240,20 +243,20 @@ class shoulderBird:
         Returns:
             [dict] : {"status": [bool], "response": [str]}
         """
-        logger.debug(f'[START] toggleBird : {user}, {state}')
+        logger.debug(f"[START] toggleBird : {user}, {state}")
 
         for guild, values in self.sbConfig.items():
             if user in values:
-                self.sbConfig[guild][user]['toggle'] = state
+                self.sbConfig[guild][user]["toggle"] = state
         if state:
-            response = 'Birds now active for all guilds'
+            response = "Birds now active for all guilds"
         else:
-            response = 'Birds now inactive for all guilds'
-        logger.debug(f'[FINISH] toggleBird : {response}')
-        return {'status': True, 'response': response}
+            response = "Birds now inactive for all guilds"
+        logger.debug(f"[FINISH] toggleBird : {response}")
+        return {"status": True, "response": response}
 
     def birdCall(self, guild: str, user: str, message: str) -> dict:
-        """ Uses regEx to find defined keywords in a chat message
+        """Uses regEx to find defined keywords in a chat message
 
         Args:
             [str] : Guild ID to pull results from
@@ -263,12 +266,13 @@ class shoulderBird:
         Returns:
             [dict] : {"status": [bool], "response": [list]}
         """
-        logger.debug(f'[START] birdCall : {guild}, {user}, {message}')
+        logger.debug(f"[START] birdCall : {guild}, {user}, {message}")
         # Is the guild configured?
         results = self.getBirds(guild)
-        if not(results["status"]):
-            logger.debug('[FINISH] birdCall : Guild returned no results: '
-                         f'{guild}')
+        if not (results["status"]):
+            logger.debug(
+                "[FINISH] birdCall : Guild returned no results: " f"{guild}"
+            )
             return {"status": False, "Response": []}
         nest = results["response"]
         birdList = []
@@ -278,25 +282,25 @@ class shoulderBird:
                 if user in nest[bird]["ignore"]:
                     continue
                 rx = nest[bird]["regex"]
-                if not(len(rx)):  # Catch for empty regex
+                if not (len(rx)):  # Catch for empty regex
                     continue
-                findRg = re.compile(r'\b{}\b'.format(rx), re.I)
+                findRg = re.compile(r"\b{}\b".format(rx), re.I)
                 found = findRg.search(message)
                 if found:
-                    logger.info(f'Bird found for {bird}')
+                    logger.info(f"Bird found for {bird}")
                     try:
                         birdList.append(int(bird))
                     except ValueError as e:
-                        logger.warning(f'Bad bird: {guild}, {user}, {e}')
+                        logger.warning(f"Bad bird: {guild}, {user}, {e}")
                         continue
         if len(birdList):
-            logger.debug(f'[FINISH] birdCall : {birdList}')
+            logger.debug(f"[FINISH] birdCall : {birdList}")
             return {"status": True, "response": birdList}
-        logger.debug('[FINISH] birdCall : No results')
+        logger.debug("[FINISH] birdCall : No results")
         return {"status": False, "repsonse": []}
 
     def gagBird(self, user: str, target: str) -> dict:
-        """ Toggles a given target for a given guild to be ignored
+        """Toggles a given target for a given guild to be ignored
 
         While logging messages may capture messages from ignored users if
         the logging levels are set low enough, ignored users will not trigger
@@ -312,28 +316,28 @@ class shoulderBird:
         Returns:
             [dict] : {"status": [bool], "response": [str]}
         """
-        logger.debug(f'[START] gagBird : {user}, {target}')
+        logger.debug(f"[START] gagBird : {user}, {target}")
         response = None
         for guild, values in self.sbConfig.items():
             if user in values:
                 # Unignore
-                if target in self.sbConfig[guild][user]['ignore']:
-                    idx = self.sbConfig[guild][user]['ignore'].index(target)
-                    self.sbConfig[guild][user]['ignore'].pop(idx)
+                if target in self.sbConfig[guild][user]["ignore"]:
+                    idx = self.sbConfig[guild][user]["ignore"].index(target)
+                    self.sbConfig[guild][user]["ignore"].pop(idx)
                     response = "User is no longer ignored in all guilds"
                     continue
-                self.sbConfig[guild][user]['ignore'].append(target)
+                self.sbConfig[guild][user]["ignore"].append(target)
                 response = "User is now ignored in all guilds"
-        logger.debug(f'[FINSIH] gagBird : {response}')
+        logger.debug(f"[FINSIH] gagBird : {response}")
         if response is None:
-            return {'status': False, 'response': 'You have no birds to edit'}
-        return {'status': True, 'response': response}
+            return {"status": False, "response": "You have no birds to edit"}
+        return {"status": True, "response": response}
 
     # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
     #              Discord.py hook methods
     # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
     async def onMessage(self, **kwargs) -> bool:
-        """ Hook method to be called from core script on Message event
+        """Hook method to be called from core script on Message event
 
         Keyword Args:
             message [discord.message] : a discord.message class
@@ -342,25 +346,26 @@ class shoulderBird:
         Returns:
             None
         """
-        logger.debug('[START] onMessage : ')
+        logger.debug("[START] onMessage : ")
         Supported_Channels = (
             "<class 'discord.channel.DMChannel'>",
-            "<class 'discord.channel.TextChannel'>")
-        message = kwargs.get('message')
-        client = kwargs.get('client')
+            "<class 'discord.channel.TextChannel'>",
+        )
+        message = kwargs.get("message")
+        client = kwargs.get("client")
 
         if client is None:
             return
 
         if str(type(message.channel)) not in Supported_Channels:
-            logger.debug('[FINISH] onMessage : Channel type not support')
+            logger.debug("[FINISH] onMessage : Channel type not support")
             return
 
         # DM Channel catch
         if str(type(message.channel)) == Supported_Channels[0]:  # DM channel
             # Special case !help command
             if message.clean_content.lower() == "!help":
-                response = 'ShoudlerBird installed: **sb!help** for details'
+                response = "ShoudlerBird installed: **sb!help** for details"
                 await message.author.dm_channel.send(response)
                 return
 
@@ -375,8 +380,11 @@ class shoulderBird:
         # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
         #  ShoulderBird - Alerting for custom search strings
         # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
-        results = self.birdCall(str(message.guild.id), str(message.author.id),
-                                message.clean_content)
+        results = self.birdCall(
+            str(message.guild.id),
+            str(message.author.id),
+            message.clean_content,
+        )
         if results["status"]:
             birds = results["response"]
             for feathers in birds:
@@ -388,36 +396,43 @@ class shoulderBird:
                         snack = m.id
                         break
 
-                logger.debug(f'Anti-snoop: {feathers} - {snack}')
+                logger.debug(f"Anti-snoop: {feathers} - {snack}")
                 if bird and snack:
                     await bird.create_dm()
-                    msg = ''.join([
-                        'Mention alert: **',
-                        str(message.author.display_name),
-                        '** mentioned you in **',
-                        message.channel.name,
-                        '** saying:\n`',
-                        message.clean_content,
-                        '`'])
+                    msg = "".join(
+                        [
+                            "Mention alert: **",
+                            str(message.author.display_name),
+                            "** mentioned you in **",
+                            message.channel.name,
+                            "** saying:\n`",
+                            message.clean_content,
+                            "`",
+                        ]
+                    )
                     await bird.dm_channel.send(msg)
-        logging.debug('[FINISH] onMessage : ')
+        logging.debug("[FINISH] onMessage : ")
         return
 
     def commands(self, message, dClient) -> str:
         """ Process any DM commands sent """
 
         # strip the !trigger word and leading space out of the message
-        cmdTrig = message.clean_content.split(' ')[0].lower()
+        cmdTrig = message.clean_content.split(" ")[0].lower()
 
-        if cmdTrig == 'sb!set':
+        if cmdTrig == "sb!set":
             # sb!set [guild] = [body]
-            if '=' not in message.clean_content:
-                return 'Error: Formatting incorrect. \n' \
-                       '```sb!set [Guild Name or ID] = [regular expression]```'
+            if "=" not in message.clean_content:
+                return (
+                    "Error: Formatting incorrect. \n"
+                    "```sb!set [Guild Name or ID] = [regular expression]```"
+                )
             # We need to pull the [guild] provided and do two things,
             # 1) Confirm bot is in that guild
             # 2) Ensure we are using a guild.id and not a name
-            cmdTarg = message.clean_content.split('=')[0].strip(cmdTrig).strip()  # noqa
+            cmdTarg = (
+                message.clean_content.split("=")[0].strip(cmdTrig).strip()
+            )  # noqa
             guildID = None
             for g in dClient.guilds:
                 # Provided a guild ID
@@ -425,35 +440,37 @@ class shoulderBird:
                     guildID = str(g.id)
                     break
                 # Provided a guild Name
-                if not(eggUtils.isInt(cmdTarg)) and g.name == cmdTarg:
+                if not (eggUtils.isInt(cmdTarg)) and g.name == cmdTarg:
                     guildID = str(g.id)
                     break
             if guildID is None and len(cmdTarg) != 0:
-                return f'Error: I\'m not that guild: {cmdTarg}'
+                return f"Error: I'm not that guild: {cmdTarg}"
 
             result = self.putBird(guildID, message)
             self.saveConfig()
-            return result['response']
+            return result["response"]
 
-        if cmdTrig == 'sb!on':
+        if cmdTrig == "sb!on":
             # Turn on all birds for user
             result = self.toggleBird(str(message.author.id), True)
             self.saveConfig()
-            return result['response']
+            return result["response"]
 
-        if cmdTrig == 'sb!off':
+        if cmdTrig == "sb!off":
             # Turn on all birds for user
             result = self.toggleBird(str(message.author.id), False)
             self.saveConfig()
-            return result['response']
+            return result["response"]
 
-        if cmdTrig == 'sb!ignore':
+        if cmdTrig == "sb!ignore":
             # sb!ignore [name/ID]
             # Confirm if the name/ID is in the guild provided
             cmdBody = message.clean_content.split()[1:][0]
-            if not(cmdBody):
-                return 'Error: Formatting incorrect. \n' \
-                       '```sb!ignore [username or ID to ignore]```'
+            if not (cmdBody):
+                return (
+                    "Error: Formatting incorrect. \n"
+                    "```sb!ignore [username or ID to ignore]```"
+                )
 
             # Find this user ID if available
             # TODO: This will need some improvements for speed
@@ -464,60 +481,65 @@ class shoulderBird:
                     targID = str(user.id)
                     break
                 # Provided a user Name
-                if not(eggUtils.isInt(cmdBody)) and user.name == cmdBody:
+                if not (eggUtils.isInt(cmdBody)) and user.name == cmdBody:
                     targID = str(user.id)
                     break
             if targID is None:
-                return f'Error: Can\'t find {cmdBody}. Be sure you are ' \
-                        'providing either their Username without the #0000 ' \
-                        'or their user ID.'
+                return (
+                    f"Error: Can't find {cmdBody}. Be sure you are "
+                    "providing either their Username without the #0000 "
+                    "or their user ID."
+                )
             result = self.gagBird(str(message.author.id), targID)
             self.saveConfig()
-            return result['response']
+            return result["response"]
 
-        if cmdTrig == 'sb!delete':
+        if cmdTrig == "sb!delete":
             # sb!remove
             result = self.delBird(str(message.author.id))
             self.saveConfig()
-            return result['response']
+            return result["response"]
 
-        if cmdTrig == 'sb!list':
+        if cmdTrig == "sb!list":
             # sb!list
             result = self.listBirds(str(message.author.id))
-            if result['status']:
-                dmmessage = ['List of birds:\n```\n']
-                for bird in result['response']:
+            if result["status"]:
+                dmmessage = ["List of birds:\n```\n"]
+                for bird in result["response"]:
                     guild = dClient.get_guild(int(bird[0]))
-                    guild = guild.name if guild is not None else 'Unknown'
-                    dmmessage.append(f'{guild} : {bird[1]}\n')
-                dmmessage.append('```')
-                return ''.join(dmmessage)
+                    guild = guild.name if guild is not None else "Unknown"
+                    dmmessage.append(f"{guild} : {bird[1]}\n")
+                dmmessage.append("```")
+                return "".join(dmmessage)
             else:
-                return result['response']
+                return result["response"]
 
-        if cmdTrig == 'sb!help':
+        if cmdTrig == "sb!help":
             # sb!help
-            response = 'Command List: *There is no undo button!*\n```' \
-                       '+ sb!list [guild name/ID]\n' \
-                       '\tLists stored searches from all guilds\n' \
-                       '+ sb!on\n' \
-                       '\tTurns ShouldBird on for all guilds you have\n' \
-                       '+ sb!off\n' \
-                       '\tTurns ShouldBird off for all guilds you have\n' \
-                       '+ sb!set [guild name or ID] = [RegEx]\n' \
-                       '\tSets a user\'s RegEx search for given guild\n' \
-                       '\tguild name is case sensitive. If you have dev\n' \
-                       '\tmode on you can provide the guild ID\n' \
-                       '+ sb!ignore [user name (not nickname) or ID]\n' \
-                       '\tToggles a user to be ignored by ShoulderBird\n' \
-                       '\tacross all guilds you have a search in. If they\n' \
-                       '\tare already ignored, they will be unignored\n' \
-                       '\tUser name excludes the #0000 numbers\n' \
-                       '+ sb!delete\n' \
-                       '\tDeletes all your birds. ***There is no undo!***\n' \
-                       '+ sb!help\n' \
-                       '\tDisplays this help box\n```'
+            response = (
+                "Command List: *There is no undo button!*\n```"
+                "+ sb!list [guild name/ID]\n"
+                "\tLists stored searches from all guilds\n"
+                "+ sb!on\n"
+                "\tTurns ShouldBird on for all guilds you have\n"
+                "+ sb!off\n"
+                "\tTurns ShouldBird off for all guilds you have\n"
+                "+ sb!set [guild name or ID] = [RegEx]\n"
+                "\tSets a user's RegEx search for given guild\n"
+                "\tguild name is case sensitive. If you have dev\n"
+                "\tmode on you can provide the guild ID\n"
+                "+ sb!ignore [user name (not nickname) or ID]\n"
+                "\tToggles a user to be ignored by ShoulderBird\n"
+                "\tacross all guilds you have a search in. If they\n"
+                "\tare already ignored, they will be unignored\n"
+                "\tUser name excludes the #0000 numbers\n"
+                "+ sb!delete\n"
+                "\tDeletes all your birds. ***There is no undo!***\n"
+                "+ sb!help\n"
+                "\tDisplays this help box\n```"
+            )
             return response
+
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

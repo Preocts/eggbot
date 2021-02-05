@@ -30,7 +30,7 @@ Only the guild owner can control this module as-is. This is intentional as only 
 
 **guard!allow** [memberID]
 
-- Adds a bot ID to the allow-list which will stop Bot Guard from kicking that bot on join. 
+- Adds a bot ID to the allow-list which will stop Bot Guard from kicking that bot on join.
 - If already listed the ID will be removed.
 - To find the memberID you need to enable Developer Mode in Discord.
   - Open User settings (the gear)
@@ -58,7 +58,7 @@ Only the guild owner can control this module as-is. This is intentional as only 
 
 ## Adding Bot Guard to your Discord.py bot
 
-While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method. 
+While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method.
 
 Installation (assumes you have installed python3+ and discord.py):
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     client.run(discord_token)
 ```
 
-The first time you run this you will seen an error in the logs for a bad/missing configuration. The script is designed to fail gracefully and create everything it needs to run for the guild owner. 
+The first time you run this you will seen an error in the logs for a bad/missing configuration. The script is designed to fail gracefully and create everything it needs to run for the guild owner.
 
 The default config path is ./config/botGuard.json from your working directory.
 

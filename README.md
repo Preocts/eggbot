@@ -3,7 +3,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Build Status](https://travis-ci.org/Preocts/Egg_Bot.svg?branch=main)](https://travis-ci.org/Preocts/Egg_Bot)
 
-Primary Author: Preocts 
+Primary Author: Preocts
 
 Find me on Discord: Preocts#8196  (just mention this repo)
 
@@ -30,11 +30,11 @@ owner_id=[Your Discord ID]
 
 ## Rebuild time
 
-After ten months, 900+ commits, and 25k+ lines of python code I've learned so much more than I ever thought I would. Thanks 2020. 
+After ten months, 900+ commits, and 25k+ lines of python code I've learned so much more than I ever thought I would. Thanks 2020.
 
 Egg_bot has some great potential and now I feel up to delivering on it.
 
-We start again! Back to the old road! 
+We start again! Back to the old road!
 
 ---
 
@@ -42,7 +42,7 @@ We start again! Back to the old road!
 
 Check the [CHANGELOG](CHANGELOG.md) for more details
 
-### Working on it - 
+### Working on it -
 
 - Standing egg_bot.py back up after tearing all the structure down
 - Dynamic module loading through decorator
@@ -82,7 +82,7 @@ It is highly recommended to always use a virtual environment when working with P
 python3.8 -m venv venv
 ```
 
-### Activate the `venv`. 
+### Activate the `venv`.
 
 **Linux/Mac**:
 ```bash

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 
@@ -12,4 +13,4 @@ def isInt(checkvalue) -> bool:
 def abs_path(filepath: str) -> str:
     """ Returns path of given __file__ """
     dirpath = os.path.sep.join(filepath.split(os.path.sep)[:-1])
-    return dirpath if dirpath else '.'
+    return dirpath if dirpath else "."

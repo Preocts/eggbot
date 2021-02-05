@@ -10,8 +10,8 @@
 [_] Add unit tests to mock failed file reads in core_entites
 [_] Queue for event actions
 [_] Replace os with Pathlib
-[_] Version bumping script to capture updates 
-    - setup.py 
+[_] Version bumping script to capture updates
+    - setup.py
     -./config/eggbot_core.json
 [_] README.md for configuration folder
 [_] Load/Save configuration should raise if error
@@ -51,7 +51,7 @@ Acceptance Criteria:
 
 2020-11-27 Configuration location:
 
-Configuration files are currently nested in with the module directories. 
+Configuration files are currently nested in with the module directories.
 These should be at the top level of the project. This will provide
 
 - Visibility

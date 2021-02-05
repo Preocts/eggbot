@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from eggbot import eggbot_core as ec
-from eggbot.core_entities import CoreConfig
+from eggbot.core_entities import coreConfig
 
 
 def run_loop(func, *args, **kwargs):
@@ -19,13 +19,13 @@ class TestEggbotCore(unittest.TestCase):
         """ These need to exist """
         self.assertIsInstance(ec.logger, ec.logging.Logger)
         self.assertIsInstance(ec.discord_client, ec.discord.client.Client)
-        self.assertIsInstance(ec.event_subs, ec.EventSub)
+        self.assertIsInstance(ec.EVENTSUBS, ec.EventSub)
 
     def test_config_load(self):
         self.assertTrue(ec.load_config())
-        config = CoreConfig.get_instance()
+        config = coreConfig()
         config.unload()
-        with patch.object(CoreConfig, "load", return_value=None):
+        with patch.object(coreConfig, "load", return_value=None):
             self.assertFalse(ec.load_config())
 
     @patch("eggbot.eggbot_core.discord_client")
@@ -84,8 +84,8 @@ class TestEggbotCore(unittest.TestCase):
         """ Make sure join calls the "on_join" sub list """
         _join_sub_01 = unittest.mock.Mock()
         _join_sub_02 = unittest.mock.Mock()
-        ec.event_subs.sub_create(_join_sub_01, "on_join")
-        ec.event_subs.sub_create(_join_sub_02, "on_join")
+        ec.EVENTSUBS.sub_create(_join_sub_01, "on_join")
+        ec.EVENTSUBS.sub_create(_join_sub_02, "on_join")
 
         mock_member = unittest.mock.Mock()
         mock_member.id = "987654321"
@@ -102,8 +102,8 @@ class TestEggbotCore(unittest.TestCase):
         """ Make sure messages call the "on_message" sub list """
         message_sub_01 = unittest.mock.Mock()
         message_sub_02 = unittest.mock.Mock()
-        ec.event_subs.sub_create(message_sub_01, "on_message")
-        ec.event_subs.sub_create(message_sub_02, "on_message")
+        ec.EVENTSUBS.sub_create(message_sub_01, "on_message")
+        ec.EVENTSUBS.sub_create(message_sub_02, "on_message")
 
         mock_message = unittest.mock.Mock()
         mock_message.author.id = "987654321"

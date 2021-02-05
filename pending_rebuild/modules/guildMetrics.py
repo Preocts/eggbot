@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Collect and process select metrics of a guild
 
     Created by Preocts
@@ -28,14 +29,14 @@ class guildMetrics:
     instCount = 0
 
     def __init__(self):
-        logger.info('Initialize guildMetrics')
+        logger.info("Initialize guildMetrics")
         self.gmConfig = {}
         self.activeConfig = None
         self.saveRate = 60
         self.lastSave = time.time()
         self.loadConfig()
         guildMetrics.instCount += 1
-        logger.info(f'Config loaded with {len(self.gmConfig)} records.')
+        logger.info(f"Config loaded with {len(self.gmConfig)} records.")
         return
 
     def __str__(self):
@@ -58,10 +59,7 @@ class guildMetrics:
         """ Creates a system record if it does not exist in the config """
         if "SYS-Rec" in self.gmConfig.keys():
             return True
-        sysSchema = {
-            'optoutGuilds': [],
-            'optoutUsers': []
-        }
+        sysSchema = {"optoutGuilds": [], "optoutUsers": []}
         self.gmConfig["SYS-Rec"] = sysSchema
         self.gmConfig["guilds"] = {}
         return True
@@ -71,9 +69,11 @@ class guildMetrics:
         if guildID in self.gmConfig["guilds"].keys():
             return True
         guildSchema = {
-            'guildNames': [guildName, ],
-            'entryMade': time.strftime('%j|%Y-%m-%d|%H.%M.%S|%z'),
-            'members': {}
+            "guildNames": [
+                guildName,
+            ],
+            "entryMade": time.strftime("%j|%Y-%m-%d|%H.%M.%S|%z"),
+            "members": {},
         }
         self.gmConfig["guilds"][guildID] = guildSchema
         return True
@@ -84,41 +84,50 @@ class guildMetrics:
             return True
         hours = [0] * 24
         userSchema = {
-            'userNames': [userName, ],
-            'userNicks': [],
-            'entryMade': time.strftime('%j|%Y-%m-%d|%H.%M.%S|%z'),
-            'messageCounters': [0, 0, 0],
-            'lastSeen': time.strftime('%j|%Y-%m-%d|%H.%M.%S|%z'),
-            'hours': hours
+            "userNames": [
+                userName,
+            ],
+            "userNicks": [],
+            "entryMade": time.strftime("%j|%Y-%m-%d|%H.%M.%S|%z"),
+            "messageCounters": [0, 0, 0],
+            "lastSeen": time.strftime("%j|%Y-%m-%d|%H.%M.%S|%z"),
+            "hours": hours,
         }
         self.gmConfig["guilds"][guildID]["members"][userID] = userSchema
         return True
 
-    def logit(self, guildID: str, guildName: str, userID: str,
-              userName: str, userNick: str, content: str) -> bool:
-        """ Processes a messasge and stores all the data for the Egg
+    def logit(
+        self,
+        guildID: str,
+        guildName: str,
+        userID: str,
+        userName: str,
+        userNick: str,
+        content: str,
+    ) -> bool:
+        """Processes a messasge and stores all the data for the Egg
 
-            *insert big-brother references here*
+        *insert big-brother references here*
         """
         self.checkSys()
         if guildID in self.gmConfig["SYS-Rec"]["optoutGuilds"]:
-            logger.debug(f'{guildID} is on the optout list')
+            logger.debug(f"{guildID} is on the optout list")
             return False
         if userID in self.gmConfig["SYS-Rec"]["optoutUsers"]:
-            logger.debug(f'{userID} is on the output list')
+            logger.debug(f"{userID} is on the output list")
             return False
         self.checkGuild(guildID, guildName)
         self.checkUser(guildID, userID, userName)
         user = self.gmConfig["guilds"][guildID]["members"][userID]
-        nowTime = time.strftime('%j|%Y-%m-%d|%H.%M.%S|%z')
-        if not(userName in user["userNames"]):
+        nowTime = time.strftime("%j|%Y-%m-%d|%H.%M.%S|%z")
+        if not (userName in user["userNames"]):
             user["userNames"].append(userName)
-        if not(userNick in user["userNicks"]):
+        if not (userNick in user["userNicks"]):
             user["userNicks"].append(userNick)
         user["lastSeen"] = nowTime
-        user["hours"][int(time.strftime('%H'))] += 1
+        user["hours"][int(time.strftime("%H"))] += 1
         user["messageCounters"][0] += 1
-        user["messageCounters"][1] += len(content.split(' '))
+        user["messageCounters"][1] += len(content.split(" "))
         if len(content):
             if content[-1] == ".":
                 user["messageCounters"][2] += 1
@@ -130,15 +139,15 @@ class guildMetrics:
 
     def loadConfig(self) -> None:
         """ Load a config into the class """
-        file_ = eggUtils.abs_path(__file__) + '/config/guildMetrics.json'
+        file_ = eggUtils.abs_path(__file__) + "/config/guildMetrics.json"
         json_file = {}
         try:
-            with open(file_, 'r') as load_file:
+            with open(file_, "r") as load_file:
                 json_file = json.load(load_file)
         except json.decoder.JSONDecodeError:
-            logger.error('Config file empty or bad format. ', exc_info=True)
+            logger.error("Config file empty or bad format. ", exc_info=True)
         except FileNotFoundError:
-            logger.error(f'Config file not found: {file_}', exc_info=True)
+            logger.error(f"Config file not found: {file_}", exc_info=True)
 
         self.gmConfig = json_file
         self.activeConfig = file_
@@ -146,14 +155,14 @@ class guildMetrics:
 
     def saveConfig(self) -> bool:
         """ Save a config into the class """
-        file_ = eggUtils.abs_path(__file__) + '/config/guildMetrics.json'
-        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        file_ = eggUtils.abs_path(__file__) + "/config/guildMetrics.json"
+        path = pathlib.Path("/".join(file_.split("/")[:-1]))
         path.mkdir(parents=True, exist_ok=True)
         try:
-            with open(file_, 'w') as save_file:
+            with open(file_, "w") as save_file:
                 save_file.write(json.dumps(self.gmConfig, indent=4))
         except OSError:
-            logger.error(f'File not be saved: {file_}', exc_info=True)
+            logger.error(f"File not be saved: {file_}", exc_info=True)
         return
 
     async def onMessage(self, **kwargs) -> bool:
@@ -170,17 +179,23 @@ class guildMetrics:
         Raises:
             None
         """
-        chtype = kwargs.get('chtype')
-        message = kwargs.get('message')
+        chtype = kwargs.get("chtype")
+        message = kwargs.get("message")
 
         if chtype != "text":
             return True
 
         # The egg watches. The egg knows.
-        self.logit(str(message.guild.id), message.guild.name,
-                   str(message.author.id), message.author.name,
-                   message.author.display_name, message.clean_content)
+        self.logit(
+            str(message.guild.id),
+            message.guild.name,
+            str(message.author.id),
+            message.author.name,
+            message.author.display_name,
+            message.clean_content,
+        )
         return True
+
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

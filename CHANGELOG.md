@@ -71,7 +71,7 @@ Types of changes
 ### Changed
 
 - Structure, Directory restructure
-- README, Enviromental variable references 
+- README, Enviromental variable references
 
 ## [0.0.1-alpha] - 2020-11-26
 

@@ -23,23 +23,17 @@ logger = logging.getLogger(__name__)
 dotenv.load_dotenv()
 
 
-class CoreConfig:
+class coreConfigSingleton(object):
+    _instance: Optional[coreConfig] = None
+
+    def __new__(cls) -> coreConfig:
+        if not isinstance(cls._instance, cls):
+            cls._instance = object.__new__(cls)
+        return cls._instance
+
+
+class coreConfig(coreConfigSingleton):
     """ Core configuration handler, singleton class """
-
-    __core_config: Optional[CoreConfig] = None
-
-    def __call__(cls) -> Optional[CoreConfig]:
-        """ Override init to create singleton """
-        if not cls.__core_config:
-            cls.__core_config = super().__init__()
-        return cls.__core_config
-
-    # @classmethod
-    # def get_instance(cls) -> Optional[CoreConfig]:
-    #     """ Get instance of singleton class """
-    #     if not cls.__core_config:
-    #         CoreConfig()
-    #     return cls.__core_config
 
     def __init__(self):
         self.__abs_path = f"{os.path.sep}".join(
@@ -47,7 +41,6 @@ class CoreConfig:
         )
         self.__cwd = os.getcwd()
         self.__config = {}
-        CoreConfig.__core_config = self
 
     @property
     def abs_path(self) -> str:

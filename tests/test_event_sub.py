@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Egg Bot, Discord Modular Bot
 
 Author  : Preocts, preocts@preocts.com
