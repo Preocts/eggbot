@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Egg Bot, Discord Modular Bot
 
 Author  : Preocts, preocts@preocts.com
@@ -56,9 +57,6 @@ class TestEventSub(unittest.TestCase):
         self.assertFalse(spub.sub_create(_outputter, "messages"))
         self.assertEqual(spub.sub_list(_outputter), ("messages",))
         self.assertEqual(spub.event_list("messages"), (_outputter,))
-
-        # Create a sub to a non-callable and check we fail
-        self.assertFalse(spub.sub_create("Hello World", "message"))
 
         # Create an empty event
         self.assertTrue(spub.event_create("testing"))

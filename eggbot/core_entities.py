@@ -1,15 +1,19 @@
+# -*- coding: utf-8 -*-
 """ Entity objects for the core bot
 
 Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+from __future__ import annotations
+
 import json
 import os
 import logging
 import pathlib
 
 from typing import Any
+from typing import Optional
 from typing import Callable
 
 import dotenv
@@ -19,12 +23,21 @@ logger = logging.getLogger(__name__)
 dotenv.load_dotenv()
 
 
-class CoreConfig(object):
-    """ Core configuration handler """
+class coreConfigSingleton(object):
+    _instance: Optional[coreConfig] = None
 
-    def __init__(self, **kwargs):
+    def __new__(cls) -> coreConfig:
+        if not isinstance(cls._instance, cls):
+            cls._instance = object.__new__(cls)
+        return cls._instance
+
+
+class coreConfig(coreConfigSingleton):
+    """ Core configuration handler, singleton class """
+
+    def __init__(self):
         self.__abs_path = f"{os.path.sep}".join(
-            __file__.split(os.path.sep)[0:-1]
+            __file__.split(os.path.sep)[0:-2]
         )
         self.__cwd = os.getcwd()
         self.__config = {}
@@ -57,7 +70,7 @@ class CoreConfig(object):
         """
         self.__config = {}
         rel_path = pathlib.Path(self.cwd).joinpath(filepath)
-        path = filepath if abs_path else rel_path.resolve()
+        path = filepath if abs_path else str(rel_path.resolve())
 
         try:
             with open(path, "r") as input_file:
@@ -100,7 +113,7 @@ class CoreConfig(object):
                 relative to this module
         """
         rel_path = pathlib.Path(self.cwd).joinpath(filepath)
-        path = filepath if abs_path else rel_path.resolve()
+        path = filepath if abs_path else str(rel_path.resolve())
         try:
             with open(path, "w") as out_file:
                 out_file.write(json.dumps(self.__config, indent=4))
@@ -109,6 +122,10 @@ class CoreConfig(object):
             logger.error("", exc_info=True)
             return False
         return True
+
+    def unload(self) -> None:
+        """ Unloads config without saving """
+        self.__config = {}
 
     def read(self, key: str) -> Any:
         """ Reads values by key from config. Returns None if not exists """
@@ -164,10 +181,6 @@ class EventSub(object):
         Returns:
             Bool - False if failed to create (check logs)
         """
-        if not isinstance(target, Callable):
-            logger.error(f".sub(), [target] is not callable: {type(target)}")
-            return False
-
         if not self._pubsub.get(event):
             self._pubsub[event] = set()  # Ensure we have a key
 
@@ -179,7 +192,7 @@ class EventSub(object):
 
         return True
 
-    def sub_delete(self, target: callable, event: str) -> bool:
+    def sub_delete(self, target: Callable, event: str) -> bool:
         """Unsubscribe a target from an event
 
         Args:
@@ -201,7 +214,7 @@ class EventSub(object):
 
         return True
 
-    def sub_wipe(self, target: callable) -> bool:
+    def sub_wipe(self, target: Callable) -> bool:
         """Removes target from all subscriptions
 
         Args:
@@ -217,7 +230,7 @@ class EventSub(object):
 
         return True
 
-    def sub_list(self, target: callable) -> tuple:
+    def sub_list(self, target: Callable) -> tuple:
         """ Returns a list of events that target is subbed to """
         sub_list = []
         for event in self.event_list_all():

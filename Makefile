@@ -29,7 +29,7 @@ clean-test: ## Remove test artifacts
 	find . -name '.pytest_cache' -exec rm -fr {} +
 
 tests: ## Run all tests found in the /tests directory.
-	coverage run -m pytest tests/
+	coverage run -m pytest -v tests/
 	coverage report --include "*/eggbot/*" --show-missing
 
 package: clean-build ## Creates a package for testing

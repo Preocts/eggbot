@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Fun things that happen when everyone gets involved
 
     Created by Preocts
@@ -28,14 +29,14 @@ class typingReact:
     instCount = 0
 
     def __init__(self):
-        logger.info('Initialize typingReact')
+        logger.info("Initialize typingReact")
         self.trConfig = {}
         self.activeConfig = None
         self.tracktyping = []
         self.loadConfig()
         self.lastin = 0
         typingReact.instCount += 1
-        logger.info('Config loaded.')
+        logger.info("Config loaded.")
         return
 
     def __str__(self):
@@ -60,7 +61,7 @@ class typingReact:
             return True
         sysSchema = {
             "SYS-Rec": {
-                'optoutGuilds': [],
+                "optoutGuilds": [],
             }
         }
         self.trConfig = sysSchema
@@ -77,38 +78,38 @@ class typingReact:
                 {
                     "peak": 5,
                     "msg": "**SEVERAL PEOPLE ARE TYPING** :eyes:",
-                    "lastran": 0
+                    "lastran": 0,
                 },
                 {
                     "peak": 10,
                     "msg": "*begins to sweat, inches toward the door*",
-                    "lastran": 0
+                    "lastran": 0,
                 },
                 {
                     "peak": 15,
                     "msg": ":crystal_ball: Will I survive this?",
-                    "lastran": 0
+                    "lastran": 0,
                 },
                 {
                     "peak": 20,
                     "msg": "*packs its bags, heads for the door*\nI'm not paid enough for this.",  # noqa E501
-                    "lastran": 0
-                }
+                    "lastran": 0,
+                },
             ],
         }
         return True
 
     def loadConfig(self) -> None:
         """ Load a config into the class """
-        file_ = eggUtils.abs_path(__file__) + '/config/typingReact.json'
+        file_ = eggUtils.abs_path(__file__) + "/config/typingReact.json"
         json_file = {}
         try:
-            with open(file_, 'r') as load_file:
+            with open(file_, "r") as load_file:
                 json_file = json.load(load_file)
         except json.decoder.JSONDecodeError:
-            logger.error('Config file empty or bad format. ', exc_info=True)
+            logger.error("Config file empty or bad format. ", exc_info=True)
         except FileNotFoundError:
-            logger.error(f'Config file not found: {file_}', exc_info=True)
+            logger.error(f"Config file not found: {file_}", exc_info=True)
 
         self.trConfig = json_file
         self.activeConfig = file_
@@ -116,14 +117,14 @@ class typingReact:
 
     def saveConfig(self) -> bool:
         """ Save a config into the class """
-        file_ = eggUtils.abs_path(__file__) + '/config/typingReact.json'
-        path = pathlib.Path('/'.join(file_.split('/')[:-1]))
+        file_ = eggUtils.abs_path(__file__) + "/config/typingReact.json"
+        path = pathlib.Path("/".join(file_.split("/")[:-1]))
         path.mkdir(parents=True, exist_ok=True)
         try:
-            with open(file_, 'w') as save_file:
+            with open(file_, "w") as save_file:
                 save_file.write(json.dumps(self.trConfig, indent=4))
         except OSError:
-            logger.error(f'File not be saved: {file_}', exc_info=True)
+            logger.error(f"File not be saved: {file_}", exc_info=True)
         return
 
     async def onMessage(self, **kwargs):
@@ -131,7 +132,7 @@ class typingReact:
         pass
 
     async def onTyping(self, **kwargs):
-        """ Hook to discord.on_typing event called from core script
+        """Hook to discord.on_typing event called from core script
 
         Uses the number of people typing to trigger a possible message from
         the bot back into the channel. Highest peak is used, cooldown is
@@ -142,29 +143,31 @@ class typingReact:
             user(object): discord.user object
             when(datetime): When the event was triggered UTC
         """
-        channel = kwargs.get('channel')
-        user = kwargs.get('user')
+        channel = kwargs.get("channel")
+        user = kwargs.get("user")
         # when = kwargs.get('when')
 
         if self.lastin:
-            logger.debug(f'Last in: {time.time() - self.lastin}')
+            logger.debug(f"Last in: {time.time() - self.lastin}")
         self.lastin = time.time()
 
         if channel.guild is None:
             return
-        if channel.guild.id in self.trConfig['SYS-Rec']['optoutGuilds']:
+        if channel.guild.id in self.trConfig["SYS-Rec"]["optoutGuilds"]:
             return
-        logger.debug(f'Typing: {user.name}')
+        logger.debug(f"Typing: {user.name}")
 
         self.checkGuild(str(channel.guild.id))
         self._cleanup()
-        qsearch = [u for u in self.tracktyping
-                   if u[0] == user.id and u[2] == channel.id]
-        if not(qsearch):
-            self.tracktyping.append(
-                (user.id, round(time.time()), channel.id))
+        qsearch = [
+            u
+            for u in self.tracktyping
+            if u[0] == user.id and u[2] == channel.id
+        ]
+        if not (qsearch):
+            self.tracktyping.append((user.id, round(time.time()), channel.id))
 
-        cooldown = self.trConfig[str(channel.guild.id)].get('cooldown', 86400)
+        cooldown = self.trConfig[str(channel.guild.id)].get("cooldown", 86400)
         channels = {}
         # Get unique channels with how many active typing
         # This is such a hack.  I love it. <3
@@ -172,20 +175,26 @@ class typingReact:
         for tt in self.tracktyping:
             channels[tt[2]] = channels.get(tt[2], 0) + 1
 
-        logger.debug(f'Channels: {channels}')
-        for pile in self.trConfig[str(channel.guild.id)].get('piles', []):
+        logger.debug(f"Channels: {channels}")
+        for pile in self.trConfig[str(channel.guild.id)].get("piles", []):
             for ch in channels:
-                if channels[ch] >= pile.get('peak', 999):
-                    elap = time.time() - pile.get('lastran', 0)
+                if channels[ch] >= pile.get("peak", 999):
+                    elap = time.time() - pile.get("lastran", 0)
                     if elap > cooldown:
-                        pile['lastran'] = round(time.time())
+                        pile["lastran"] = round(time.time())
                         # Is it safe to assume that the person who typed
                         # and triggered this is in the guild/channel we
                         # care about?  I think it is.
-                        deets = (channel.guild.id, channel.id, channel.name,
-                                 user.id, user.name, pile.get('msg', ''))
-                        logging.info(f'Reacting to a lot of typing: {deets}')
-                        await channel.send(pile.get('msg', ''))
+                        deets = (
+                            channel.guild.id,
+                            channel.id,
+                            channel.name,
+                            user.id,
+                            user.name,
+                            pile.get("msg", ""),
+                        )
+                        logging.info(f"Reacting to a lot of typing: {deets}")
+                        await channel.send(pile.get("msg", ""))
         return
 
     def _cleanup(self):
@@ -198,6 +207,7 @@ class typingReact:
             newlist.append((uid, tic, channel))
         self.tracktyping = newlist
         return
+
 
 # May Bartmoss have mercy on your data for running this bot.
 # We are all only eggs

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Helper module containing useful tools for addon modules
 
 Author  : Preocts, preocts@preocts.com
@@ -28,7 +29,7 @@ class EggModuleException(Exception):
 
 @logdec.debug_log
 def loadjson(filepath: str) -> dict:
-    """ Loads a json file from given path and returns a dict
+    """Loads a json file from given path and returns a dict
 
     Please keep in mind the filepath is relative to the location of where
     eggbot.py is executed, not the path where the module resides.
@@ -44,24 +45,24 @@ def loadjson(filepath: str) -> dict:
     if not file_check.is_file():
         return {}
 
-    json_file = {'loadfail': True}
+    json_file = {"loadfail": True}
 
     try:
-        with open(filepath, 'r') as load_file:
+        with open(filepath, "r") as load_file:
             json_file = json.load(load_file)
     except json.decoder.JSONDecodeError:
-        logger.error('Config file empty or bad format. ', exc_info=True)
+        logger.error("Config file empty or bad format. ", exc_info=True)
     except FileNotFoundError:
-        logger.error(f'Config file not found: {filepath}', exc_info=True)
+        logger.error(f"Config file not found: {filepath}", exc_info=True)
     except Exception:
-        logger.error(f'Unexpected error loading: {filepath}', exc_info=True)
+        logger.error(f"Unexpected error loading: {filepath}", exc_info=True)
 
     return json_file
 
 
 @logdec.debug_log
 def savejson(filepath: str, dict_: dict, formatted: bool = True) -> bool:
-    """ Saves a json file to the given path and returns a bool
+    """Saves a json file to the given path and returns a bool
 
     Please keep in mind the filepath is relative to the location of where
     eggbot.py is executed, not the path where the module resides.
@@ -74,14 +75,14 @@ def savejson(filepath: str, dict_: dict, formatted: bool = True) -> bool:
     """
     saved = True
     sep = os.path.sep
-    path = pathlib.Path(f'{sep}'.join(filepath.split(sep)[:-1]))
+    path = pathlib.Path(f"{sep}".join(filepath.split(sep)[:-1]))
     path.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(filepath, 'w') as save_file:
+        with open(filepath, "w") as save_file:
             save_file.write(json.dumps(dict_, indent=4))
     except (OSError, Exception):
-        logger.error(f'File not be saved: {filepath}', exc_info=True)
+        logger.error(f"File not be saved: {filepath}", exc_info=True)
         saved = False
 
     return saved

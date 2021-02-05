@@ -85,7 +85,7 @@ The mention can be located anywhere in the chat mention. The "+" and "-" need to
 
 ## Adding Kudos to your Discord.py bot
 
-While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method. 
+While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method.
 
 Installation (assumes you have installed python3+ and discord.py):
 

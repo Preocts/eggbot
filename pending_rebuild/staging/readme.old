@@ -15,9 +15,9 @@ Preocts#8196 Discord | [Github](https://github.com/Preocts/Egg_Bot)
 
 ## Customizable Discord Chat Bot
 
-The idea behind Egg_Bot's core code is to have a very slim script that is powered by Discord.py but can be enhanced with modules. The script will attempt to auto-load any .py file found in the ./modules path and integrate configured events for that module. 
+The idea behind Egg_Bot's core code is to have a very slim script that is powered by Discord.py but can be enhanced with modules. The script will attempt to auto-load any .py file found in the ./modules path and integrate configured events for that module.
 
-Each module, in a sense, is its own bot responding to the event feed from the core script. 
+Each module, in a sense, is its own bot responding to the event feed from the core script.
 
 What started as a simple way to send a welcome message when a new user joined a guild, Egg Bot has expanded to include:
 

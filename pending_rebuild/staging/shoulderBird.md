@@ -4,7 +4,7 @@
 
 Shoulder Bird is the answer to "Can I get a ping when someone says [whatever] in the chat so that I'm aware?  The answer, my friends, is yes. Yes you can.
 
-Shoulder Bird works on a regex engine that scans all chat that the bot can see for anything that matches the regex expression defined per user. A user, through DM command line option, can set their own regex expression for any guild that the bot is active in.  Once set, the bot will check that regex against any on_message events seen in the guild. 
+Shoulder Bird works on a regex engine that scans all chat that the bot can see for anything that matches the regex expression defined per user. A user, through DM command line option, can set their own regex expression for any guild that the bot is active in.  Once set, the bot will check that regex against any on_message events seen in the guild.
 
 Fair warning, I'm aware that this might not scale gracefully. This was designed for a single guild with what I would call a slow chat input. How this will handle even a dozen guilds with mild to moderate chat activity is beyond my testing ability at this time.
 
@@ -70,7 +70,7 @@ You can get as complex with regex as you like. There are many tools out there to
 
 ## Adding Shoulder Bird to your Discord.py bot
 
-While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method. 
+While created for my own egg_bot system, this module is designed to be added to any Discord bot code that is running off the discord.py library. The class needs to be initialized and then you simply pass the discord.message to the .onMessage() method.
 
 Installation (assumes you have installed python3+ and discord.py):
 
