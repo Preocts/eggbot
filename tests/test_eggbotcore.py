@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Testing suite """
+import os
+import shutil
 import asyncio
 import unittest
 from unittest.mock import patch
@@ -30,6 +32,21 @@ class TestEggbotCore(unittest.TestCase):
         self.assertTrue(ec.load_config())
         with patch.object(ec.coreConfig, "load", return_value=False):
             self.assertFalse(ec.load_config())
+
+    def test_load_modules(self):
+        """ Pass/Fail loading modules """
+        self.assertTrue(ec.load_modules())
+        shutil.move("./modules", "./modules_test")
+        try:
+            self.assertFalse(ec.load_modules())
+        finally:
+            shutil.move("./modules_test", "./modules")
+        shutil.copy("./tests/fixtures/mock_module.py", "./modules/module_mock.py")
+        try:
+            with self.assertRaises(Exception):
+                ec.load_modules()
+        finally:
+            os.remove("./modules/module_mock.py")
 
     @patch("eggbot.eggbotcore.discord_client")
     def test_main(self, mock_client):
