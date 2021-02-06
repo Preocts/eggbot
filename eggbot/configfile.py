@@ -14,9 +14,10 @@ from typing import Optional
 from eggbot.utils.configio import ConfigIO
 
 
-class ConfigFile(ConfigIO):
+class ConfigFile:
     """ Core configuration handler """
 
+    configClient: ConfigIO = ConfigIO()
     logger = logging.getLogger(__name__)
 
     def __init__(self, filename: Optional[str] = None) -> None:
@@ -28,19 +29,31 @@ class ConfigFile(ConfigIO):
         Args:
             filename : Path and name of the JSON config file
         """
-        super().__init__()
         self.filename: Optional[str] = filename
+        self.__config: dict = {}
         self.load(filename)
 
+    @property
+    def config(self) -> dict:
+        """ Return copy of configuration dictionary """
+        return dict(self.__config)
+
+    def unload(self) -> None:
+        """ Unloads config without saving """
+        self.__config = {}
+
     def load(self, filename: Optional[str] = None) -> bool:
+        """ Load config. Uses prior loaded file if none provided """
         if filename:
             self.filename = filename
-        return super().load(self.filename)
+        self.__config = self.configClient.load(self.filename)
+        return bool(self.__config)
 
     def save(self, filename: Optional[str] = None) -> bool:
+        """ Save config. Uses prior loaded file if none provided """
         if filename:
             self.filename = filename
-        return super().save(self.filename)
+        return self.configClient.save(self.__config, self.filename)
 
     def read(self, key: str) -> Any:
         """ Reads values by key from config. Returns None if not exists """
