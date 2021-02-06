@@ -3,5 +3,4 @@ pytest
 coverage
 black
 pylint
-flake8
 mypy

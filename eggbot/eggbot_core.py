@@ -1,40 +1,39 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """ Egg Bot, Discord Modular Bot
 
-Author  : Preocts, preocts@preocts.com
+Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import os
 import logging
 
-import discord
+import discord  # type: ignore
 
-from eggbot.core_entities import coreConfig
-from eggbot.core_entities import EventSub
+from eggbot.configfile import ConfigFile
+from eggbot.eventsub import EventSub
 
 
-EVENTSUBS = EventSub()
 DISCORD_TOKEN = os.environ.get("discord_api_key")
 logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
 intents.members = True
 discord_client = discord.Client(status="online", intents=intents)
+eventSubs = EventSub()
+coreConfig = ConfigFile()
 
 
 def load_config() -> bool:
     """ Load configuration """
-    eggbot_config = coreConfig()
     logger.info("Opening configuration...")
-    eggbot_config.load()
-    if not eggbot_config.config:
+    coreConfig.load("./config/eggbot_core.json")
+    if not coreConfig.config:
         logger.warning("Configuration not found!")
         # TODO: Add method to pull file path for output
         return False
-    logger.info(
-        "Configuration file loaded with %d keys.", len(eggbot_config.config)
-    )
+    logger.info("Configuration file loaded with %d keys.", len(coreConfig.config))
     return True
 
 
@@ -47,10 +46,8 @@ async def on_member_join(member) -> bool:
     if member.bot:
         logger.info("on_member_join(), Bot join detected, ignoring.")
         return False
-
-    for subbed in EVENTSUBS.event_list("on_join"):
+    for subbed in eventSubs.event_list("on_join"):
         subbed(member)
-
     return True
 
 
@@ -60,14 +57,11 @@ async def on_message(message) -> bool:
     if message.author.id == discord_client.user.id:
         logger.debug("on_message(), Ignoring ourselves.")
         return False
-
     if message.author.bot:
         logger.info("on_message(), Bot chat, ignoring.")
         return False
-
-    for subbed in EVENTSUBS.event_list("on_message"):
+    for subbed in eventSubs.event_list("on_message"):
         subbed(message)
-
     return True
 
 
