@@ -45,7 +45,7 @@ class ConfigIO:
             return False
         try:
             with open(filename, "w", encoding="UTF-8") as out_file:
-                out_file.write(json.dumps(config, indent=4))
+                out_file.write(json.dumps(config, indent=4) + "\n")
         except OSError as err:
             self.logger.error(".save() Cannot save core config: %s", err)
             self.logger.error("", exc_info=True)

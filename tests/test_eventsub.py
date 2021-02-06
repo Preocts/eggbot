@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Egg Bot, Discord Modular Bot
+""" Unit Tests
 
 Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
@@ -8,17 +8,17 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 import logging
 import unittest
 
-
-from eggbot import core_entities as ce
+from eggbot.eventsub import EventSub
 
 
 logger = logging.getLogger(__name__)
 
 
 class TestEventSub(unittest.TestCase):
-    """ Runs tests against the object of EventSub and children """
+    """ Test Suite """
 
     def test_object_methods(self):
+        """ Ensure expected attributes """
         expected_methods = [
             "sub_create",
             "sub_delete",
@@ -29,12 +29,12 @@ class TestEventSub(unittest.TestCase):
             "event_list",
             "event_list_all",
         ]
-        eventSubs = ce.EventSub()
+        eventsubs = EventSub()
         test_pass = True
 
         for method in expected_methods:
-            if not hasattr(eventSubs, method):
-                logger.error(f"[UNITTEST] Failed finding {method}")
+            if not hasattr(eventsubs, method):
+                logger.error("[UNITTEST] Failed finding %s", method)
                 test_pass = False
         self.assertTrue(test_pass)
 
@@ -44,25 +44,25 @@ class TestEventSub(unittest.TestCase):
         def _outputter(_input):
             return _input
 
-        spub = ce.EventSub()
+        eventsubs = EventSub()
 
         # Empty object, no subs / events
-        self.assertIsInstance(spub.sub_list(_outputter), tuple)
-        self.assertIsInstance(spub.event_list_all(), tuple)
-        self.assertEqual(spub.sub_list(_outputter), ())
-        self.assertEqual(spub.event_list_all(), ())
+        self.assertIsInstance(eventsubs.sub_list(_outputter), tuple)
+        self.assertIsInstance(eventsubs.event_list_all(), tuple)
+        self.assertEqual(eventsubs.sub_list(_outputter), ())
+        self.assertEqual(eventsubs.event_list_all(), ())
 
         # Create a sub, and an event by doing so
-        self.assertTrue(spub.sub_create(_outputter, "messages"))
-        self.assertFalse(spub.sub_create(_outputter, "messages"))
-        self.assertEqual(spub.sub_list(_outputter), ("messages",))
-        self.assertEqual(spub.event_list("messages"), (_outputter,))
+        self.assertTrue(eventsubs.sub_create(_outputter, "messages"))
+        self.assertFalse(eventsubs.sub_create(_outputter, "messages"))
+        self.assertEqual(eventsubs.sub_list(_outputter), ("messages",))
+        self.assertEqual(eventsubs.event_list("messages"), (_outputter,))
 
         # Create an empty event
-        self.assertTrue(spub.event_create("testing"))
-        self.assertFalse(spub.event_create("testing"))
+        self.assertTrue(eventsubs.event_create("testing"))
+        self.assertFalse(eventsubs.event_create("testing"))
         self.assertEqual(
-            spub.event_list_all(),
+            eventsubs.event_list_all(),
             (
                 "messages",
                 "testing",
@@ -70,15 +70,15 @@ class TestEventSub(unittest.TestCase):
         )
 
         # Ensure callable is, in fact, callable
-        self.assertEqual(spub.event_list("messages")[0](1), 1)
+        self.assertEqual(eventsubs.event_list("messages")[0](1), 1)
 
         # Ensure we can unsub (event remains)
-        self.assertFalse(spub.sub_delete(_outputter, "not set"))
-        self.assertTrue(spub.sub_delete(_outputter, "messages"))
-        self.assertFalse(spub.sub_delete("Incorrect", "messages"))
-        self.assertEqual(spub.sub_list(_outputter), ())
+        self.assertFalse(eventsubs.sub_delete(_outputter, "not set"))
+        self.assertTrue(eventsubs.sub_delete(_outputter, "messages"))
+        self.assertFalse(eventsubs.sub_delete("Incorrect", "messages"))
+        self.assertEqual(eventsubs.sub_list(_outputter), ())
         self.assertEqual(
-            spub.event_list_all(),
+            eventsubs.event_list_all(),
             (
                 "messages",
                 "testing",
@@ -87,16 +87,16 @@ class TestEventSub(unittest.TestCase):
 
         # Create a few more subs
         for i in range(10):
-            spub.sub_create(_outputter, str(i))
-            spub.sub_create(self.test_crud, str(i))
+            eventsubs.sub_create(_outputter, str(i))
+            eventsubs.sub_create(self.test_crud, str(i))
 
         # Ensure unsub all works
-        self.assertTrue(spub.sub_wipe(_outputter))
-        self.assertEqual(spub.sub_list(_outputter), ())
+        self.assertTrue(eventsubs.sub_wipe(_outputter))
+        self.assertEqual(eventsubs.sub_list(_outputter), ())
 
         # Ensure we can destroy an event
-        sublist = spub.sub_list(self.test_crud)
+        sublist = eventsubs.sub_list(self.test_crud)
         self.assertIn("5", sublist)
-        self.assertTrue(spub.event_delete("5"))
-        sublist = spub.sub_list(self.test_crud)
+        self.assertTrue(eventsubs.event_delete("5"))
+        sublist = eventsubs.sub_list(self.test_crud)
         self.assertNotIn("5", sublist)
