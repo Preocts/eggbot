@@ -64,10 +64,11 @@ async def on_message(message) -> bool:
     return True
 
 
-def main() -> None:
+def main() -> int:
     """ Main entry point """
     load_config()
     discord_client.run(DISCORD_TOKEN)
+    return 0
 
 
 # May Bartmoss have mercy on your data for running this bot.

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+""" Testing suite """
 import asyncio
 import unittest
 from unittest.mock import patch
 
-from eggbot import eggbot_core as ec
-from eggbot.core_entities import coreConfig
+from eggbot import eggbotcore as ec
+from eggbot.configfile import ConfigFile
 
 
 def run_loop(func, *args, **kwargs):
@@ -15,34 +16,37 @@ def run_loop(func, *args, **kwargs):
 
 
 class TestEggbotCore(unittest.TestCase):
+    """ Testing suite """
+
     def test_globals(self):
         """ These need to exist """
         self.assertIsInstance(ec.logger, ec.logging.Logger)
         self.assertIsInstance(ec.discord_client, ec.discord.client.Client)
-        self.assertIsInstance(ec.EVENTSUBS, ec.EventSub)
+        self.assertIsInstance(ec.eventSubs, ec.EventSub)
+        self.assertIsInstance(ec.coreConfig, ConfigFile)
 
     def test_config_load(self):
+        """ Pass fail on config load """
         self.assertTrue(ec.load_config())
-        config = coreConfig()
-        config.unload()
-        with patch.object(coreConfig, "load", return_value=None):
+        with patch.object(ec.coreConfig, "load", return_value=False):
             self.assertFalse(ec.load_config())
 
-    @patch("eggbot.eggbot_core.discord_client")
+    @patch("eggbot.eggbotcore.discord_client")
     def test_main(self, mock_client):
-        """Should exit clean after doing things
+        """
+        Should exit clean after doing things
 
         Discord client async loop is mocked and not run but is tested that
         a call was made.
         """
         ec.DISCORD_TOKEN = "Do not show secrets in test"
-        ec.main()
+        self.assertEqual(ec.main(), 0)
         mock_client.run.assert_called()
         mock_client.run.assert_called_with(ec.DISCORD_TOKEN)
 
     def test_join_ignore_me(self):
         """ On Joins should ignore bot actions """
-        with patch("eggbot.eggbot_core.discord_client") as mock_client:
+        with patch("eggbot.eggbotcore.discord_client") as mock_client:
             mock_client.user.id = "123456789"
             # Create mocked member
             mock_member = unittest.mock.Mock()
@@ -62,7 +66,7 @@ class TestEggbotCore(unittest.TestCase):
 
     def test_message_ignore_me(self):
         """ Message events should ignore bot chatter """
-        with patch("eggbot.eggbot_core.discord_client") as mock_client:
+        with patch("eggbot.eggbotcore.discord_client") as mock_client:
             mock_client.user.id = "123456789"
             # Create mocked message
             mock_message = unittest.mock.Mock()
@@ -82,36 +86,38 @@ class TestEggbotCore(unittest.TestCase):
 
     def test_join_pub_events(self):
         """ Make sure join calls the "on_join" sub list """
+        # TODO
         _join_sub_01 = unittest.mock.Mock()
         _join_sub_02 = unittest.mock.Mock()
-        ec.EVENTSUBS.sub_create(_join_sub_01, "on_join")
-        ec.EVENTSUBS.sub_create(_join_sub_02, "on_join")
+        ec.eventSubs.sub_create(_join_sub_01, "on_join")
+        ec.eventSubs.sub_create(_join_sub_02, "on_join")
 
         mock_member = unittest.mock.Mock()
         mock_member.id = "987654321"
         mock_member.bot = False
 
-        with patch("eggbot.eggbot_core.discord_client") as mock_client:
+        with patch("eggbot.eggbotcore.discord_client") as mock_client:
             mock_client.user.id = "123456789"
-            run_loop(ec.on_member_join, mock_member)
+            self.assertTrue(run_loop(ec.on_member_join, mock_member))
 
         _join_sub_01.assert_called_with(mock_member)
         _join_sub_02.assert_called_with(mock_member)
 
     def test_message_pub_events(self):
         """ Make sure messages call the "on_message" sub list """
+        # TODO
         message_sub_01 = unittest.mock.Mock()
         message_sub_02 = unittest.mock.Mock()
-        ec.EVENTSUBS.sub_create(message_sub_01, "on_message")
-        ec.EVENTSUBS.sub_create(message_sub_02, "on_message")
+        ec.eventSubs.sub_create(message_sub_01, "on_message")
+        ec.eventSubs.sub_create(message_sub_02, "on_message")
 
         mock_message = unittest.mock.Mock()
         mock_message.author.id = "987654321"
         mock_message.author.bot = False
 
-        with patch("eggbot.eggbot_core.discord_client") as mock_client:
+        with patch("eggbot.eggbotcore.discord_client") as mock_client:
             mock_client.userid = "123456789"
-            run_loop(ec.on_message, mock_message)
+            self.assertTrue(run_loop(ec.on_message, mock_message))
 
         message_sub_01.assert_called_with(mock_message)
         message_sub_02.assert_called_with(mock_message)
