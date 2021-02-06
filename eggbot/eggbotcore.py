@@ -28,10 +28,9 @@ coreConfig = ConfigFile()
 def load_config() -> bool:
     """ Load configuration """
     logger.info("Opening configuration...")
-    coreConfig.load("./config/eggbot_core.json")
-    if not coreConfig.config:
+    if not coreConfig.load("./config/eggbot_core.json"):
         logger.warning("Configuration not found!")
-        # TODO: Add method to pull file path for output
+        logger.warning("File used: %s", coreConfig.filename)
         return False
     logger.info("Configuration file loaded with %d keys.", len(coreConfig.config))
     return True
