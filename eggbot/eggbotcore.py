@@ -14,6 +14,7 @@ import discord  # type: ignore
 
 from eggbot.configfile import ConfigFile
 from eggbot.eventsub import EventSub
+from eggbot.utils.loadenv import LoadEnv
 
 
 DISCORD_TOKEN = os.environ.get("discord_api_key")
@@ -24,6 +25,7 @@ intents.members = True
 discord_client = discord.Client(status="online", intents=intents)
 eventSubs = EventSub()
 coreConfig = ConfigFile()
+envVars = LoadEnv()
 
 
 def load_config() -> bool:
@@ -80,7 +82,7 @@ def main() -> int:
     """ Main entry point """
     if not load_config():
         return 1
-    discord_client.run(DISCORD_TOKEN)
+    discord_client.run(envVars.get("DISCORD_TOKEN"))
     return 0
 
 
