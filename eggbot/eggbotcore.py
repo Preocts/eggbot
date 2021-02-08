@@ -81,6 +81,7 @@ def main() -> int:
     """ Main entry point """
     if not load_config():
         return 1
+    envVars.load()
     discord_client.run(envVars.get("DISCORD_TOKEN"))
     return 0
 

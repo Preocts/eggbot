@@ -29,11 +29,10 @@ class LoadEnv:
         """ Get a value from environ """
         return os.environ.get(key, "")
 
-    def __init__(self, filepath: Optional[str] = None) -> None:
+    def __init__(self) -> None:
         """ Provide a path to .env if not located in working directory """
-        self.filepath: Optional[str] = filepath
+        self.filepath: Optional[str] = None
         self.env_values: Dict[str, str] = {}
-        self.load(filepath)
 
     def __del__(self):
         """ Destructor """
