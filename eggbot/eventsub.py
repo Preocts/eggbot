@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-""" Hold all subscriptions to events from bot addons
+""" Hold all subscriptions to events from bot addon modules
 
 Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import os
 import logging
+import importlib
 
 from typing import Callable
 
 
 class EventSub:
-    """Allows modules to sub to event notifications
+    """
+    Allows modules to sub to event notifications
 
     A component to the pub/sub framework for how the bot handles events
     and allows future scalability. Declare one EventSub() object per
@@ -25,7 +28,16 @@ class EventSub:
     def __init__(self):
         self._pubsub = {}
 
-    def sub_create(self, target: Callable, event: str) -> bool:
+    def load_modules(self) -> None:
+        """ loads modules from module directory and creates events """
+        if os.path.isdir("./modules"):
+            for file_ in os.listdir("./modules"):
+                if file_.endswith(".py") and (file_.startswith("module_")):
+                    importlib.import_module("modules." + file_[:-3])
+                    self.logger.info("Loaded module: %s", file_)
+                    # (sys.modules["eggbot.modules." + mod].initClass())
+
+    def create(self, target: Callable, event: str) -> bool:
         """Subscribe a target to an event
 
         Args:
@@ -46,7 +58,7 @@ class EventSub:
 
         return True
 
-    def sub_delete(self, target: Callable, event: str) -> bool:
+    def delete(self, target: Callable, event: str) -> bool:
         """Unsubscribe a target from an event
 
         Args:
@@ -68,51 +80,8 @@ class EventSub:
 
         return True
 
-    def sub_wipe(self, target: Callable) -> bool:
-        """Removes target from all subscriptions
-
-        Args:
-            target - The target callable object to be removed
-
-        Returns:
-            True
-        """
-        events = self.event_list_all()
-
-        for event in events:
-            self._pubsub[event].discard(target)
-
-        return True
-
-    def sub_list(self, target: Callable) -> tuple:
-        """ Returns a list of events that target is subbed to """
-        sub_list = []
-        for event in self.event_list_all():
-            if target in self._pubsub[event]:
-                sub_list.append(event)
-        return tuple(sub_list)
-
-    def event_list_all(self) -> tuple:
-        """ Returns tuple of all events """
-        return tuple(self._pubsub.keys())
-
     def event_list(self, event: str) -> tuple:
         """ Returns all subscribed callables in event """
         if event not in self._pubsub.keys():
             self.logger.warning("event_list(), Event '%s' not found.", event)
         return tuple(self._pubsub.get(event, ()))
-
-    def event_delete(self, event: str) -> bool:
-        """ Deletes an entire event, unsubbing all within """
-        if event not in self._pubsub.keys():
-            self.logger.error("event_delete(), Event '%s' not found.", event)
-            return False
-        del self._pubsub[event]
-        return True
-
-    def event_create(self, event: str) -> bool:
-        """ Creates an empty event set """
-        if event in self._pubsub.keys():
-            return False
-        self._pubsub[event] = set()
-        return True

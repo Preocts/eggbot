@@ -6,9 +6,7 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-import os
 import logging
-import importlib
 
 import discord  # type: ignore
 
@@ -35,17 +33,6 @@ def load_config() -> bool:
         logger.warning("File used: %s", coreConfig.filename)
         return False
     logger.info("Configuration file loaded with %d keys.", len(coreConfig.config))
-    return True
-
-
-def load_modules() -> bool:
-    """ loads unloaded modules from module directory """
-    if not os.path.isdir("./modules"):
-        return False
-    for file_ in os.listdir("./modules"):
-        if file_.endswith(".py") and (file_.startswith("module_")):
-            importlib.import_module("modules." + file_[:-3])
-            logger.info("Loaded module: %s", file_)
     return True
 
 
