@@ -17,7 +17,6 @@ from eggbot.eventsub import EventSub
 from eggbot.utils.loadenv import LoadEnv
 
 
-DISCORD_TOKEN = os.environ.get("discord_api_key")
 logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()

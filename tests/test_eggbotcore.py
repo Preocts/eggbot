@@ -56,10 +56,10 @@ class TestEggbotCore(unittest.TestCase):
         Discord client async loop is mocked and not run but is tested that
         a call was made.
         """
-        ec.DISCORD_TOKEN = "Do not show secrets in test"
         self.assertEqual(ec.main(), 0)
         mock_client.run.assert_called()
-        mock_client.run.assert_called_with(ec.DISCORD_TOKEN)
+        with patch("eggbot.eggbotcore.load_config", return_value=False):
+            self.assertEqual(ec.main(), 1)
 
     def test_join_ignore_me(self):
         """ On Joins should ignore bot actions """
