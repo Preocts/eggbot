@@ -28,14 +28,16 @@ class EventSub:
     def __init__(self):
         self._pubsub = {}
 
-    def load_modules(self) -> None:
+    def load_modules(self) -> bool:
         """ loads modules from module directory and creates events """
-        if os.path.isdir("./modules"):
-            for file_ in os.listdir("./modules"):
-                if file_.endswith(".py") and (file_.startswith("module_")):
-                    importlib.import_module("modules." + file_[:-3])
-                    self.logger.info("Loaded module: %s", file_)
-                    # (sys.modules["eggbot.modules." + mod].initClass())
+        if not os.path.isdir("./modules"):
+            return False
+        for file_ in os.listdir("./modules"):
+            if file_.endswith(".py") and (file_.startswith("module_")):
+                importlib.import_module("modules." + file_[:-3])
+                self.logger.info("Loaded module: %s", file_)
+                # (sys.modules["eggbot.modules." + mod].initClass())
+        return True
 
     def create(self, target: Callable, event: str) -> bool:
         """Subscribe a target to an event

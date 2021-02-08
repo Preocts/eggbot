@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """ Testing suite """
-import os
-import shutil
 import asyncio
 import unittest
 from unittest.mock import patch
@@ -32,21 +30,6 @@ class TestEggbotCore(unittest.TestCase):
         self.assertTrue(ec.load_config())
         with patch.object(ec.coreConfig, "load", return_value=False):
             self.assertFalse(ec.load_config())
-
-    def test_load_modules(self):
-        """ Pass/Fail loading modules """
-        self.assertTrue(ec.load_modules())
-        shutil.move("./modules", "./modules_test")
-        try:
-            self.assertFalse(ec.load_modules())
-        finally:
-            shutil.move("./modules_test", "./modules")
-        shutil.copy("./tests/fixtures/mock_module.py", "./modules/module_mock.py")
-        try:
-            with self.assertRaises(Exception):
-                ec.load_modules()
-        finally:
-            os.remove("./modules/module_mock.py")
 
     @patch("eggbot.eggbotcore.discord_client")
     def test_main(self, mock_client):
@@ -103,11 +86,10 @@ class TestEggbotCore(unittest.TestCase):
 
     def test_join_pub_events(self):
         """ Make sure join calls the "on_join" sub list """
-        # TODO
         _join_sub_01 = unittest.mock.Mock()
         _join_sub_02 = unittest.mock.Mock()
-        ec.eventSubs.sub_create(_join_sub_01, "on_join")
-        ec.eventSubs.sub_create(_join_sub_02, "on_join")
+        ec.eventSubs.create(_join_sub_01, "on_join")
+        ec.eventSubs.create(_join_sub_02, "on_join")
 
         mock_member = unittest.mock.Mock()
         mock_member.id = "987654321"
@@ -122,11 +104,10 @@ class TestEggbotCore(unittest.TestCase):
 
     def test_message_pub_events(self):
         """ Make sure messages call the "on_message" sub list """
-        # TODO
         message_sub_01 = unittest.mock.Mock()
         message_sub_02 = unittest.mock.Mock()
-        ec.eventSubs.sub_create(message_sub_01, "on_message")
-        ec.eventSubs.sub_create(message_sub_02, "on_message")
+        ec.eventSubs.create(message_sub_01, "on_message")
+        ec.eventSubs.create(message_sub_02, "on_message")
 
         mock_message = unittest.mock.Mock()
         mock_message.author.id = "987654321"
