@@ -7,7 +7,7 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import unittest
 
-from eggbot.eventsub import EventSubs
+from eggbot.eventsubs import EventSubs
 from eggbot.models.eventtype import EventType
 
 
