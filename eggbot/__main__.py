@@ -6,8 +6,16 @@ Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-from eggbot.eggbot_core import main
+import sys
+
+from eggbot.eggbotcore import EggBotCore
+
+
+def main() -> int:
+    """ Main entry point """
+    eggbot = EggBotCore()
+    return eggbot.launch_bot()
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
