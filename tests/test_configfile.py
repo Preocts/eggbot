@@ -12,6 +12,7 @@ class TestCoreConfig(unittest.TestCase):
     def test_properties(self):
         """ Unit Test """
         config = ConfigFile("./tests/fixtures/mock_config.json")
+        config.load()
         self.assertIsInstance(config.config, dict)
 
     def test_load(self):
@@ -59,6 +60,7 @@ class TestCoreConfig(unittest.TestCase):
         key = f"unitTest{random.randint(1000,10000)}"  # nosec
 
         config = ConfigFile("./tests/fixtures/mock_config.json")
+        config.load()
         self.assertTrue(config.config)
 
         self.assertNotIn(key, config.config.keys())
@@ -75,6 +77,7 @@ class TestCoreConfig(unittest.TestCase):
     def test_unload(self):
         """ Empty current config, reload from same file """
         config = ConfigFile("./tests/fixtures/mock_config.json")
+        config.load()
         self.assertTrue(config.config)
         config.unload()
         self.assertEqual(config.config, {})

@@ -31,7 +31,6 @@ class ConfigFile:
         """
         self.filename: Optional[str] = filename
         self.__config: dict = {}
-        self.load(filename)
 
     @property
     def config(self) -> dict:
