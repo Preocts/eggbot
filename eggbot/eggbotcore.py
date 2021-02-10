@@ -46,7 +46,6 @@ class EggBotCore:
         )
         return True
 
-    @discord_.client.event
     async def on_member_join(self, member) -> bool:
         """ Triggered on all join events """
         if member.id == self.discord_.client.user.id:
@@ -62,7 +61,6 @@ class EggBotCore:
                 subbed(member)
         return True
 
-    @discord_.client.event
     async def on_message(self, message) -> bool:
         """ Triggered on all message events """
         if message.author.id == self.discord_.client.user.id:
@@ -76,16 +74,49 @@ class EggBotCore:
                 subbed(message)
         return True
 
+    async def on_ready(self) -> bool:
+        """ Triggered when client has completed processing of data recieved """
+        # TODO (jcm) : What do we need to do here?
+        if self.event_subs:
+            for subbed in self.event_subs.get(EventType.READY):
+                subbed()
+        return True
+
+    async def on_disconnect(self) -> bool:
+        """ Triggered on disconnect. Does not indicate re-connect logic will fail """
+        # TODO (jcm) : What do we need to do here?
+        if self.event_subs:
+            for subbed in self.event_subs.get(EventType.DISCONNECT):
+                subbed()
+        return True
+
     def launch_bot(self) -> int:
         """ Start the bot, blocking """
+        self.__load_environment()
+        self.__register_events()
+        self.discord_.run()
+        return 0
+
+    def __load_environment(self) -> None:
+        """ Load core config and environment variables """
         if not self.env_vars:
             raise Exception("Internal Object 'env_vars' not initialized.")
         if not self.load_config():
             raise Exception("Unable to load core_configuration.")
         self.env_vars.load()
         self.discord_.set_secret(self.env_vars.get("DISCORD_SECRET"))
-        self.discord_.run()
-        return 0
+
+    def __register_events(self) -> None:
+        """
+        Link event handler methods to discord client
+
+        This replaces the @discord.client.event decorators as we want to
+        capture the instance method of these, not the unbound function.
+        """
+        self.discord_.client.event(self.on_ready)
+        self.discord_.client.event(self.on_disconnect)
+        self.discord_.client.event(self.on_member_join)
+        self.discord_.client.event(self.on_message)
 
 
 # May Bartmoss have mercy on your data for running this bot.

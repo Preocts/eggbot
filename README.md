@@ -20,9 +20,11 @@ Currently under a re-write.
 1. Logging configuration on launch
    - Rotating file output
    - Console output
-1. Further abstraction of Discord client - Events and Cogs
+1. **done** Further abstraction of Discord client - Events and Cogs
 1. Shoulder Bird plug-in refactor
 1. Convert to pytest framework for unit tests
+1. Build a better roadmap
+1. Kudos plug-in refactor
 
 ---
 
