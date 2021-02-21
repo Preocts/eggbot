@@ -3,14 +3,13 @@
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 Shoulder Bird Refactor (2021.02 Rewrite)
 
-[_] Debug logging wrapper (util level)
-[_] At least two classes
-    - shouldbirdparser
-    - shouldbirdcli
+[x] shoulderbirdconfig
+[_] shouldbirdparser
+[_] shouldbirdcli
 [x] Pull load/save configs to util
 [x] Create base config if none exist
-[~] CRUD methods for config
-[_] Unit test config IO
+[x] CRUD methods for config
+[x] Unit test config IO
 [~] Refactor naming
 [~] Reconsider return values (push for single value)
 [_] birdCall - Refactor DRY
@@ -23,6 +22,7 @@ Shoulder Bird Refactor (2021.02 Rewrite)
 
 utils/configio.py - Why is filename optional
 
+[_] Debug logging wrapper (util level)
 [x] Add unit tests to mock failed file reads in core_entites
 [x] Queue for event actions
 [_] Version bumping script to capture updates

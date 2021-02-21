@@ -1,0 +1,13 @@
+{
+    "module": "ShoulderBird",
+    "version": "1.0.0",
+    "9876543210": {
+        "0123456789": {
+            "guild_id": "9876543210",
+            "member_id": "0123456789",
+            "regex": "Destroy",
+            "toggle": true,
+            "ignore": null
+        }
+    }
+}

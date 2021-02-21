@@ -13,17 +13,10 @@
 """
 
 import re
-import json
 import logging
-import pathlib
 from eggbot.utils import eggUtils
 
 logger = logging.getLogger(__name__)  # Create module level logger
-
-
-def initClass():
-    """ A fucntion to allow automated creation of a class instance """
-    return shoulderBird()
 
 
 class shoulderBird:
@@ -77,184 +70,6 @@ class shoulderBird:
 
     __nonzero__ = __bool__
 
-    def __del__(self):
-        """ Save configs on exit """
-        self.saveConfig()
-        shoulderBird.instCount -= 1
-        return
-
-    def loadConfig(self) -> None:
-        """ Load a config into the class """
-        file_ = eggUtils.abs_path(__file__) + "/config/shoulderBird.json"
-        json_file = {}
-        try:
-            with open(file_, "r") as load_file:
-                json_file = json.load(load_file)
-        except json.decoder.JSONDecodeError:
-            logger.error("Config file empty or bad format. ", exc_info=True)
-        except FileNotFoundError:
-            logger.error(f"Config file not found: {file_}", exc_info=True)
-
-        self.sbConfig = json_file
-        self.activeConfig = file_
-        return
-
-    def saveConfig(self) -> bool:
-        """ Save a config into the class """
-        file_ = eggUtils.abs_path(__file__) + "/config/shoulderBird.json"
-        path = pathlib.Path("/".join(file_.split("/")[:-1]))
-        path.mkdir(parents=True, exist_ok=True)
-        try:
-            with open(file_, "w") as save_file:
-                save_file.write(json.dumps(self.sbConfig, indent=4))
-        except OSError:
-            logger.error(f"File not be saved: {file_}", exc_info=True)
-        return
-
-    # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
-    #           Shoulderbird internal methods
-    # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
-    def configCheck(self, guild: str, user: str):
-        """ Ensures the config is healthy """
-        logger.debug(f"[START] configCheck : {guild}, {user}")
-        if not (isinstance(self.sbConfig, dict)):
-            self.sbConfig = {}
-        if not (guild in self.sbConfig):
-            self.sbConfig[guild] = {}
-        if not (user in self.sbConfig[guild]):
-            self.sbConfig[guild][user] = {
-                "regex": "",
-                "toggle": True,
-                "ignore": [],
-                "reminder": 0,
-            }
-        self.saveConfig()
-        logger.debug("[FINISH] configCheck : ")
-        return
-
-    def getBirds(self, guild: str) -> dict:
-        """Fetch all defined Birds from the config file
-
-        Args:
-            [str] : Guild ID to pull results from
-
-        Returns:
-            [dict] : {"status": [bool], "response": [str]}
-        """
-        logger.debug(f"[START] getBirds : {guild}")
-        if (guild in self.sbConfig) and len(self.sbConfig[guild]):
-            logger.debug(f"[FINISH] getBirds : {len(self.sbConfig[guild])}")
-            return {"status": True, "response": self.sbConfig[guild]}
-        logger.debug("[FINISH] getBirds : Guild not found or empty")
-        return {"status": False, "response": "Guild not found or empty"}
-
-    def getBird(self, guild: str, user: str) -> dict:
-        """Fetch a single defined Bird from the config file
-
-        Args:
-            [str] : Guild ID to pull results from
-            [str] : User ID to pull results for
-
-        Returns:
-            [dict] : {"status": [bool], "response": [str]}
-        """
-        logger.debug(f"[START] getBird : {guild}, {user}")
-        response = None
-        if (guild in self.sbConfig) and len(self.sbConfig[guild]):
-            if user in self.sbConfig[guild]:
-                response = (
-                    self.sbConfig[guild][user]["regex"],
-                    self.sbConfig[guild][user]["toggle"],
-                )
-                logger.debug(f"[FINISH] getBird : {response}")
-                return {"status": True, "response": response}
-        logger.debug("[FINISH] getBird : Guild or user not found")
-        return {"status": False, "response": "Guild or user not found"}
-
-    def listBirds(self, user) -> dict:
-        """List all of the birds a user has set
-
-        Args:
-            [str] : User ID to pull results for
-
-        Returns:
-            [dict] : {'status': [bool], 'response': [list]}
-        """
-        logger.debug(f"[START] listBirds : {user}")
-        birdlist = []
-        for guild, values in self.sbConfig.items():
-            if user in values:
-                birdlist.append([guild, self.sbConfig[guild][user]["regex"]])
-        logger.debug(f"[FINISH] listBirds : {len(birdlist)}")
-        if birdlist:
-            return {"status": True, "response": birdlist}
-        return {"status": False, "response": "No birds found."}
-
-    def putBird(self, guild, message) -> dict:
-        """Stores a Bird into the loaded config
-
-        Args:
-            [str] : Discord Guild ID
-            [discord.message] : Discord message
-
-        Returns:
-            [dict] : {'status': [bool], 'response': [str]}
-        """
-        logger.debug(f"[START] putBird : {message.clean_content}")
-        user = str(message.author.id)
-        # messsage format : "sb!set [guild] = [regex]"
-        regex = message.clean_content.split("=")[1:][0].strip()  # Just [regex]
-
-        self.configCheck(guild, user)
-        self.sbConfig[guild][user]["regex"] = regex
-        logger.debug("[FINISH] putBird : ")
-        return {"status": True, "response": "Bird has been stored in config"}
-
-    def delBird(self, user: str) -> dict:
-        """Removes users Birds from the loaded config (no undo)
-
-        Args:
-            [str] : User ID to delete
-
-        Returns:
-            [dict] : {"status": [bool], "response": [str]}
-        """
-        logger.debug(f"[START] delBird : {user}")
-        response = None
-        for guild, values in self.sbConfig.items():
-            if user in values:
-                del self.sbConfig[guild][user]
-                response = "Birds have been deleted"
-        logger.debug(f"[FINISH] delBird : {response}")
-        if response is None:
-            return {"status": False, "response": "No birds were found"}
-        return {"status": True, "response": "Birds have been deleted"}
-
-    def toggleBird(self, user: str, state: bool) -> dict:
-        """Toggles ShoulderBird in all guilds for a user to given bool
-
-        This used to be an actual toggle, maybe one day it will be again. For
-        brevity, sb!toggle was replaced with sb!on and sb!off in v1.0.0.
-
-        Args:
-            [str] : User ID to toggle
-            [bool] : Target state of user's birds
-
-        Returns:
-            [dict] : {"status": [bool], "response": [str]}
-        """
-        logger.debug(f"[START] toggleBird : {user}, {state}")
-
-        for guild, values in self.sbConfig.items():
-            if user in values:
-                self.sbConfig[guild][user]["toggle"] = state
-        if state:
-            response = "Birds now active for all guilds"
-        else:
-            response = "Birds now inactive for all guilds"
-        logger.debug(f"[FINISH] toggleBird : {response}")
-        return {"status": True, "response": response}
-
     def birdCall(self, guild: str, user: str, message: str) -> dict:
         """Uses regEx to find defined keywords in a chat message
 
@@ -270,9 +85,7 @@ class shoulderBird:
         # Is the guild configured?
         results = self.getBirds(guild)
         if not (results["status"]):
-            logger.debug(
-                "[FINISH] birdCall : Guild returned no results: " f"{guild}"
-            )
+            logger.debug("[FINISH] birdCall : Guild returned no results: " f"{guild}")
             return {"status": False, "Response": []}
         nest = results["response"]
         birdList = []
@@ -430,9 +243,7 @@ class shoulderBird:
             # We need to pull the [guild] provided and do two things,
             # 1) Confirm bot is in that guild
             # 2) Ensure we are using a guild.id and not a name
-            cmdTarg = (
-                message.clean_content.split("=")[0].strip(cmdTrig).strip()
-            )  # noqa
+            cmdTarg = message.clean_content.split("=")[0].strip(cmdTrig).strip()  # noqa
             guildID = None
             for g in dClient.guilds:
                 # Provided a guild ID

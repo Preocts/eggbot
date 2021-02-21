@@ -15,6 +15,8 @@ from eggbot.eventsubs import EventSubs
 from eggbot.utils.loadenv import LoadEnv
 from eggbot.models.eventtype import EventType
 
+DEFAULT_CONFIG = "configs/eggbotcore.json"
+
 
 class EggBotCore:
     """ Main construct of bot """
@@ -37,7 +39,7 @@ class EggBotCore:
         self.logger.info("Opening configuration...")
         if not self.core_config:
             raise Exception("Internal Object 'core_config' not initialized.")
-        if not self.core_config.load("./config/eggbot_core.json"):
+        if not self.core_config.load(DEFAULT_CONFIG):
             self.logger.warning("Configuration not found!")
             self.logger.warning("File used: %s", self.core_config.filename)
             return False

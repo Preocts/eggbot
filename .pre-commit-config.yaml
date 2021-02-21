@@ -3,6 +3,7 @@ default_language_version:
 default_stages:
 - commit
 - push
+exclude: ^pending_rebuild/
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 'v3.4.0'
@@ -18,6 +19,7 @@ repos:
     rev: '1.7.0'
     hooks:
     - id: bandit
+      args: [--skip, "B101"]
 -   repo: local
     hooks:
     -   id: black
