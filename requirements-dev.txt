@@ -4,3 +4,4 @@ coverage
 black
 pylint
 mypy
+flake8
