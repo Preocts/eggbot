@@ -13,8 +13,8 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
+from typing import Set
 from typing import List
-from typing import Optional
 
 from eggbot.configfile import ConfigFile
 
@@ -33,7 +33,17 @@ class BirdMember:
         self.member_id = member_id
         self.regex: str = kwargs.get("regex", "")
         self.toggle: bool = kwargs.get("toggle", True)
-        self.ignore: Optional[List[str]] = kwargs.get("ignore")
+        self.ignore: Set[str] = set(kwargs.get("ignore", []))
+
+    def to_dict(self) -> dict:
+        """ Converts values to dict for use in JSON """
+        return {
+            "guild_id": self.guild_id,
+            "member_id": self.member_id,
+            "regex": self.regex,
+            "toggle": self.toggle,
+            "ignore": list(self.ignore),
+        }
 
 
 class ShoulderBirdConfig:
@@ -65,7 +75,7 @@ class ShoulderBirdConfig:
     def __save_member_to_guild(self, guild_id: str, member: BirdMember) -> None:
         """ Save a specific member to a guild. Creates new or overwrites existing """
         guild_config = self.__load_guild(guild_id)
-        guild_config[member.member_id] = member.__dict__
+        guild_config[member.member_id] = member.to_dict()
         self.__configclient.update(guild_id, guild_config)
 
     def reload_config(self) -> bool:
@@ -105,7 +115,7 @@ class ShoulderBirdConfig:
         Keyword Args:
             regex [str] : Regular expression
             toggle [bool] : True if config is active, False if inactive
-            ignore Optional[List[str]] : List of member IDs to ignore. None if not set
+            ignore Set[str] : Set of member IDs to ignore. Can be empty
         """
         self.logger.debug("save_member: '%s', '%s', '%s'", guild_id, member_id, kwargs)
         member_config = self.load_member(guild_id, member_id)

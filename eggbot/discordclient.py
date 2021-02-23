@@ -28,11 +28,15 @@ class SingleClient(type):
 class DiscordClient(metaclass=SingleClient):
     """ Abstract layer for discord client of choice """
 
+    # Type stubs
+    member: discord.Member
+    message: discord.Message
+    guild: discord.Guild
+
     def __init__(self) -> None:
+        """ Creates a singleon of a Discord Client """
         self.__discord_secret = ""
-        intents = discord.Intents.default()
-        intents.members = True
-        self.client = discord.Client(status="online", intents=intents)
+        self.client = discord.Client(status="online", intents=discord.Intents.all())
 
     def set_secret(self, discord_secret: str) -> None:
         """ Store Discord API key """

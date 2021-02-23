@@ -70,48 +70,6 @@ class shoulderBird:
 
     __nonzero__ = __bool__
 
-    def birdCall(self, guild: str, user: str, message: str) -> dict:
-        """Uses regEx to find defined keywords in a chat message
-
-        Args:
-            [str] : Guild ID to pull results from
-            [str] : User ID to pull results for
-            [str] : Message content to run regex against
-
-        Returns:
-            [dict] : {"status": [bool], "response": [list]}
-        """
-        logger.debug(f"[START] birdCall : {guild}, {user}, {message}")
-        # Is the guild configured?
-        results = self.getBirds(guild)
-        if not (results["status"]):
-            logger.debug("[FINISH] birdCall : Guild returned no results: " f"{guild}")
-            return {"status": False, "Response": []}
-        nest = results["response"]
-        birdList = []
-        for bird in nest:
-            # check all available active regex for a hit
-            if nest[bird]["toggle"]:
-                if user in nest[bird]["ignore"]:
-                    continue
-                rx = nest[bird]["regex"]
-                if not (len(rx)):  # Catch for empty regex
-                    continue
-                findRg = re.compile(r"\b{}\b".format(rx), re.I)
-                found = findRg.search(message)
-                if found:
-                    logger.info(f"Bird found for {bird}")
-                    try:
-                        birdList.append(int(bird))
-                    except ValueError as e:
-                        logger.warning(f"Bad bird: {guild}, {user}, {e}")
-                        continue
-        if len(birdList):
-            logger.debug(f"[FINISH] birdCall : {birdList}")
-            return {"status": True, "response": birdList}
-        logger.debug("[FINISH] birdCall : No results")
-        return {"status": False, "repsonse": []}
-
     def gagBird(self, user: str, target: str) -> dict:
         """Toggles a given target for a given guild to be ignored
 
@@ -191,7 +149,7 @@ class shoulderBird:
             return
 
         # ╔════════════*.·:·.✧    ✦    ✧.·:·.*════════════╗
-        #  ShoulderBird - Alerting for custom search strings
+        #    ShoulderBird - Alerting for search strings
         # ╚════════════*.·:·.✧    ✦    ✧.·:·.*════════════╝
         results = self.birdCall(
             str(message.guild.id),

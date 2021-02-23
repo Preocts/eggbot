@@ -7,7 +7,7 @@
             "member_id": "0123456789",
             "regex": "Destroy",
             "toggle": true,
-            "ignore": null
+            "ignore": []
         }
     }
 }
