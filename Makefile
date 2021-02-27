@@ -2,7 +2,7 @@
 
 dev-install:
 	pip install --upgrade pip setuptools wheel
-	pip install --upgrade -r requirements.txt  -r dev-requirements.txt
+	pip install --upgrade -r requirements.txt  -r requirements-dev.txt
 
 # Run all cleaning steps
 clean: clean-build clean-pyc clean-test
