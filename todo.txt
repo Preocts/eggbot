@@ -4,16 +4,18 @@
 Shoulder Bird Refactor (2021.02 Rewrite)
 
 [x] shoulderbirdconfig
-[_] shouldbirdparser
+[~] shouldbirdparser
 [_] shouldbirdcli
 [x] Pull load/save configs to util
 [x] Create base config if none exist
 [x] CRUD methods for config
 [x] Unit test config IO
 [~] Refactor naming
-[~] Reconsider return values (push for single value)
-[_] birdCall - Refactor DRY
+[x] Reconsider return values (push for single value)
+[x] birdCall - Refactor DRY
 [_] model MessageCommand (command, content)
+[_] move DEFAULT_CONFIG to parser module
+[_] move SimpleMessage to model file
 @@@ - 542 lines, 1 file
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

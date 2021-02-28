@@ -1,0 +1,34 @@
+{
+    "module": "ShoulderBird",
+    "version": "1.0.0",
+    "01": {
+        "01": {
+            "guild_id": "01",
+            "member_id": "01",
+            "regex": "test(|suite)",
+            "toggle": true,
+            "ignore": []
+        },
+        "02": {
+            "guild_id": "01",
+            "member_id": "02",
+            "regex": "test",
+            "toggle": true,
+            "ignore": []
+        },
+        "03": {
+            "guild_id": "01",
+            "member_id": "03",
+            "regex": "case",
+            "toggle": true,
+            "ignore": []
+        },
+        "04": {
+            "guild_id": "01",
+            "member_id": "04",
+            "regex": "test",
+            "toggle": false,
+            "ignore": []
+        }
+    }
+}
