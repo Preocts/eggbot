@@ -9,12 +9,26 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 import sys
 
 from eggbot.eggbotcore import EggBotCore
+from eggbot.models.eventtype import EventType
+from modules.shoulderbirdparser import ShoulderBirdParser
 
 
 def main() -> int:
     """ Main entry point """
     eggbot = EggBotCore()
-    return eggbot.launch_bot()
+
+    # TODO: Replace with module loader
+    # Register modules
+    shoulderbird = ShoulderBirdParser()
+
+    eggbot.event_subs.add(EventType.MESSAGE, shoulderbird.eventcall)
+
+    eggbot.launch_bot()
+
+    # TODO: Replace with module unloader
+    shoulderbird.close()
+
+    return 0
 
 
 if __name__ == "__main__":

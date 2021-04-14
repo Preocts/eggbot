@@ -60,11 +60,6 @@ class ShoulderBirdConfig:
             self.__configclient.create("module", MODULE_NAME)
             self.__configclient.create("version", MODULE_VERSION)
 
-    def __del__(self) -> None:
-        """ Save config on destroy """
-        # This is not guaranteed, but worth the chance
-        self.__configclient.save()
-
     def __load_guild(self, guild_id: str) -> dict:
         """ Load a specific guild from config. Will create guild if not found """
         self.logger.debug("load_guild: '%s'", guild_id)

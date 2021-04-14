@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=fixme, too-many-instance-attributes
+disable=fixme, too-many-instance-attributes, too-few-public-methods

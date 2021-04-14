@@ -21,7 +21,10 @@ import time
 import logging
 from typing import List
 
-from eggbot.discordclient import DiscordClient
+from discord import Message  # type: ignore
+from discord import Guild  # type: ignore
+from discord import Member  # type: ignore
+
 from modules.shoulderbirdconfig import DEFAULT_CONFIG
 from modules.shoulderbirdconfig import BirdMember
 from modules.shoulderbirdconfig import ShoulderBirdConfig
@@ -35,6 +38,11 @@ class ShoulderBirdParser:
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
         """ Loads config """
         self.__config = ShoulderBirdConfig(config_file)
+
+    def close(self):
+        """ Saves config state, breaks all references """
+        self.__config.save_config()
+        del self.__config
 
     def get_matches(
         self, guild_id: str, user_id: str, clean_message: str
@@ -54,68 +62,78 @@ class ShoulderBirdParser:
                 match_list.append(member)
         return match_list
 
-    async def onmessage(self, discord_message: DiscordClient.message) -> None:
+    async def eventcall(self, event: Message) -> None:
         """ Hook for discord client, async coro """
+        if isinstance(event, Message):
+            message: Message = event
+        else:
+            self.logger.error("Unknown event type: %s", type(event))
+            return
         tic = time.perf_counter()
-        self.logger.info("[START] onmessage")
-        message = SimpleMessage(discord_message)
-        guild: DiscordClient.guild = discord_message.guild
+        self.logger.debug("[START] onmessage")
 
-        if not message.content or not message.is_text_channel():
-            self.logger.info("Unsupported channel or empty message.")
+        if not message.content or str(message.channel.type) != "text":
+            self.logger.debug(
+                "Unsupported channel or empty message. %s, %s",
+                message.channel.type,
+                message.content[:10],
+            )
             return None
-        matches = self.get_matches(message.guild_id, message.user_id, message.content)
+
+        guild: Guild = message.guild
+        channel_ids: List[str] = [str(member.id) for member in message.channel.members]
+
+        matches = self.get_matches(
+            str(message.guild.id), str(message.author.id), message.content
+        )
 
         for match in matches:
-            if match.member_id not in message.get_channel_member_ids():
+            if match.member_id not in channel_ids:
                 self.logger.debug(
                     "'%s' not in channel '%s'", match.member_id, message.channel_name
                 )
                 continue
-            self.__send_dm(match, message, guild)
+            await self.__send_dm(match, message, guild)
 
-        self.logger.info(
+        self.logger.debug(
             "[FINISH] onmessage completed: %f ms", round(time.perf_counter() - tic, 2)
         )
 
     async def __send_dm(
-        self, member: BirdMember, message: SimpleMessage, guild: DiscordClient.guild
+        self, member: BirdMember, message: Message, guild: Guild
     ) -> None:
         """ Private - send DM message to match. To be replaced with actions queue """
         try:
-            target: DiscordClient.member = guild.get_member(int(member.member_id))
+            target: Member = guild.get_member(int(member.member_id))
         except ValueError:
-            self.logger.error(
-                "Invalid member_id conversion to int: '%s'", member.member_id
-            )
-            target = None
-        if target:
-            msg = (
-                f"ShoulderBird notification, **{message.author}** mentioned you in "
-                "**{message.channel_name}** saying:\n`{message.content}`"
-            )
+            self.logger.error("Invalid member_id to int: '%s'", member.member_id)
+            return
+
+        msg = (
+            f"ShoulderBird notification, **{message.author.display_name}** "
+            f"mentioned you in **{message.channel.name}** saying:\n"
+            f"`{message.content}`\n{message.jump_url}"
+        )
+        if target.dm_channel is None:
+            await target.create_dm()
+        if target.dm_channel:
             await target.dm_channel.send(msg)
 
 
 class SimpleMessage:
     """ Data-type class for simplifing discord message object """
 
-    def __init__(self, message: DiscordClient.message) -> None:
-        """ Data-type class for simplifing discord message object """
-        self.__message = message
-        self.content: str = message.clean_content
-        self.channel_name: str = message.channel.name
-        self.guild_id: str = str(message.guild.id)
-        self.user_id: str = str(message.author.id)
-        self.author: str = message.author.display_name
+    #     """ Data-type class for simplifing discord message object """
+    #     self.__message = message
+    #     self.content: str = message.clean_content
+    #     self.channel_name: str = message.channel.name
+    #     self.guild_id: str = str(message.guild.id)
+    #     self.user_id: str = str(message.author.id)
+    #     self.author: str = message.author.display_name
 
-    def get_channel_member_ids(self) -> List[str]:
-        """ Returns list of member_ids in message channel, can return empty """
-        id_list: List[str] = []
-        if self.is_text_channel():
-            id_list = [str(member.id) for member in self.__message.channel.members]
-        return id_list
-
-    def is_text_channel(self) -> bool:
-        """ Bool flag for channel type """
-        return self.__message.channel.type == "text"
+    # def get_channel_member_ids(self) -> List[str]:
+    #     """ Returns list of member_ids in message channel, can return empty """
+    #     id_list: List[str] = []
+    #     if self.is_text_channel():
+    #         id_list = [str(member.id) for member in self.__message.channel.members]
+    #     return id_list

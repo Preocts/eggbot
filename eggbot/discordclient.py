@@ -28,15 +28,14 @@ class SingleClient(type):
 class DiscordClient(metaclass=SingleClient):
     """ Abstract layer for discord client of choice """
 
-    # Type stubs
-    member: discord.Member
-    message: discord.Message
-    guild: discord.Guild
-
     def __init__(self) -> None:
         """ Creates a singleon of a Discord Client """
         self.__discord_secret = ""
-        self.client = discord.Client(status="online", intents=discord.Intents.all())
+        intents = discord.Intents.default()
+        intents.members = True  # pylint: disable=assigning-non-slot
+        self.client = discord.Client(
+            statys="online", type=2, name="TESTING WORLD", intents=intents
+        )
 
     def set_secret(self, discord_secret: str) -> None:
         """ Store Discord API key """
@@ -45,3 +44,7 @@ class DiscordClient(metaclass=SingleClient):
     def run(self) -> None:
         """ Start discord connection - blocking """
         self.client.run(self.__discord_secret)
+
+    async def close(self) -> None:
+        """ Shut down the connection """
+        await self.client.close()

@@ -4,18 +4,15 @@
 Shoulder Bird Refactor (2021.02 Rewrite)
 
 [x] shoulderbirdconfig
-[~] shouldbirdparser
+[x] shouldbirdparser
 [_] shouldbirdcli
 [x] Pull load/save configs to util
 [x] Create base config if none exist
 [x] CRUD methods for config
 [x] Unit test config IO
-[~] Refactor naming
+[x] Refactor naming
 [x] Reconsider return values (push for single value)
 [x] birdCall - Refactor DRY
-[_] model MessageCommand (command, content)
-[_] move DEFAULT_CONFIG to parser module
-[_] move SimpleMessage to model file
 @@@ - 542 lines, 1 file
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -24,6 +21,7 @@ Shoulder Bird Refactor (2021.02 Rewrite)
 
 utils/configio.py - Why is filename optional
 
+[_] model MessageCommand (command, content)
 [_] Debug logging wrapper (util level)
 [x] Add unit tests to mock failed file reads in core_entites
 [x] Queue for event actions
@@ -32,6 +30,7 @@ utils/configio.py - Why is filename optional
 [_] README.md for configuration folder
 [_] Load/Save configuration should raise if error
 [_] Discord object logger for debug
+[_] eventaction to named tuple
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                              Complete                                -
