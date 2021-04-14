@@ -14,8 +14,6 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-from __future__ import annotations
-
 import re
 import time
 import logging
@@ -62,22 +60,34 @@ class ShoulderBirdParser:
                 match_list.append(member)
         return match_list
 
-    async def eventcall(self, event: Message) -> None:
+    @classmethod
+    def __is_valid_message(cls, message: Message) -> bool:
+        """ Tests for valid message to process """
+        if not isinstance(message, Message):
+            cls.logger.error("Unknown arg type: %s", type(message))
+            return False
+
+        if not message.content:
+            cls.logger.warning("Empty message given, skipping.")
+            return False
+
+        if str(message.channel.type) not in ["text", "private"]:
+            cls.logger.debug("Unsupported message type, skipping.")
+            return False
+
+        return True
+
+    async def onmessage(self, message: Message) -> None:
         """ Hook for discord client, async coro """
-        if isinstance(event, Message):
-            message: Message = event
-        else:
-            self.logger.error("Unknown event type: %s", type(event))
-            return
+        if not ShoulderBirdParser.__is_valid_message(message):
+            return None
+
         tic = time.perf_counter()
         self.logger.debug("[START] onmessage")
 
-        if not message.content or str(message.channel.type) != "text":
-            self.logger.debug(
-                "Unsupported channel or empty message. %s, %s",
-                message.channel.type,
-                message.content[:10],
-            )
+        # If this is a private message, branch to CLI hander and return here
+        if str(message.channel.type) == "private":
+            # CLI call here
             return None
 
         guild: Guild = message.guild
@@ -118,22 +128,3 @@ class ShoulderBirdParser:
             await target.create_dm()
         if target.dm_channel:
             await target.dm_channel.send(msg)
-
-
-class SimpleMessage:
-    """ Data-type class for simplifing discord message object """
-
-    #     """ Data-type class for simplifing discord message object """
-    #     self.__message = message
-    #     self.content: str = message.clean_content
-    #     self.channel_name: str = message.channel.name
-    #     self.guild_id: str = str(message.guild.id)
-    #     self.user_id: str = str(message.author.id)
-    #     self.author: str = message.author.display_name
-
-    # def get_channel_member_ids(self) -> List[str]:
-    #     """ Returns list of member_ids in message channel, can return empty """
-    #     id_list: List[str] = []
-    #     if self.is_text_channel():
-    #         id_list = [str(member.id) for member in self.__message.channel.members]
-    #     return id_list

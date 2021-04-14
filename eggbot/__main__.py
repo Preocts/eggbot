@@ -21,7 +21,7 @@ def main() -> int:
     # Register modules
     shoulderbird = ShoulderBirdParser()
 
-    eggbot.event_subs.add(EventType.MESSAGE, shoulderbird.eventcall)
+    eggbot.event_subs.add(EventType.MESSAGE, shoulderbird.onmessage)
 
     eggbot.launch_bot()
 

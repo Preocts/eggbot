@@ -7,11 +7,11 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
-
-from typing import Any
 from typing import List
 from typing import Protocol
 from typing import NamedTuple
+
+from discord import Message  # type: ignore
 
 from eggbot.models.eventtype import EventType
 
@@ -19,7 +19,7 @@ from eggbot.models.eventtype import EventType
 class EventCallback(Protocol):
     """ Protocol duck type """
 
-    async def __call__(self, event: Any) -> None:
+    async def __call__(self, message: Message) -> None:
         ...
 
 
