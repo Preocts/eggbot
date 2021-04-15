@@ -23,7 +23,7 @@ from modules.shoulderbirdcli import ShoulderbirdCLI
 @pytest.fixture(scope="function", name="cli")
 def fixture_cli() -> ShoulderbirdCLI:
     """ Create instance of CLI class"""
-    config = ShoulderBirdConfig("./tests/fixtures/mock_shoulderbird.json")
+    config = ShoulderBirdConfig("./tests/fixtures/mock_shoulderbirdparser.json")
     return ShoulderbirdCLI(config)
 
 
@@ -46,8 +46,8 @@ def test_no_command_found(cli: ShoulderbirdCLI, message: Mock) -> None:
     assert cli.parse_command(message) is None
 
 
-def test_set_valid_guild_name(cli: ShoulderbirdCLI, message: Mock) -> None:
-    """ Set a search by guild name """
+def test_set_valid_guild_name_new(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Set a search by guild name that doesn't exist """
     guilds = [Guild(10, "test"), Guild(9876543210, "testings")]
     message.clean_content = "sb!set testings = (search|find)"
     message.author.id = 111
@@ -58,7 +58,21 @@ def test_set_valid_guild_name(cli: ShoulderbirdCLI, message: Mock) -> None:
     assert "Search set" in result
 
     member = cli.config.load_member("9876543210", "111")
-    assert member is not None
+    assert member.regex == "(search|find)"
+
+
+def test_set_valid_id_exists(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Set a search by guild ID that does exist """
+    guilds = [Guild(101, "test"), Guild(9876543210, "testings")]
+    message.clean_content = "sb!set 101 = (search|find)"
+    message.author.id = 101
+    with patch.object(cli, "discord") as mock_discord:
+        mock_discord.guilds = guilds
+        result = cli.parse_command(message)
+    assert result
+    assert "Search set" in result
+
+    member = cli.config.load_member("101", "101")
     assert member.regex == "(search|find)"
 
 
@@ -85,3 +99,43 @@ def test_set_invalid_guild(cli: ShoulderbirdCLI, message: Mock) -> None:
 
     assert result
     assert "Error: Guild not found" in result
+
+
+def test_toggle_on_guild_found(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Guild found in config, turn toggle on """
+    message.clean_content = "sb!on"
+    message.author.id = 101
+    result = cli.parse_command(message)
+
+    assert result
+    assert "ShoulderBird now **on**" in result
+
+
+def test_toggle_on_guild_not_found(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Guild not found in config, nothing to turn on """
+    message.clean_content = "sb!on"
+    message.author.id = 901
+    result = cli.parse_command(message)
+
+    assert result
+    assert "No searches found," in result
+
+
+def test_toggle_off_guild_found(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Guild found in config, turn toggle off """
+    message.clean_content = "sb!off"
+    message.author.id = 101
+    result = cli.parse_command(message)
+
+    assert result
+    assert "ShoulderBird now **off**" in result
+
+
+def test_toggle_off_guild_not_found(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Guild not found in config, nothing to turn off """
+    message.clean_content = "sb!off"
+    message.author.id = 901
+    result = cli.parse_command(message)
+
+    assert result
+    assert "No searches found," in result

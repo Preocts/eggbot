@@ -25,7 +25,7 @@ from modules.shoulderbirdconfig import ShoulderBirdConfig
 
 COMMAND_CONFIG: Dict[str, Dict[str, str]] = {
     "sb!set": {
-        "attr": "set",
+        "attr": "set_search",
         "format": "sb!set [Guild Name | Guild ID] = [keyword]",
         "help": "Sets keyword search for a specific guild.",
     },
@@ -77,7 +77,7 @@ class ShoulderbirdCLI:
 
         return return_value
 
-    def set(self, message: Message) -> str:
+    def set_search(self, message: Message) -> str:
         """ Set a search """
         self.logger.debug("Set search, '%s'", message.clean_content)
         segments: List[str] = message.clean_content.replace("sb!set ", "").split("=", 1)
@@ -93,6 +93,26 @@ class ShoulderbirdCLI:
         )
 
         return f"Search set: {segments[1]}"
+
+    def toggle_on(self, message: Message) -> str:
+        """ Toggle ShoulderBird on for message author """
+        return self.__toggle(str(message.author.id), True)
+
+    def toggle_off(self, message: Message) -> str:
+        """ Toggle ShoulderBird off for message author """
+        return self.__toggle(str(message.author.id), False)
+
+    def __toggle(self, member_id: str, switch: bool) -> str:
+        """ Private method to handle looking up and changing toggles """
+        self.logger.debug("Toggle '%s' to '%s'", member_id, switch)
+        verb = "on" if switch else "off"
+        member_list = self.config.member_list_all(member_id)
+        for member in member_list:
+            self.config.save_member(member.guild_id, member.member_id, toggle=switch)
+        if member_list:
+            return f"ShoulderBird now **{verb}** for {len(member_list)} guild(s)."
+
+        return "No searches found, use `sb!help set` to get started."
 
     def __find_guild(self, guild_id: str) -> Optional[str]:
         """ Find guild by ID or name, return None if not found """
