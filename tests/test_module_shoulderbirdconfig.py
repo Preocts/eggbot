@@ -101,11 +101,3 @@ class TestShoulderBirdConfig:
         for config in configs:
             assert config.regex == "multi-test"
         self.parser.reload_config()
-
-    def test_save_on_destroy(self) -> None:
-        """ Presume we have a save call on __del__ """
-        assert self.parser is not None
-        self.parser.save_member(MOCK_GUILD_ID, MOCK_MEMBER_ID, regex="Destroy")
-        TestShoulderBirdConfig.parser = None
-        TestShoulderBirdConfig.parser = ShoulderBirdConfig(MOCK_CONFIG)
-        assert self.parser.load_member(MOCK_GUILD_ID, MOCK_MEMBER_ID).regex == "Destroy"
