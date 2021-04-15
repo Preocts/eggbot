@@ -26,6 +26,7 @@ from discord import Member  # type: ignore
 from modules.shoulderbirdconfig import DEFAULT_CONFIG
 from modules.shoulderbirdconfig import BirdMember
 from modules.shoulderbirdconfig import ShoulderBirdConfig
+from modules.shoulderbirdcli import ShoulderbirdCLI
 
 
 class ShoulderBirdParser:
@@ -36,6 +37,7 @@ class ShoulderBirdParser:
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
         """ Loads config """
         self.__config = ShoulderBirdConfig(config_file)
+        self.cli = ShoulderbirdCLI(self.__config)
 
     def close(self):
         """ Saves config state, breaks all references """

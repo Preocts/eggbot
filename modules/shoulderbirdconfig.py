@@ -99,7 +99,7 @@ class ShoulderBirdConfig:
         return config_list
 
     def load_member(self, guild_id: str, member_id: str) -> BirdMember:
-        """ Load a member from a guild. Can return None if member not found """
+        """ Load a member from a guild. Will return empty member if not found """
         self.logger.debug("load_member: '%s', '%s'", guild_id, member_id)
         member = self.__load_guild(guild_id).get(member_id)
         return BirdMember(**member) if member else BirdMember(guild_id, member_id)

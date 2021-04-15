@@ -7,7 +7,7 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 from __future__ import annotations
-
+from typing import List
 from typing import Optional
 
 import discord  # type: ignore
@@ -48,3 +48,8 @@ class DiscordClient(metaclass=SingleClient):
     async def close(self) -> None:
         """ Shut down the connection """
         await self.client.close()
+
+    @property
+    def guilds(self) -> List[discord.Guild]:
+        """ List of guilds loaded to client """
+        return self.client.guilds

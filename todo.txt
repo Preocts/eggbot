@@ -5,7 +5,7 @@ Shoulder Bird Refactor (2021.02 Rewrite)
 
 [x] shoulderbirdconfig
 [x] shouldbirdparser
-[_] shouldbirdcli
+[~] shouldbirdcli
 [x] Pull load/save configs to util
 [x] Create base config if none exist
 [x] CRUD methods for config
@@ -13,6 +13,7 @@ Shoulder Bird Refactor (2021.02 Rewrite)
 [x] Refactor naming
 [x] Reconsider return values (push for single value)
 [x] birdCall - Refactor DRY
+[x] Rename eventcall to message(), adjust EventAction to __call__
 @@@ - 542 lines, 1 file
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
