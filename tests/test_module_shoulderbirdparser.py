@@ -24,7 +24,7 @@ class TestShoulderBirdParser:
             "./tests/fixtures/mock_shoulderbirdparser.json"
         )
         self.mock_call = {
-            "guild_id": "01",
+            "guild_id": "101",
             "user_id": "Delta",
             "clean_message": "I should hope this test passes!",
         }
@@ -34,14 +34,14 @@ class TestShoulderBirdParser:
         matches = self.parser.get_matches(**self.mock_call)
         assert len(matches) == 2
         for idx, match in enumerate(matches):
-            assert match.member_id == f"0{idx + 1}"
+            assert match.member_id == f"10{idx + 1}"
 
     def test_positive_match_complex(self):
         """ Positive match, tests for case agnostic """
         self.mock_call["clean_message"] = "I should hope this TESTsuite passes!"
         matches = self.parser.get_matches(**self.mock_call)
         assert len(matches) == 1
-        assert matches[0].member_id == "01"
+        assert matches[0].member_id == "101"
 
     def test_word_bound_regex(self):
         """ Negitive match, ensure word bound is applied """
