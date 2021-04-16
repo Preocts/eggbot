@@ -13,6 +13,21 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.7-alpha] - 2021.04.17
+
+### Added
+- JoinAction refactor completed:
+  - `joinactions` reduced to only live code
+  - Documentation completed
+  - Testing completed
+- JoinActions loaded into event system
+
+### Changed
+- Typing hinting for event_sub `CALLBACKEVENT`, couldn't get `protocol` to overload politely
+
+### Fixed
+- Removed `error` logging lines which were glorified debug lines
+
 ## [0.0.6-alpha] - 2021.04.16
 
 ### Added

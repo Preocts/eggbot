@@ -1,4 +1,4 @@
-# Egg Bot
+# eggbot - Discord Chat Bot
 
 Egg Bot is a side-project Discord chat bot written for a friend that just keeps me entertained.
 
@@ -22,16 +22,17 @@ Currently under a re-write.
    - Console output
 1. **done** Further abstraction of Discord client - Events and Cogs
 1. **done** Shoulder Bird plug-in refactor
+1. **done** OnJoin module refactor
 1. *started* Convert to pytest framework for unit tests
+1. Kudos module refactor
+1. Coverage to minimum 90% - all files
 1. Build a better roadmap
-1. Kudos plug-in refactor
-
 ---
 
 ## Requirements
 
 - Python >= 3.8
-- discord.py >= 1.5.1v
+- discord.py >= 1.7.1
 
 ## Installation
 
@@ -41,6 +42,8 @@ Currently under a re-write.
 ## Documentation
 
 - [ShoulderBird Module](docs/shoulderbird.md)
+- [JoinAction Module](docs/joinactions.md)
+
 
 
 ## Environment setup
