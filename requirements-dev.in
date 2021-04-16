@@ -1,0 +1,7 @@
+pre-commit
+pytest
+coverage
+black
+pylint
+mypy
+flake8

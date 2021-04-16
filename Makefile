@@ -1,44 +1,32 @@
-.PHONY: dev-install clean clean-pyc clean-build clean-test tests package
+.PHONY: init install lock install-dev clean-pyc clean-install clean update
 
-dev-install:
+init:
 	pip install --upgrade pip setuptools wheel
-	pip install --upgrade -r requirements.txt  -r requirements-dev.txt
+	pip install pip-tools
 
-# Run all cleaning steps
-clean: clean-build clean-pyc clean-test
+install: init # install run-time requirements
+	pip install -r requirements.txt
+
+lock:  # generate new hashes for requirement files
+	pip-compile --generate-hashes --output-file requirements.txt requirements.in
+	pip-compile --generate-hashes --output-file requirements-dev.txt requirements-dev.in
+
+update: # update dependancies
+	pip-compile --upgrade --generate-hashes --output-file requirements.txt requirements.in
+	pip-compile --upgrade --generate-hashes --output-file requirements-dev.txt requirements-dev.in
+	pip install --upgrade -r requirements.txt -r requirements-dev.txt
+
+install-dev:  # Install development requirements
+	pip install -r requirements-dev.txt
 
 clean-pyc: ## Remove python artifacts.
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
-	find . -name '__pycache__' -exec rm -fr {} +
+	find . -name '*~' -exec rm -f  {} +
+	find . -name '__pycache__' -exec rm -rf {} +
+	find . -name '.mypy_cache' -exec rm -rf {} +
 
-clean-build: ## Remove build artifacts.
-	rm -f artifact.zip
-	rm -rf dist/
-	rm -rf *.egg-info
-	rm -rf vendors/
-	rm -rf lambda-artifact.zip
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+clean-install: ## Remove build artifacts.
+	find . -name '*.egg-info' -exec rm -rf {} +
 
-clean-test: ## Remove test artifacts
-	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
-	find . -name '.pytest_cache' -exec rm -fr {} +
-
-tests: ## Run all tests found in the /tests directory.
-	coverage run -m pytest -v tests/
-	coverage report --include "*/eggbot/*" --show-missing
-	coverage report --include "*/modules/*" --show-missing
-
-package: clean-build ## Creates a package for testing
-	mkdir vendors
-	mkdir dist
-	pip install -r requirements.txt -t ./vendors
-	cp -r vendors/* ./dist/
-	cp -r ./src/eggbot ./dist
-	cp -r ./config/ ./dist/
-	mv ./dist/eggbot/__main__.py ./dist/main.py
-	(cd ./dist && zip -r ../artifact.zip .)
+clean: clean-pyc clean-install
