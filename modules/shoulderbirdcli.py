@@ -202,7 +202,7 @@ class ShoulderbirdCLI:
         allowed = f"()|{ascii_letters}"
         for char in search:
             if char in allowed:
-                clean_list.append(char)
+                clean_list.append(char.lower())
             else:
-                clean_list.append(f"\\{char}")
+                clean_list.append(f"\\{char.lower()}")
         return "".join(clean_list)
