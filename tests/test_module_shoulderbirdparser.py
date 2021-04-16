@@ -10,41 +10,38 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import pytest
 
 from modules.shoulderbirdparser import ShoulderBirdParser
 
 
-class TestShoulderBirdParser:
-    """ Test suite """
+@pytest.fixture(scope="function", name="parser")
+def fixture_parser() -> ShoulderBirdParser:
+    """ fixture """
+    return ShoulderBirdParser("./tests/fixtures/mock_shoulderbirdparser.json")
 
-    # pylint: disable=attribute-defined-outside-init
-    def setup_method(self):
-        """ Fixture Creation """
-        self.parser = ShoulderBirdParser(
-            "./tests/fixtures/mock_shoulderbirdparser.json"
-        )
-        self.mock_call = {
-            "guild_id": "101",
-            "user_id": "Delta",
-            "clean_message": "I should hope this test passes!",
-        }
 
-    def test_positive_match_simple(self):
-        """ Positive match, also tests toggle """
-        matches = self.parser.get_matches(**self.mock_call)
-        assert len(matches) == 2
-        for idx, match in enumerate(matches):
-            assert match.member_id == f"10{idx + 1}"
+def test_positive_match_simple(parser: ShoulderBirdParser) -> None:
+    """ Positive matches, also tests toggle """
+    matches = parser.get_matches("101", "Delta", "This is a test")
+    assert len(matches) == 2
+    for idx, match in enumerate(matches):
+        assert match.member_id == f"10{idx + 1}"
 
-    def test_positive_match_complex(self):
-        """ Positive match, tests for case agnostic """
-        self.mock_call["clean_message"] = "I should hope this TESTsuite passes!"
-        matches = self.parser.get_matches(**self.mock_call)
-        assert len(matches) == 1
-        assert matches[0].member_id == "101"
 
-    def test_word_bound_regex(self):
-        """ Negitive match, ensure word bound is applied """
-        self.mock_call["clean_message"] = "Ishouldhopethistestpasses!"
-        matches = self.parser.get_matches(**self.mock_call)
-        assert len(matches) == 0
+def test_positive_match_complex(parser: ShoulderBirdParser):
+    """ Positive match, tests for case agnostic """
+    msg = "I should hope this TESTsuite passes!"
+    matches = parser.get_matches("102", "Delta", msg)
+    assert len(matches) == 1
+    assert matches[0].member_id == "101"
+
+
+def test_word_bound_regex_complex_search(parser: ShoulderBirdParser):
+    """ Negitive match, ensure word bound is applied """
+    msg = "appreciated"
+    matches = parser.get_matches("101", "Delta", msg)
+    assert len(matches) == 0
+    msg = "preoct"
+    matches = parser.get_matches("101", "Delta", msg)
+    assert len(matches) == 1

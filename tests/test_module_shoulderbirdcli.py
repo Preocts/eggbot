@@ -219,5 +219,5 @@ def test_sanitize_search(cli: ShoulderbirdCLI) -> None:
     safe_re = "(simple|Complex)"
     assert cli.sanitize_search(safe_re) == "(simple|complex)"
 
-    questionable = "(Simple*|complex)[a-z]*\\s"
-    assert cli.sanitize_search(questionable) == r"(simple\*|complex)\[a\-z\]\*\\s"
+    questionable = "(Simple|c*ompl+ex?|a{5})\\"
+    assert cli.sanitize_search(questionable) == r"(simple|c\*ompl\+ex\?|a\{5\})\\"

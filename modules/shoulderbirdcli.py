@@ -14,7 +14,6 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
-from string import ascii_letters
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -197,12 +196,12 @@ class ShoulderbirdCLI:
 
     @staticmethod
     def sanitize_search(search: str) -> str:
-        """ Only allow `(`, `)` and `|` in regex """
-        clean_list = []
-        allowed = f"()|{ascii_letters}"
+        """ Remove the risk of expensive regex calls """
+        disallowed = ["*", ".", "?", ":", "\\", "}", "{", "+"]
+        clean_search: List[str] = []
         for char in search:
-            if char in allowed:
-                clean_list.append(char.lower())
+            if char in disallowed:
+                clean_search.append(f"\\{char.lower()}")
             else:
-                clean_list.append(f"\\{char.lower()}")
-        return "".join(clean_list)
+                clean_search.append(char.lower())
+        return "".join(clean_search)
