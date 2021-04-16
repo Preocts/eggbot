@@ -19,7 +19,7 @@
         "103": {
             "guild_id": "101",
             "member_id": "103",
-            "regex": "case",
+            "regex": "oct(|s)|pre(|oct|octs)|egg(|s|bot|_bot)",
             "toggle": true,
             "ignore": []
         },

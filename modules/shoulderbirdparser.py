@@ -57,7 +57,7 @@ class ShoulderBirdParser:
             if not (member.toggle and member.regex) or user_id in member.ignore:
                 continue
             # Word bound regex search, case agnostic
-            if re.search(fr"(?i)\b{member.regex}\b", clean_message):
+            if re.search(fr"(?i)\b({member.regex})\b", clean_message):
                 self.logger.debug("Match found: '%s'", member.member_id)
                 match_list.append(member)
         return match_list
