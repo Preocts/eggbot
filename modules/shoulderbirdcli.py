@@ -14,6 +14,7 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
+from string import ascii_letters
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -50,7 +51,7 @@ COMMAND_CONFIG: Dict[str, Dict[str, str]] = {
         "help": "Unignores a user by Discord name or ID.",
     },
     "sb!help": {
-        "attr": "help",
+        "attr": "help_msg",
         "format": "sb!help (command)",
         "help": "Available help: set, on, off, ignore, unignore",
     },
@@ -98,11 +99,10 @@ class ShoulderbirdCLI:
         if guild_id is None:
             return f"Error: Guild not found, {segments[0].strip()}"
 
-        self.config.save_member(
-            guild_id, str(message.author.id), regex=segments[1].strip()
-        )
+        clean_search = ShoulderbirdCLI.sanitize_search(segments[1].strip())
+        self.config.save_member(guild_id, str(message.author.id), regex=clean_search)
         self.config.save_config()
-        return f"Search set: {segments[1]}"
+        return f"Search set: {clean_search}"
 
     def ignore(self, message: Message) -> str:
         """ Add a user to the ignore across all guilds """
@@ -181,7 +181,7 @@ class ShoulderbirdCLI:
                 break
         return found_id
 
-    def help(self, message: Message) -> str:
+    def help_msg(self, message: Message) -> str:
         """ Helpful help is always helpful """
         self.logger.debug("Help: %s", message.clean_content)
         target = "sb!" + message.clean_content.replace("sb!help", "").strip()
@@ -194,3 +194,15 @@ class ShoulderbirdCLI:
                 f"`{COMMAND_CONFIG[target]['format']}`",
             ]
         )
+
+    @staticmethod
+    def sanitize_search(search: str) -> str:
+        """ Only allow `(`, `)` and `|` in regex """
+        clean_list = []
+        allowed = f"()|{ascii_letters}"
+        for char in search:
+            if char in allowed:
+                clean_list.append(char)
+            else:
+                clean_list.append(f"\\{char}")
+        return "".join(clean_list)

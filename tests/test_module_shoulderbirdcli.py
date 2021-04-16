@@ -212,3 +212,12 @@ def test_all_helps(cli: ShoulderbirdCLI, message: Mock) -> None:
 
         assert result
         assert values["help"] in result, key
+
+
+def test_sanitize_search(cli: ShoulderbirdCLI) -> None:
+    """ Regex injection is a thing apparently """
+    safe_re = "(simple|complex)"
+    assert cli.sanitize_search(safe_re) == safe_re
+
+    questionable = "(simple*|complex)[a-z]*\\s"
+    assert cli.sanitize_search(questionable) == r"(simple\*|complex)\[a\-z\]\*\\s"
