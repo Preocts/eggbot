@@ -44,6 +44,16 @@ COMMAND_CONFIG: Dict[str, Dict[str, str]] = {
         "format": "sb!ignore [Name | ID]",
         "help": "Ignores a user by Discord name or ID.",
     },
+    "sb!unignore": {
+        "attr": "unignore",
+        "format": "sb!unignore [Name | ID]",
+        "help": "Unignores a user by Discord name or ID.",
+    },
+    "sb!help": {
+        "attr": "help",
+        "format": "sb!help (command)",
+        "help": "Available help: set, on, off, ignore, unignore",
+    },
 }
 
 
@@ -91,8 +101,46 @@ class ShoulderbirdCLI:
         self.config.save_member(
             guild_id, str(message.author.id), regex=segments[1].strip()
         )
-
+        self.config.save_config()
         return f"Search set: {segments[1]}"
+
+    def ignore(self, message: Message) -> str:
+        """ Add a user to the ignore across all guilds """
+        target: str = message.clean_content.replace("sb!ignore", "").strip()
+        return self.__ignore_toggle(message, target, True)
+
+    def unignore(self, message: Message) -> str:
+        """ Remove a user from ignore across all guilds """
+        target: str = message.clean_content.replace("sb!unignore", "").strip()
+        return self.__ignore_toggle(message, target, False)
+
+    def __ignore_toggle(self, message: Message, target: str, switch: bool) -> str:
+        """ Private method to handle lookup up and changing ignores """
+        self.logger.debug("Ignore to %s, '%s'", switch, message.clean_content)
+        verb = "added to" if switch else "removed from"
+        if not target:
+            return f"Error: Formatting. {COMMAND_CONFIG['sb!ignore']['format']}"
+
+        user_id = self.__find_user(target)
+
+        if not user_id:
+            return (
+                f"'{target}' not found. Use their discord name (not nickname), it "
+                "is case sensitive. Or, use their discord ID."
+            )
+
+        member_list = self.config.member_list_all(str(message.author.id))
+        for config in member_list:
+            if switch:
+                config.ignore.add(user_id)
+            elif user_id in config.ignore:
+                config.ignore.remove(user_id)
+            self.config.save_member(
+                config.guild_id, config.member_id, ignore=config.ignore
+            )
+        if member_list:
+            self.config.save_config()
+        return f"'{target}' {verb} ignore list."
 
     def toggle_on(self, message: Message) -> str:
         """ Toggle ShoulderBird on for message author """
@@ -110,15 +158,39 @@ class ShoulderbirdCLI:
         for member in member_list:
             self.config.save_member(member.guild_id, member.member_id, toggle=switch)
         if member_list:
+            self.config.save_config()
             return f"ShoulderBird now **{verb}** for {len(member_list)} guild(s)."
 
         return "No searches found, use `sb!help set` to get started."
 
-    def __find_guild(self, guild_id: str) -> Optional[str]:
+    def __find_guild(self, search: str) -> Optional[str]:
         """ Find guild by ID or name, return None if not found """
         found_id: Optional[str] = None
         for guild in self.discord.guilds:
-            if guild_id == str(guild.id) or guild_id == guild.name:
+            if search == str(guild.id) or search == guild.name:
                 found_id = str(guild.id)
                 break
         return found_id
+
+    def __find_user(self, search: str) -> Optional[str]:
+        """ Find member by ID or name, return None if not found """
+        found_id: Optional[str] = None
+        for user in self.discord.users:
+            if search == str(user.id) or search == user.name:
+                found_id = str(user.id)
+                break
+        return found_id
+
+    def help(self, message: Message) -> str:
+        """ Helpful help is always helpful """
+        self.logger.debug("Help: %s", message.clean_content)
+        target = "sb!" + message.clean_content.replace("sb!help", "").strip()
+        if target not in COMMAND_CONFIG:
+            target = "sb!help"
+
+        return "\n".join(
+            [
+                COMMAND_CONFIG[target]["help"],
+                f"`{COMMAND_CONFIG[target]['format']}`",
+            ]
+        )

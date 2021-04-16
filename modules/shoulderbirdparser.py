@@ -89,7 +89,9 @@ class ShoulderBirdParser:
 
         # If this is a private message, branch to CLI hander and return here
         if str(message.channel.type) == "private":
-            # CLI call here
+            response = self.cli.parse_command(message)
+            if response:
+                await self.__send_dm(message.author, response)
             return None
 
         guild: Guild = message.guild
@@ -105,13 +107,13 @@ class ShoulderBirdParser:
                     "'%s' not in channel '%s'", match.member_id, message.channel_name
                 )
                 continue
-            await self.__send_dm(match, message, guild)
+            await self.__send_match_dm(match, message, guild)
 
         self.logger.debug(
             "[FINISH] onmessage completed: %f ms", round(time.perf_counter() - tic, 2)
         )
 
-    async def __send_dm(
+    async def __send_match_dm(
         self, member: BirdMember, message: Message, guild: Guild
     ) -> None:
         """ Private - send DM message to match. To be replaced with actions queue """
@@ -126,7 +128,16 @@ class ShoulderBirdParser:
             f"mentioned you in **{message.channel.name}** saying:\n"
             f"`{message.content}`\n{message.jump_url}"
         )
+        await self.__send_dm(target, msg)
+
+    @staticmethod
+    async def __send_dm(target: Member, content: str) -> None:
+        """ Private, sends a DM to target """
         if target.dm_channel is None:
             await target.create_dm()
         if target.dm_channel:
-            await target.dm_channel.send(msg)
+            await target.dm_channel.send(content)
+
+
+# May Bartmoss have mercy on your data for running this bot.
+# We are all only eggs

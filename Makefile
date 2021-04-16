@@ -31,6 +31,7 @@ clean-test: ## Remove test artifacts
 tests: ## Run all tests found in the /tests directory.
 	coverage run -m pytest -v tests/
 	coverage report --include "*/eggbot/*" --show-missing
+	coverage report --include "*/modules/*" --show-missing
 
 package: clean-build ## Creates a package for testing
 	mkdir vendors

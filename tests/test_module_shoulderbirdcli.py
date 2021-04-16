@@ -18,12 +18,13 @@ import pytest
 
 from modules.shoulderbirdconfig import ShoulderBirdConfig
 from modules.shoulderbirdcli import ShoulderbirdCLI
+from modules.shoulderbirdcli import COMMAND_CONFIG
 
 
 @pytest.fixture(scope="function", name="cli")
 def fixture_cli() -> ShoulderbirdCLI:
     """ Create instance of CLI class"""
-    config = ShoulderBirdConfig("./tests/fixtures/mock_shoulderbirdparser.json")
+    config = ShoulderBirdConfig("./tests/fixtures/mock_shoulderbirdcli.json")
     return ShoulderbirdCLI(config)
 
 
@@ -34,7 +35,14 @@ def fixture_message() -> Mock:
 
 
 class Guild(NamedTuple):
-    """ Guild values """
+    """ Mocked Guild object """
+
+    id: int
+    name: str
+
+
+class User(NamedTuple):
+    """ Mocked User object """
 
     id: int
     name: str
@@ -139,3 +147,68 @@ def test_toggle_off_guild_not_found(cli: ShoulderbirdCLI, message: Mock) -> None
 
     assert result
     assert "No searches found," in result
+
+
+def test_ignore_no_target(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Ignore command but nothing given """
+    message.clean_content = "sb!ignore "
+    result = cli.parse_command(message)
+
+    assert result
+    assert "Error: Formatting" in result
+
+
+def test_ignore_user_not_found(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Username not found, return helpful tips """
+    message.clean_content = "sb!ignore dave"
+    users = [User(10, "test"), User(9876543210, "test_user")]
+    with patch.object(cli, "discord") as mock_discord:
+        mock_discord.users = users
+        result = cli.parse_command(message)
+
+        assert result
+        assert "'dave' not found." in result
+
+
+def test_ignore_name_toggle_target(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Ignore a user, confirm. Unignore user, confirm """
+    message.clean_content = "sb!ignore test_user"
+    message.author.id = 901
+    users = [User(10, "test"), User(9876543210, "test_user")]
+    with patch.object(cli, "discord") as mock_discord:
+        mock_discord.users = users
+        ignored_result = cli.parse_command(message)
+
+        assert ignored_result
+        assert "'test_user' added to" in ignored_result
+
+        for member in cli.config.member_list_all("901"):
+            assert "9876543210" in member.ignore, member.guild_id
+
+        message.clean_content = "sb!unignore test_user"
+        unignored_result = cli.parse_command(message)
+
+        assert unignored_result
+        assert "'test_user' removed from" in unignored_result
+
+        for member in cli.config.member_list_all("901"):
+            assert "9876543210" not in member.ignore, member.guild_id
+
+
+def test_help(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Check for good help responses """
+    message.clean_content = "sb!help"
+    result = cli.parse_command(message)
+
+    assert result
+    assert COMMAND_CONFIG["sb!help"]["help"] in result
+
+
+def test_all_helps(cli: ShoulderbirdCLI, message: Mock) -> None:
+    """ Checks all helps in COMMAND_CONFIG """
+    for key, values in COMMAND_CONFIG.items():
+        message.clean_content = f"sb!help {key.replace('sb!', '')}"
+        result = cli.parse_command(message)
+
+        assert result
+        assert values["help"] in result, key

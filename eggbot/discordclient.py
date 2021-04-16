@@ -53,3 +53,8 @@ class DiscordClient(metaclass=SingleClient):
     def guilds(self) -> List[discord.Guild]:
         """ List of guilds loaded to client """
         return self.client.guilds
+
+    @property
+    def users(self) -> List[discord.User]:
+        """ List of users loaded to client """
+        return self.client.users
