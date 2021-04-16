@@ -7,7 +7,6 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
-from typing import Optional
 
 from eggbot.discordclient import DiscordClient
 from eggbot.configfile import ConfigFile
@@ -15,14 +14,13 @@ from eggbot.eventsubs import EventSubs
 from eggbot.utils.loadenv import LoadEnv
 from eggbot.models.eventtype import EventType
 
+DEFAULT_CONFIG = "configs/eggbotcore.json"
+
 
 class EggBotCore:
     """ Main construct of bot """
 
     logger = logging.getLogger(__name__)
-    event_subs: Optional[EventSubs] = None
-    core_config: Optional[ConfigFile] = None
-    env_vars: Optional[LoadEnv] = None
     discord_ = DiscordClient()
 
     def __init__(self) -> None:
@@ -37,7 +35,7 @@ class EggBotCore:
         self.logger.info("Opening configuration...")
         if not self.core_config:
             raise Exception("Internal Object 'core_config' not initialized.")
-        if not self.core_config.load("./config/eggbot_core.json"):
+        if not self.core_config.load(DEFAULT_CONFIG):
             self.logger.warning("Configuration not found!")
             self.logger.warning("File used: %s", self.core_config.filename)
             return False
@@ -58,7 +56,7 @@ class EggBotCore:
             self.logger.error(self.event_subs.get(EventType.MEMBERJOIN))
             for subbed in self.event_subs.get(EventType.MEMBERJOIN):
                 self.logger.error("WE HERE")
-                subbed(member)
+                await subbed(member)
         return True
 
     async def on_message(self, message) -> bool:
@@ -69,9 +67,13 @@ class EggBotCore:
         if message.author.bot:
             self.logger.info("on_message(), Bot chat, ignoring.")
             return False
+        # if str(message.author.id) == self.core_config.read("owner"):
+        if message.content == "egg!dc":
+            await self.discord_.close()
+            return False
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.MESSAGE):
-                subbed(message)
+                await subbed(message)
         return True
 
     async def on_ready(self) -> bool:
@@ -79,7 +81,7 @@ class EggBotCore:
         # TODO (jcm) : What do we need to do here?
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.READY):
-                subbed()
+                await subbed(None)
         return True
 
     async def on_disconnect(self) -> bool:
@@ -87,7 +89,7 @@ class EggBotCore:
         # TODO (jcm) : What do we need to do here?
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.DISCONNECT):
-                subbed()
+                await subbed(None)
         return True
 
     def launch_bot(self) -> int:

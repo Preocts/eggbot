@@ -13,6 +13,17 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.6-alpha] - 2021.04.16
+
+### Added
+- Loading modules in `__main__.py` as a holding pattern for auto-loader
+- Cleaned up a ton of calls
+- ShoulderBird refactor completed:
+  - `shoulderbirdconfig` holds and manages config file
+  - `shoulderbirdparser` manages scanning for search keys
+  - `shoulderbirdcli` allows configuration from direct message chat
+  - Documentation
+
 ## [0.0.5-alpha] - 2020.11.29
 
 ### Added

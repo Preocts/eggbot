@@ -98,8 +98,8 @@ class TestEggbotCore(unittest.TestCase):
     def test_join_pub_events(self):
         """ Make sure join calls the "on_join" sub list """
         eggbot = EggBotCore()
-        _join_sub_01 = unittest.mock.Mock()
-        _join_sub_02 = unittest.mock.Mock()
+        _join_sub_01 = unittest.mock.AsyncMock()
+        _join_sub_02 = unittest.mock.AsyncMock()
         eggbot.event_subs.add(EventType.MEMBERJOIN, _join_sub_01)
         eggbot.event_subs.add(EventType.MEMBERJOIN, _join_sub_02)
 
@@ -117,8 +117,8 @@ class TestEggbotCore(unittest.TestCase):
     def test_message_pub_events(self):
         """ Make sure messages call the "on_message" sub list """
         eggbot = EggBotCore()
-        message_sub_01 = unittest.mock.Mock()
-        message_sub_02 = unittest.mock.Mock()
+        message_sub_01 = unittest.mock.AsyncMock()
+        message_sub_02 = unittest.mock.AsyncMock()
         eggbot.event_subs.add(EventType.MESSAGE, message_sub_01)
         eggbot.event_subs.add(EventType.MESSAGE, message_sub_02)
 

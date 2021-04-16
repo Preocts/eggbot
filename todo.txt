@@ -2,24 +2,41 @@
 =                               Active                                 -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                               Future                                 -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-[_] Add unit tests to mock failed file reads in core_entites
-[_] Queue for event actions
-[_] Replace os with Pathlib
+utils/configio.py - Why is filename optional
+
+[_] model MessageCommand (command, content)
+[_] Debug logging wrapper (util level)
+[x] Add unit tests to mock failed file reads in core_entites
+[x] Queue for event actions
 [_] Version bumping script to capture updates
-    - setup.py
     -./config/eggbot_core.json
 [_] README.md for configuration folder
 [_] Load/Save configuration should raise if error
 [_] Discord object logger for debug
+[_] eventaction to named tuple
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 =                              Complete                                -
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+2021-04-15 Shoulder Bird Refactor (2021.02 Rewrite)
+
+[x] shoulderbirdconfig
+[x] shouldbirdparser
+[x] shouldbirdcli
+[x] Pull load/save configs to util
+[x] Create base config if none exist
+[x] CRUD methods for config
+[x] Unit test config IO
+[x] Refactor naming
+[x] Reconsider return values (push for single value)
+[x] birdCall - Refactor DRY
+[x] Rename eventcall to message(), adjust EventAction to __call__
+@@@ - 542 lines, 1 file
 
 2020-11-28 Event Framework (0.0.5-alpha)
 
