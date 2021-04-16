@@ -129,8 +129,8 @@ class JoinActions:
     async def _send_dm(self, content: str, member: Member) -> None:
         """ Send a direct message to given member """
         if not member.dm_channel:
-            member.create_dm()
+            await member.create_dm()
         if not member.dm_channel:
             self.logger.info("DM to '%s' not allowed.", member.name)
         else:
-            member.dm_channel.send(content)
+            await member.dm_channel.send(content)
