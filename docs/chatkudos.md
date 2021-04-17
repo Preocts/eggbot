@@ -23,7 +23,7 @@ Egg_Bot> 3 points to Some_Member
 Me> @Some_Member ---
 Egg_Bot> 3 points from Some_Member
 
-me> @Some_Member +Awesome-Sauce+
+Me> @Some_Member +Awesome-Sauce+
 Egg_Bot> 1 points to Some_Member
 ```
 

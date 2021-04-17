@@ -35,6 +35,7 @@ COMMAND_CONFIG: Dict[str, str] = {
     "kudos!role": "set_lists",
     "kudos!lock": "set_lock",
     "kudos!help": "show_help",
+    "kudos!board": "generate_board",
 }
 
 
@@ -219,6 +220,28 @@ class ChatKudos:
             "Detailed use instructions here: "
             "https://github.com/Preocts/eggbot/blob/main/docs/chatkudos.md"
         )
+
+    def generate_board(self, message: Message) -> str:
+        """ Create scoreboard """
+        self.logger.debug("Scoreboard: %s", message.content)
+        try:
+            count = int(message.content.replace("kudos!board", ""))
+        except ValueError:
+            count = 10
+        guild_conf = self.get_guild(str(message.guild.id))
+        # Make a list of keys (user IDs) sorted by their value (score) low to high
+        id_list = sorted(guild_conf.scores, key=lambda key: guild_conf.scores[key])
+        score_list: List[str] = [f"Top {count} ChatKudos holders:", "```"]
+        while count > 0 and id_list:
+            user_id = id_list.pop()
+            user = message.guild.get_member(int(user_id))
+            display_name = user.display_name if user else user_id
+            score_list.append(
+                "{:>5} | {:<38}".format(guild_conf.scores[user_id], display_name)
+            )
+            count -= 1
+        score_list.append("```")
+        return "\n".join(score_list)
 
     def parse_command(self, message: Message) -> str:
         """ Process all commands prefixed with 'kudos!' """

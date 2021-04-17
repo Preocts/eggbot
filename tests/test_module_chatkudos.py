@@ -12,6 +12,7 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 from unittest.mock import Mock
 from unittest.mock import patch
+from typing import List
 from typing import Generator
 
 import pytest
@@ -34,12 +35,14 @@ def fixture_kudos() -> Generator:
 @pytest.fixture(scope="function", name="message")
 def fixture_message() -> Mock:
     """ Fixture """
-    mentions = Mock()
-    mentions.id = "111"
-    mentions.display_name = "Tester"
+    members: List[Mock] = [
+        Mock(display_name="Tester01"),
+        Mock(display_name="Tester02"),
+    ]
 
-    role_mentions = Mock()
-    role_mentions.id = "ABC"
+    mentions = Mock(id="111", display_name="Tester")
+
+    role_mentions = Mock(id="ABC")
     role_mentions.name = "Cool Kats"
 
     message = Mock()
@@ -50,6 +53,7 @@ def fixture_message() -> Mock:
     message.author.display_name = "Tester"
     message.mentions = [mentions]
     message.role_mentions = [role_mentions]
+    message.guild.get_member.side_effect = members
     return message
 
 
@@ -208,7 +212,27 @@ def test_lock_toggle(kudos: ChatKudos, message: Mock) -> None:
 
 def test_help(kudos: ChatKudos, message: Mock) -> None:
     """ Does this have a help? """
-    message.conent = "kudos!help"
+    message.content = "kudos!help"
 
     result = kudos.parse_command(message)
     assert "https://github.com/Preocts/eggbot/blob/main/docs/chatkudos.md" in result
+
+
+def test_board_all(kudos: ChatKudos, message: Mock) -> None:
+    """ Print the board without # limit """
+    message.content = "kudos!board Give me all the board"
+
+    result = kudos.parse_command(message)
+    assert "Top 10 ChatKudos holders:" in result
+    assert "Tester01" in result
+    assert "Tester02" in result
+
+
+def test_board_limited(kudos: ChatKudos, message: Mock) -> None:
+    """ Print the board with a # limit """
+    message.content = "kudos!board 1"
+
+    result = kudos.parse_command(message)
+    assert "Top 1 ChatKudos holders:" in result
+    assert "Tester01" in result
+    assert "Tester02" not in result
