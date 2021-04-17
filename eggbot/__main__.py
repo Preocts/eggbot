@@ -11,6 +11,7 @@ import sys
 from eggbot.eggbotcore import EggBotCore
 from eggbot.models.eventtype import EventType
 from modules.shoulderbirdparser import ShoulderBirdParser
+from modules.joinactions import JoinActions
 
 
 def main() -> int:
@@ -20,8 +21,10 @@ def main() -> int:
     # TODO: Replace with module loader
     # Register modules
     shoulderbird = ShoulderBirdParser()
+    joinactions = JoinActions()
 
     eggbot.event_subs.add(EventType.MESSAGE, shoulderbird.onmessage)
+    eggbot.event_subs.add(EventType.MEMBERJOIN, joinactions.onjoin)
 
     eggbot.launch_bot()
 

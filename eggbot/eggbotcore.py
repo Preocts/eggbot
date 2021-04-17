@@ -53,9 +53,7 @@ class EggBotCore:
             self.logger.info("on_member_join(), Bot join detected, ignoring.")
             return False
         if self.event_subs:
-            self.logger.error(self.event_subs.get(EventType.MEMBERJOIN))
             for subbed in self.event_subs.get(EventType.MEMBERJOIN):
-                self.logger.error("WE HERE")
                 await subbed(member)
         return True
 
@@ -67,10 +65,10 @@ class EggBotCore:
         if message.author.bot:
             self.logger.info("on_message(), Bot chat, ignoring.")
             return False
-        # if str(message.author.id) == self.core_config.read("owner"):
-        if message.content == "egg!dc":
-            await self.discord_.close()
-            return False
+        if str(message.author.id) == self.core_config.read("owner"):
+            if message.content == "egg!dc":
+                await self.discord_.close()
+                return False
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.MESSAGE):
                 await subbed(message)
