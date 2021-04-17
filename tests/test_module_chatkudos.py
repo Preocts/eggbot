@@ -34,12 +34,22 @@ def fixture_kudos() -> Generator:
 @pytest.fixture(scope="function", name="message")
 def fixture_message() -> Mock:
     """ Fixture """
+    mentions = Mock()
+    mentions.id = "111"
+    mentions.display_name = "Tester"
+
+    role_mentions = Mock()
+    role_mentions.id = "ABC"
+    role_mentions.name = "Cool Kats"
+
     message = Mock()
     message.content = "kudos!help"
     message.guild.name = "Testing Guild"
     message.guild.id = 111
     message.author.id = 111
     message.author.display_name = "Tester"
+    message.mentions = [mentions]
+    message.role_mentions = [role_mentions]
     return message
 
 
@@ -137,5 +147,39 @@ def test_adjust_loss_messages(kudos: ChatKudos, message: Mock) -> None:
 def test_adjust_message_empty(kudos: ChatKudos, message: Mock) -> None:
     """ Confirm an empty message is skipped """
     message.content = "kudos!gain"
+    result = kudos.parse_command(message)
+    assert not result
+
+
+def test_add_remove_user_list(kudos: ChatKudos, message: Mock) -> None:
+    """ Add, then remove, a user from user list """
+    message.role_mentions = []  # Clear to focus test scope
+    message.content = "kudos!user @Tester"  # mention is provided by fixture
+
+    result = kudos.parse_command(message)
+    assert "**+**Tester" in result
+
+    result = kudos.parse_command(message)
+    assert "**-**Tester" in result
+
+
+def test_add_remove_role_list(kudos: ChatKudos, message: Mock) -> None:
+    """ Add, then remove, a role from role list """
+    message.mentions = []  # Clear to focus test scope
+    message.content = "kudos!role #Cool Kats"  # role_mention provided by fixture
+
+    result = kudos.parse_command(message)
+    assert "**+**Cool Kats" in result
+
+    result = kudos.parse_command(message)
+    assert "**-**Cool Kats" in result
+
+
+def test_add_remove_list_empty(kudos: ChatKudos, message: Mock) -> None:
+    """ Confirm message with no mentions is skipped """
+    message.role_mentions = []
+    message.mentions = []
+    message.content = "kudos!user This is just an empty message"
+
     result = kudos.parse_command(message)
     assert not result

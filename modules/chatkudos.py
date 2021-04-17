@@ -31,6 +31,8 @@ COMMAND_CONFIG: Dict[str, str] = {
     "kudos!max": "set_max",
     "kudos!gain": "set_gain",
     "kudos!loss": "set_loss",
+    "kudos!user": "set_lists",
+    "kudos!role": "set_lists",
 }
 
 
@@ -153,6 +155,53 @@ class ChatKudos:
         self.save_guild(guild_id, **kwargs)
         return "Message has been set."
 
+    def set_lists(self, message: Message) -> str:
+        """ Update user and role lists based on message mentions """
+        self.logger.debug(
+            "Set lists: %d mentions, %d role_mentions",
+            len(message.mentions),
+            len(message.role_mentions),
+        )
+        changes: List[str] = self._set_users_list(message)
+        changes.extend(self._set_roles_list(message))
+
+        if not changes:
+            return ""
+        return "Allow list changes: " + ", ".join(changes)
+
+    def _set_users_list(self, message: Message) -> List[str]:
+        """ Process and user mentions in message, return changes """
+        changes: List[str] = []
+        users = set(self.get_guild(str(message.guild.id)).users)
+
+        for mention in message.mentions:
+            if mention.id in users:
+                users.remove(mention.id)
+                changes.append(f"**-**{mention.display_name}")
+            else:
+                users.add(mention.id)
+                changes.append(f"**+**{mention.display_name}")
+        if changes:
+            self.logger.error(changes)
+            self.save_guild(str(message.guild.id), users=list(users))
+        return changes
+
+    def _set_roles_list(self, message: Message) -> List[str]:
+        """ Process all role mentions in message, return changes """
+        changes: List[str] = []
+        roles = set(self.get_guild(str(message.guild.id)).roles)
+
+        for role_mention in message.role_mentions:
+            if role_mention.id in roles:
+                roles.remove(role_mention.id)
+                changes.append(f"**-**{role_mention.name}")
+            else:
+                roles.add(role_mention.id)
+                changes.append(f"**+**{role_mention.name}")
+        if changes:
+            self.save_guild(str(message.guild.id), roles=list(roles))
+        return changes
+
     def parse_command(self, message: Message) -> str:
         """ Process all commands prefixed with 'kudos!' """
         self.logger.debug("Parsing command: %s", message.content)
@@ -161,5 +210,6 @@ class ChatKudos:
             result = getattr(self, COMMAND_CONFIG[command])(message)
         except (AttributeError, KeyError):
             self.logger.error("'%s' attribute not found!", command)
+            return ""
         self.config.save()
         return result
