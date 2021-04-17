@@ -14,10 +14,13 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 from __future__ import annotations
+import re
+import time
 import logging
 from typing import Any
 from typing import List
 from typing import Dict
+from typing import Optional
 from typing import NamedTuple
 
 from discord import Message  # type: ignore
@@ -74,6 +77,15 @@ class KudosConfig(NamedTuple):
         return self._asdict()  # pylint: disable=E1101
 
 
+class Kudos(NamedTuple):
+    """ Model for a Kudos """
+
+    user_id: str
+    display_name: str
+    amount: int
+    current: int
+
+
 class ChatKudos:
     """ Kudos points brought to Discord """
 
@@ -112,6 +124,7 @@ class ChatKudos:
             lock: bool, restict to `roles`/`users` or open to all
             gain_message: str, message displayed on gain of points
             loss_message: str, message displayed on loss of points
+            scores: Dict[str, int], User_ID: score
         """
         self.logger.debug("Save: %s, (%s)", guild_id, kwargs)
         guild_conf = self.get_guild(guild_id)
@@ -122,6 +135,7 @@ class ChatKudos:
             lock=kwargs.get("lock", guild_conf.lock),
             gain_message=kwargs.get("gain_message", guild_conf.gain_message),
             loss_message=kwargs.get("loss_message", guild_conf.loss_message),
+            scores=kwargs.get("scores", guild_conf.scores),
         )
         if not self.config.read(guild_id):
             self.config.create(guild_id, new_conf.as_dict())
@@ -243,6 +257,52 @@ class ChatKudos:
         score_list.append("```")
         return "\n".join(score_list)
 
+    def find_kudos(self, message: Message) -> List[Kudos]:
+        """ Process a chat-line for Kudos """
+        kudos_list: List[Kudos] = []
+
+        for mention in message.mentions:
+            kudos = self._calc_kudos(message, str(mention.id))
+            if kudos is None:
+                continue
+            current = self.get_guild(message.guild.id).scores.get(str(mention.id), 0)
+            kudos_list.append(
+                Kudos(str(mention.id), mention.display_name, kudos, current)
+            )
+            self.logger.debug("Find Kudos: %s", kudos_list[-1])
+        return kudos_list
+
+    def _calc_kudos(self, message: Message, mention_id: str) -> Optional[int]:
+        """ Calculate the number of kudos given to a mention """
+        max_ = self.get_guild(str(message.guild.id)).max
+
+        for idx, word in enumerate(message.content.split()):
+            if not re.search(f"{mention_id}", word):
+                continue
+            try:
+                next_word = message.content.split()[idx + 1]
+            except IndexError:
+                continue
+            if "+" not in next_word and "-" not in next_word:
+                continue
+
+            point_change = next_word.count("+") - next_word.count("-")
+            if max_ > 0 < point_change > max_:
+                point_change = max_
+            elif max_ > 0 > point_change < (max_ * -1):
+                point_change = max_ * -1
+
+            return point_change
+        return None
+
+    def apply_kudos(self, guild_id: str, kudos_list: List[Kudos]) -> None:
+        """ Update scores in config """
+        scores = self.get_guild(guild_id).scores
+        for kudos in kudos_list:
+            scores[kudos.user_id] = scores.get(kudos.user_id, 0) + kudos.amount
+
+        self.save_guild(guild_id, scores=scores)
+
     def parse_command(self, message: Message) -> str:
         """ Process all commands prefixed with 'kudos!' """
         self.logger.debug("Parsing command: %s", message.content)
@@ -254,3 +314,26 @@ class ChatKudos:
             return ""
         self.config.save()
         return result
+
+    def onmessage(self, message: Message) -> None:
+        """ On Message event hook for bot """
+        if not message.content or str(message.channel.type) != "text":
+            return
+
+        tic = time.perf_counter()
+        self.logger.debug("[START] onmessage - ChatKudos")
+
+        if message.content.startswith("kudos!"):
+            # response = self.parse_command(message)
+            # TODO: Channel send here
+            return
+
+        if not message.mentions:
+            return
+
+        kudo_list = self.find_kudos(message)
+        self.apply_kudos(str(message.guild.id), kudo_list)
+        # await self._announce_kudos(kudo_list)
+
+        toc = time.perf_counter()
+        self.logger.debug("[FINISH] onmessage: %f ms", round(toc - tic, 2))

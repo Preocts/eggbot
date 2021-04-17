@@ -51,6 +51,7 @@ def fixture_message() -> Mock:
     message.guild.id = 111
     message.author.id = 111
     message.author.display_name = "Tester"
+    message.channel.type = "text"
     message.mentions = [mentions]
     message.role_mentions = [role_mentions]
     message.guild.get_member.side_effect = members
@@ -236,3 +237,37 @@ def test_board_limited(kudos: ChatKudos, message: Mock) -> None:
     assert "Top 1 ChatKudos holders:" in result
     assert "Tester01" in result
     assert "Tester02" not in result
+
+
+def test_find_kudos(kudos: ChatKudos, message: Mock) -> None:
+    """ Return the accurate Kudos count for messages """
+    message.content = "<#!111> ++-++-++ <!222#> just kidding"
+    message.mentions = [
+        Mock(id="111", display_name="Tester01"),
+        Mock(id="222", display_name="Tester02"),
+    ]
+
+    result = kudos.find_kudos(message)
+    assert len(result) == 1
+    assert result[0].display_name == "Tester01"
+    assert result[0].amount == 4
+
+    kudos.save_guild("111", max=1)
+    result = kudos.find_kudos(message)
+    assert result[0].amount == 1
+
+
+# @patch.mark.asyncio
+def test_onmessage_kudos_apply(kudos: ChatKudos, message: Mock) -> None:
+    """ Give two Kudos. Config should update """
+    message.content = "<#!111> + <!222#> + Oh yeah baby!"
+    message.mentions = [
+        Mock(id="111", display_name="Tester01"),
+        Mock(id="222", display_name="Tester02"),
+    ]
+
+    kudos.onmessage(message)
+
+    scores = kudos.get_guild("111").scores
+    assert scores["111"] == -37
+    assert scores["222"] == 1
