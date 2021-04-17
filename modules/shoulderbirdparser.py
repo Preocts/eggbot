@@ -70,7 +70,7 @@ class ShoulderBirdParser:
             return False
 
         if not message.content:
-            cls.logger.warning("Empty message given, skipping.")
+            cls.logger.debug("Empty message given, skipping.")
             return False
 
         if str(message.channel.type) not in ["text", "private"]:

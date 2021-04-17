@@ -28,7 +28,6 @@ class EggBotCore:
         self.event_subs = EventSubs()
         self.core_config = ConfigFile()
         self.env_vars = LoadEnv()
-        logging.basicConfig(level="INFO")
 
     def load_config(self) -> bool:
         """ Load configuration """
