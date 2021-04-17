@@ -30,7 +30,7 @@ def fixture_kudos() -> ChatKudos:
 def fixture_message() -> Mock:
     """ Fixture """
     message = Mock()
-    message.clean_content = "kudos!help"
+    message.content = "kudos!help"
     message.guild.name = "Testing Guild"
     message.guild.id = 111
     message.author.id = 111
@@ -87,11 +87,11 @@ def test_save_guild_not_exists(kudos: ChatKudos) -> None:
 
 def test_adjust_max(kudos: ChatKudos, message: Mock) -> None:
     """ Change max for existing and non-existing guild """
-    message.clean_content = "kudos!max 10"
+    message.content = "kudos!max 10"
     result = kudos.parse_command(message)
     assert "Max points set to 10" in result
 
-    message.clean_content = "kudos!max -1"
+    message.content = "kudos!max -1"
     message.guild.id = "999"
     result = kudos.parse_command(message)
     assert "Max points set to unlimited" in result
@@ -102,28 +102,28 @@ def test_adjust_max(kudos: ChatKudos, message: Mock) -> None:
 
 def test_adjust_max_invalid(kudos: ChatKudos, message: Mock) -> None:
     """ Provide an invalid format to the command """
-    message.clean_content = "kudos!max 10 points"
+    message.content = "kudos!max 10 points"
     result = kudos.parse_command(message)
     assert "Usage:" in result
 
 
 def test_adjust_gain_messages(kudos: ChatKudos, message: Mock) -> None:
     """ Adjust the gain messages on existing and non-existing guilds """
-    message.clean_content = "kudos!gain This is gain"
+    message.content = "kudos!gain This is gain"
     result = kudos.parse_command(message)
-    assert "Gain message set: `This is gain`" in result
+    assert "Message has been set." in result
 
     message.guild.id = "999"
     result = kudos.parse_command(message)
-    assert "Gain message set: `This is gain`" in result
+    assert "Message has been set." in result
 
 
 def test_adjust_loss_messages(kudos: ChatKudos, message: Mock) -> None:
     """ Adjust the loss messages on existing and non-existing guilds """
-    message.clean_content = "kudos!loss This is loss"
+    message.content = "kudos!loss This is loss"
     result = kudos.parse_command(message)
-    assert "Loss message set: `This is loss`" in result
+    assert "Message has been set." in result
 
     message.guild.id = "999"
     result = kudos.parse_command(message)
-    assert "Loss message set: `This is loss`" in result
+    assert "Message has been set." in result

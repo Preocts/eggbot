@@ -125,9 +125,9 @@ class ChatKudos:
 
     def set_max(self, message: Message) -> str:
         """ Set max number of points to be gained in one line """
-        self.logger.debug("Set %s max: %s", message.guild.name, message.clean_content)
+        self.logger.debug("Set %s max: %s", message.guild.name, message.content)
         try:
-            max_ = int(message.clean_content.replace("kudos!max", ""))
+            max_ = int(message.content.replace("kudos!max", ""))
         except ValueError:
             return "Usage: `kudo!max [N]` where N is a number."
         self.save_guild(str(message.guild.id), max=max_)
@@ -135,10 +135,25 @@ class ChatKudos:
             return f"Max points set to {max_}"
         return "Max points set to unlimited"
 
+    def set_gain(self, message: Message) -> str:
+        """ Update the gain message of a guild """
+        content = message.content.replace("kudos!gain", "").strip()
+        return self._set_message(str(message.guild.id), {"gain_message": content})
+
+    def set_loss(self, message: Message) -> str:
+        """ Update the loss message of a guild """
+        content = message.content.replace("kudos!loss", "").strip()
+        return self._set_message(str(message.guild.id), {"loss_message": content})
+
+    def _set_message(self, guild_id: str, content: Dict[str, str]) -> str:
+        """ Sets and saves gain/loss messages """
+        self.save_guild(guild_id, **content)
+        return "Message has been set."
+
     def parse_command(self, message: Message) -> str:
         """ Process all commands prefixed with 'kudos!' """
-        self.logger.debug("Parsing command: %s", message.clean_content)
-        command = message.clean_content.split()[0]
+        self.logger.debug("Parsing command: %s", message.content)
+        command = message.content.split()[0]
         try:
             return getattr(self, COMMAND_CONFIG[command])(message)
         except (AttributeError, KeyError):
