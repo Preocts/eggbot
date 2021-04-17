@@ -324,8 +324,9 @@ class ChatKudos:
         self.logger.debug("[START] onmessage - ChatKudos")
 
         if message.content.startswith("kudos!"):
-            # response = self.parse_command(message)
-            # TODO: Channel send here
+            response = self.parse_command(message)
+            if response:
+                await message.channel.send(response)
             return
 
         if not message.mentions:
@@ -345,10 +346,16 @@ class ChatKudos:
                 msg = self.get_guild(str(message.guild.id)).loss_message
             else:
                 msg = self.get_guild(str(message.guild.id)).gain_message
-            new_total = kudos.current + kudos.amount
 
-            msg = msg.replace("[POINTS]", str(kudos.amount))
-            msg = msg.replace("[NAME]", kudos.display_name)
-            msg = msg.replace("[TOTAL]", str(new_total))
+            await message.channel.send(self._format_message(msg, kudos))
 
-            await message.channel.send(msg)
+    @staticmethod
+    def _format_message(content: str, kudos: Kudos) -> str:
+        """ Apply metadata replacements """
+        new_total = kudos.current + kudos.amount
+
+        formatted_msg = content.replace("[POINTS]", str(kudos.amount))
+        formatted_msg = formatted_msg.replace("[NAME]", kudos.display_name)
+        formatted_msg = formatted_msg.replace("[TOTAL]", str(new_total))
+
+        return formatted_msg

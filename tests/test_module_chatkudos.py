@@ -19,6 +19,7 @@ from typing import Generator
 import pytest
 
 from modules.chatkudos import ChatKudos
+from modules.chatkudos import Kudos
 from modules.chatkudos import MODULE_NAME
 from modules.chatkudos import MODULE_VERSION
 from modules.chatkudos import COMMAND_CONFIG
@@ -276,10 +277,19 @@ def test_find_kudos(kudos: ChatKudos, message: Mock) -> None:
     assert result[0].amount == 1
 
 
+def test_format_message() -> None:
+    """ Message formatting """
+    msg = "Fantastic [NAME], have [POINTS] Kudos points. You now have [TOTAL] in total."
+    expect = "Fantastic Tester01, have 15 Kudos points. You now have 30 in total."
+    kudos = Kudos("111", "Tester01", 15, 15)
+
+    result = ChatKudos._format_message(msg, kudos)  # pylint: disable=W0212
+
+    assert result == expect
+
+
 @pytest.mark.asyncio
-async def test_onmessage_kudos_apply(
-    kudos: ChatKudos, async_message: AsyncMock
-) -> None:
+async def test_onmessage_kudos(kudos: ChatKudos, async_message: AsyncMock) -> None:
     """ Give two Kudos. Config should update """
     await kudos.onmessage(async_message)
 
@@ -288,3 +298,14 @@ async def test_onmessage_kudos_apply(
     assert scores["222"] == 1
 
     async_message.channel.send.assert_called()
+    assert async_message.channel.send.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_onmessage_command(kudos: ChatKudos, async_message: AsyncMock) -> None:
+    """ Give a command, ensure we hit the command path """
+    async_message.content = "kudos!help"
+
+    await kudos.onmessage(async_message)
+
+    async_message.channel.send.assert_called_once()
