@@ -45,7 +45,7 @@ The mention can be located anywhere in the chat mention. The "+" and "-" need to
 
 ---
 
-#### Configuration Commands:
+## Configuration Commands:
 
 - *Can only be run by members on the user allow list (locked or unlocked)*
 - *Server owner and bot owner always has access to these*
@@ -72,13 +72,13 @@ kudos!gain Fantastic [NAME], have [POINTS] Kudos points. You now have [TOTAL] in
 kudos!loss That one cost you [POINTS] points, [NAME]. That leaves you [TOTAL] in total.
 ```
 
-**kudo!set user** [@mention] (@mention)...
-
-**kudo!set role** [@role_name] (@role_name)...
-
-- Controls what is on the allow lists for users and roles. This acts as a toggle. Adding a user who is already on the list will remove them. Same for roles
-- You can add as many users or roles as desired in one call (2000 character limit)
-- You can even mix and match roles and users, these are aliased for clarity but run the same functions.
+### `kudos!user [@mention (@mention ...)]`
+### `kudos!role [@role_name (@role_name ...)]`
+- Add/Remove users and roles from the allow list
+- When locked (see below) these users and roles will be able to use ChatKudos
+- Guild owner and Bot owner, by default, always have access
+- If a user or role is not on the list it will be added, otherwise it is removed
+- You can mix and match roles and users using either command
 
 **kudo!set lock**
 

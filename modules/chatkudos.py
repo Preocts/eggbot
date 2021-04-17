@@ -138,16 +138,19 @@ class ChatKudos:
     def set_gain(self, message: Message) -> str:
         """ Update the gain message of a guild """
         content = message.content.replace("kudos!gain", "").strip()
-        return self._set_message(str(message.guild.id), {"gain_message": content})
+        return self._set_message(str(message.guild.id), "gain_message", content)
 
     def set_loss(self, message: Message) -> str:
         """ Update the loss message of a guild """
         content = message.content.replace("kudos!loss", "").strip()
-        return self._set_message(str(message.guild.id), {"loss_message": content})
+        return self._set_message(str(message.guild.id), "loss_message", content)
 
-    def _set_message(self, guild_id: str, content: Dict[str, str]) -> str:
+    def _set_message(self, guild_id: str, key: str, content: Dict[str, str]) -> str:
         """ Sets and saves gain/loss messages """
-        self.save_guild(guild_id, **content)
+        if not content:
+            return ""
+        kwargs = {key: content}
+        self.save_guild(guild_id, **kwargs)
         return "Message has been set."
 
     def parse_command(self, message: Message) -> str:
@@ -155,7 +158,8 @@ class ChatKudos:
         self.logger.debug("Parsing command: %s", message.content)
         command = message.content.split()[0]
         try:
-            return getattr(self, COMMAND_CONFIG[command])(message)
+            result = getattr(self, COMMAND_CONFIG[command])(message)
         except (AttributeError, KeyError):
             self.logger.error("'%s' attribute not found!", command)
-        return ""
+        self.config.save()
+        return result

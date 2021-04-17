@@ -11,6 +11,8 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 from unittest.mock import Mock
+from unittest.mock import patch
+from typing import Generator
 
 import pytest
 
@@ -21,9 +23,12 @@ from modules.chatkudos import COMMAND_CONFIG
 
 
 @pytest.fixture(scope="function", name="kudos")
-def fixture_kudos() -> ChatKudos:
+def fixture_kudos() -> Generator:
     """ Fixture """
-    return ChatKudos("./tests/fixtures/mock_chatkudos.json")
+    kudos = ChatKudos("./tests/fixtures/mock_chatkudos.json")
+    # disable writing to the fixture file
+    with patch.object(kudos.config, "save"):
+        yield kudos
 
 
 @pytest.fixture(scope="function", name="message")
@@ -127,3 +132,10 @@ def test_adjust_loss_messages(kudos: ChatKudos, message: Mock) -> None:
     message.guild.id = "999"
     result = kudos.parse_command(message)
     assert "Message has been set." in result
+
+
+def test_adjust_message_empty(kudos: ChatKudos, message: Mock) -> None:
+    """ Confirm an empty message is skipped """
+    message.content = "kudos!gain"
+    result = kudos.parse_command(message)
+    assert not result
