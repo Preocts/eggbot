@@ -42,9 +42,9 @@ def fixture_message() -> Mock:
         Mock(display_name="Tester02"),
     ]
 
-    mentions = Mock(id="111", display_name="Tester")
+    mentions = Mock(id=111, display_name="Tester")
 
-    role_mentions = Mock(id="ABC")
+    role_mentions = Mock(id=987)
     role_mentions.name = "Cool Kats"
 
     message = Mock()
@@ -197,15 +197,15 @@ def test_add_remove_user_list(kudos: ChatKudos, message: Mock) -> None:
 def test_add_remove_role_list(kudos: ChatKudos, message: Mock) -> None:
     """ Add, then remove, a role from role list """
     message.mentions = []  # Clear to focus test scope
-    message.content = "kudos!role #Cool Kats"  # role_mention provided by fixture
+    message.content = "kudos!role @Cool Kats"  # role_mention provided by fixture
 
     result = kudos.parse_command(message)
     assert "**+**Cool Kats" in result
-    assert "ABC" in kudos.get_guild("111").roles
+    assert "987" in kudos.get_guild("111").roles
 
     result = kudos.parse_command(message)
     assert "**-**Cool Kats" in result
-    assert "ABC" not in kudos.get_guild("111").roles
+    assert "987" not in kudos.get_guild("111").roles
 
 
 def test_add_remove_list_empty(kudos: ChatKudos, message: Mock) -> None:
@@ -271,6 +271,7 @@ def test_find_kudos(kudos: ChatKudos, message: Mock) -> None:
     assert len(result) == 1
     assert result[0].display_name == "Tester01"
     assert result[0].amount == 4
+    assert result[0].current == -38
 
     kudos.save_guild("111", max=1)
     result = kudos.find_kudos(message)

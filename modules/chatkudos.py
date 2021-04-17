@@ -192,11 +192,11 @@ class ChatKudos:
         users = set(self.get_guild(str(message.guild.id)).users)
 
         for mention in message.mentions:
-            if mention.id in users:
-                users.remove(mention.id)
+            if str(mention.id) in users:
+                users.remove(str(mention.id))
                 changes.append(f"**-**{mention.display_name}")
             else:
-                users.add(mention.id)
+                users.add(str(mention.id))
                 changes.append(f"**+**{mention.display_name}")
         if changes:
             self.logger.error(changes)
@@ -209,11 +209,11 @@ class ChatKudos:
         roles = set(self.get_guild(str(message.guild.id)).roles)
 
         for role_mention in message.role_mentions:
-            if role_mention.id in roles:
-                roles.remove(role_mention.id)
+            if str(role_mention.id) in roles:
+                roles.remove(str(role_mention.id))
                 changes.append(f"**-**{role_mention.name}")
             else:
-                roles.add(role_mention.id)
+                roles.add(str(role_mention.id))
                 changes.append(f"**+**{role_mention.name}")
         if changes:
             self.save_guild(str(message.guild.id), roles=list(roles))
@@ -265,7 +265,9 @@ class ChatKudos:
             kudos = self._calc_kudos(message, str(mention.id))
             if kudos is None:
                 continue
-            current = self.get_guild(message.guild.id).scores.get(str(mention.id), 0)
+            current = self.get_guild(str(message.guild.id)).scores.get(
+                str(mention.id), 0
+            )
             kudos_list.append(
                 Kudos(str(mention.id), mention.display_name, kudos, current)
             )
