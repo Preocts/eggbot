@@ -315,7 +315,7 @@ class ChatKudos:
         self.config.save()
         return result
 
-    def onmessage(self, message: Message) -> None:
+    async def onmessage(self, message: Message) -> None:
         """ On Message event hook for bot """
         if not message.content or str(message.channel.type) != "text":
             return
@@ -331,9 +331,24 @@ class ChatKudos:
         if not message.mentions:
             return
 
-        kudo_list = self.find_kudos(message)
-        self.apply_kudos(str(message.guild.id), kudo_list)
-        # await self._announce_kudos(kudo_list)
+        kudos_list = self.find_kudos(message)
+        self.apply_kudos(str(message.guild.id), kudos_list)
+        await self._announce_kudos(message, kudos_list)
 
         toc = time.perf_counter()
         self.logger.debug("[FINISH] onmessage: %f ms", round(toc - tic, 2))
+
+    async def _announce_kudos(self, message: Message, kudos_list: List[Kudos]) -> None:
+        """ Send any Kudos to the chat """
+        for kudos in kudos_list:
+            if kudos.amount < 0:
+                msg = self.get_guild(str(message.guild.id)).loss_message
+            else:
+                msg = self.get_guild(str(message.guild.id)).gain_message
+            new_total = kudos.current + kudos.amount
+
+            msg = msg.replace("[POINTS]", str(kudos.amount))
+            msg = msg.replace("[NAME]", kudos.display_name)
+            msg = msg.replace("[TOTAL]", str(new_total))
+
+            await message.channel.send(msg)

@@ -11,6 +11,7 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 from unittest.mock import Mock
+from unittest.mock import AsyncMock
 from unittest.mock import patch
 from typing import List
 from typing import Generator
@@ -55,6 +56,24 @@ def fixture_message() -> Mock:
     message.mentions = [mentions]
     message.role_mentions = [role_mentions]
     message.guild.get_member.side_effect = members
+    return message
+
+
+@pytest.fixture(scope="function", name="async_message")
+def fixture_async_message() -> AsyncMock:
+    """ Fixture """
+    message = AsyncMock()
+    message.content = "<#!111> + <!222#> + Oh yeah baby!"
+    message.guild.name = "Testing Guild"
+    message.guild.id = 111
+    message.author.id = 111
+    message.author.display_name = "Tester"
+    message.channel.type = "text"
+    message.mentions = [
+        AsyncMock(id="111", display_name="Tester01"),
+        AsyncMock(id="222", display_name="Tester02"),
+    ]
+
     return message
 
 
@@ -257,17 +276,15 @@ def test_find_kudos(kudos: ChatKudos, message: Mock) -> None:
     assert result[0].amount == 1
 
 
-# @patch.mark.asyncio
-def test_onmessage_kudos_apply(kudos: ChatKudos, message: Mock) -> None:
+@pytest.mark.asyncio
+async def test_onmessage_kudos_apply(
+    kudos: ChatKudos, async_message: AsyncMock
+) -> None:
     """ Give two Kudos. Config should update """
-    message.content = "<#!111> + <!222#> + Oh yeah baby!"
-    message.mentions = [
-        Mock(id="111", display_name="Tester01"),
-        Mock(id="222", display_name="Tester02"),
-    ]
-
-    kudos.onmessage(message)
+    await kudos.onmessage(async_message)
 
     scores = kudos.get_guild("111").scores
     assert scores["111"] == -37
     assert scores["222"] == 1
+
+    async_message.channel.send.assert_called()
