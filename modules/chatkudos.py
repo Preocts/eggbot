@@ -312,7 +312,6 @@ class ChatKudos:
         except (AttributeError, KeyError):
             self.logger.error("'%s' attribute not found!", command)
             return ""
-        self.config.save()
         return result
 
     async def onmessage(self, message: Message) -> None:
@@ -327,6 +326,7 @@ class ChatKudos:
             response = self.parse_command(message)
             if response:
                 await message.channel.send(response)
+                self.config.save()
             return
 
         if not message.mentions:
@@ -335,6 +335,7 @@ class ChatKudos:
         kudos_list = self.find_kudos(message)
         self.apply_kudos(str(message.guild.id), kudos_list)
         await self._announce_kudos(message, kudos_list)
+        self.config.save()
 
         toc = time.perf_counter()
         self.logger.debug("[FINISH] onmessage: %f ms", round(toc - tic, 2))

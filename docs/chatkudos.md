@@ -1,6 +1,6 @@
 # Chat Kudos Module v1.0.0
 
-### Kudos points brought to Discord
+## Kudos points brought to Discord
 
 Chat Kudos are points that can be granted, or taken, from server members by simply mentioning their name and having "+"s or "-"s following the mention.  The bot will reply with a customizable message, tell you how many kudos were just received, and keep a running tally.
 
