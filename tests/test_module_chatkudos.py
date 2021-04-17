@@ -127,10 +127,12 @@ def test_adjust_gain_messages(kudos: ChatKudos, message: Mock) -> None:
     message.content = "kudos!gain This is gain"
     result = kudos.parse_command(message)
     assert "Message has been set." in result
+    assert kudos.get_guild("111").gain_message == "This is gain"
 
     message.guild.id = "999"
     result = kudos.parse_command(message)
     assert "Message has been set." in result
+    assert kudos.get_guild("999").gain_message == "This is gain"
 
 
 def test_adjust_loss_messages(kudos: ChatKudos, message: Mock) -> None:
@@ -138,10 +140,12 @@ def test_adjust_loss_messages(kudos: ChatKudos, message: Mock) -> None:
     message.content = "kudos!loss This is loss"
     result = kudos.parse_command(message)
     assert "Message has been set." in result
+    assert kudos.get_guild("111").loss_message == "This is loss"
 
     message.guild.id = "999"
     result = kudos.parse_command(message)
     assert "Message has been set." in result
+    assert kudos.get_guild("999").loss_message == "This is loss"
 
 
 def test_adjust_message_empty(kudos: ChatKudos, message: Mock) -> None:
@@ -158,9 +162,11 @@ def test_add_remove_user_list(kudos: ChatKudos, message: Mock) -> None:
 
     result = kudos.parse_command(message)
     assert "**+**Tester" in result
+    assert "111" in kudos.get_guild("111").users
 
     result = kudos.parse_command(message)
     assert "**-**Tester" in result
+    assert "111" not in kudos.get_guild("111").users
 
 
 def test_add_remove_role_list(kudos: ChatKudos, message: Mock) -> None:
@@ -170,9 +176,11 @@ def test_add_remove_role_list(kudos: ChatKudos, message: Mock) -> None:
 
     result = kudos.parse_command(message)
     assert "**+**Cool Kats" in result
+    assert "ABC" in kudos.get_guild("111").roles
 
     result = kudos.parse_command(message)
     assert "**-**Cool Kats" in result
+    assert "ABC" not in kudos.get_guild("111").roles
 
 
 def test_add_remove_list_empty(kudos: ChatKudos, message: Mock) -> None:
@@ -183,3 +191,24 @@ def test_add_remove_list_empty(kudos: ChatKudos, message: Mock) -> None:
 
     result = kudos.parse_command(message)
     assert not result
+
+
+def test_lock_toggle(kudos: ChatKudos, message: Mock) -> None:
+    """ Turn the lock on and off again, fixture starts locked """
+    message.content = "kudos!lock"
+
+    result = kudos.parse_command(message)
+    assert result == "ChatKudos is now unlocked. **Everyone** can use it!"
+    assert not kudos.get_guild("111").lock
+
+    result = kudos.parse_command(message)
+    assert result == "ChatKudos is now locked. Only allowed users/roles can use it!"
+    assert kudos.get_guild("111").lock
+
+
+def test_help(kudos: ChatKudos, message: Mock) -> None:
+    """ Does this have a help? """
+    message.conent = "kudos!help"
+
+    result = kudos.parse_command(message)
+    assert "https://github.com/Preocts/eggbot/blob/main/docs/chatkudos.md" in result

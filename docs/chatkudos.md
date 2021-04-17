@@ -31,17 +31,18 @@ The mention can be located anywhere in the chat mention. The "+" and "-" need to
 
 ---
 
-#### Basic Commands:
+## Basic Commands:
 
-*Open to anyone allowed to run Kudos*
+**Open to anyone allowed to run Kudos**
 
-**kudo!board** (#)
+### `kudos!board (#)`
 
-- Show top scoreboard in the channel the command is run. Scoreboard defaults to the top 10 Kudos holders but you can provide a number to specify how many results you want to display.
+- Show high-score board in the channel
+- Scoreboard defaults to the top 10 Kudos holders but you can provide a number to specify how many results you want to display
 
-**kudo!help**
+### `kudos!help`
 
-- A short version of this document will be DM'ed in Discord
+- A link back to this page
 
 ---
 
@@ -80,8 +81,7 @@ kudos!loss That one cost you [POINTS] points, [NAME]. That leaves you [TOTAL] in
 - If a user or role is not on the list it will be added, otherwise it is removed
 - You can mix and match roles and users using either command
 
-**kudo!set lock**
-
-- Turns lock on or off.
-- When Kudos is locked only allowed users/roles can use Kudos. Server owner always has access to Kudos regardless of lock.
-- This is the same as adding @everyone to role allow list without pinging the entire server.
+### `kudos!lock`
+- Toggles lock on or off
+- When Kudos is locked only allowed users/roles can use Kudos
+- Server owner and bot owner always has access to Kudos regardless of lock

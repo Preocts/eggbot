@@ -33,6 +33,8 @@ COMMAND_CONFIG: Dict[str, str] = {
     "kudos!loss": "set_loss",
     "kudos!user": "set_lists",
     "kudos!role": "set_lists",
+    "kudos!lock": "set_lock",
+    "kudos!help": "show_help",
 }
 
 
@@ -201,6 +203,22 @@ class ChatKudos:
         if changes:
             self.save_guild(str(message.guild.id), roles=list(roles))
         return changes
+
+    def set_lock(self, message: Message) -> str:
+        """ Toggle lock for guild """
+        guild_conf = self.get_guild(str(message.guild.id))
+        self.save_guild(str(message.guild.id), lock=not guild_conf.lock)
+        if not guild_conf.lock:
+            return "ChatKudos is now locked. Only allowed users/roles can use it!"
+        return "ChatKudos is now unlocked. **Everyone** can use it!"
+
+    def show_help(self, message: Message) -> str:
+        """ Help and self-plug, yay! """
+        self.logger.debug("Help: %s", message.author.name)
+        return (
+            "Detailed use instructions here: "
+            "https://github.com/Preocts/eggbot/blob/main/docs/chatkudos.md"
+        )
 
     def parse_command(self, message: Message) -> str:
         """ Process all commands prefixed with 'kudos!' """
