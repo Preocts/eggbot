@@ -13,6 +13,7 @@ from eggbot.eggbotcore import EggBotCore
 from eggbot.models.eventtype import EventType
 from modules.shoulderbirdparser import ShoulderBirdParser
 from modules.joinactions import JoinActions
+from modules.chatkudos import ChatKudos
 
 
 def main() -> int:
@@ -24,9 +25,11 @@ def main() -> int:
     # Register modules
     shoulderbird = ShoulderBirdParser()
     joinactions = JoinActions()
+    chatkudos = ChatKudos()
 
     eggbot.event_subs.add(EventType.MESSAGE, shoulderbird.onmessage)
     eggbot.event_subs.add(EventType.MEMBERJOIN, joinactions.onjoin)
+    eggbot.event_subs.add(EventType.MESSAGE, chatkudos.onmessage)
 
     eggbot.launch_bot()
 

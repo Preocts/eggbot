@@ -1,0 +1,18 @@
+{
+    "module": "ChatKudos",
+    "version": "1.0.0",
+    "111": {
+        "roles": [],
+        "users": [
+            "222"
+        ],
+        "max": -1,
+        "lock": true,
+        "gain_message": "Bringing {points} into {name}'s bank!",
+        "loss_message": "Taking {points} from {name}'s bank!",
+        "scores": {
+            "123": 39,
+            "111": -38
+        }
+    }
+}
