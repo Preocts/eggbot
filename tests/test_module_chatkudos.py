@@ -132,12 +132,12 @@ def test_adjust_max(kudos: ChatKudos, message: Mock) -> None:
     """ Change max for existing and non-existing guild """
     message.content = "kudos!max 10"
     result = kudos.parse_command(message)
-    assert "Max points set to 10" in result
+    assert "Max points now: 10" in result
 
     message.content = "kudos!max -1"
     message.guild.id = "999"
     result = kudos.parse_command(message)
-    assert "Max points set to unlimited" in result
+    assert "Max points now: unlimited" in result
 
     assert kudos.get_guild("111").max == 10
     assert kudos.get_guild("999").max == -1

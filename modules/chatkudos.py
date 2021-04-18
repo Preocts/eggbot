@@ -56,21 +56,7 @@ class KudosConfig(NamedTuple):
     @classmethod
     def from_dict(cls, config: Dict[str, Any]) -> KudosConfig:
         """ Create model from loaded config segment """
-        return cls(
-            roles=config.get("roles", []),
-            users=config.get("users", []),
-            max=config.get("max", 5),
-            lock=config.get("lock", False),
-            gain_message=config.get(
-                "gain_message",
-                "[POINTS] to [NICKNAME]! That gives them [TOTAL] total!",
-            ),
-            loss_message=config.get(
-                "loss_message",
-                "[POINTS] from [NICKNAME]! That gives them [TOTAL] total!",
-            ),
-            scores=config.get("scores", {}),
-        )
+        return cls(**config)
 
     def as_dict(self) -> Dict[str, Any]:
         """ Returns NamedTuple as Dict """
@@ -99,11 +85,6 @@ class ChatKudos:
         if not self.config.config:
             self.config.create("module", MODULE_NAME)
             self.config.create("version", MODULE_VERSION)
-        else:
-            if self.config.read("module") != MODULE_NAME:
-                self.logger.warning("ChatKudos config module name mismatch!")
-            if self.config.read("version") != MODULE_VERSION:
-                self.logger.warning("ChatKudos config version mismatch!")
 
     def get_guild(self, guild_id: str) -> KudosConfig:
         """ Load a guild from the config, return defaults if empty """
@@ -124,7 +105,7 @@ class ChatKudos:
             lock: bool, restict to `roles`/`users` or open to all
             gain_message: str, message displayed on gain of points
             loss_message: str, message displayed on loss of points
-            scores: Dict[str, int], User_ID: score
+            scores: Dict[str, int], Discord user id paired with total Kudos
         """
         self.logger.debug("Save: %s, (%s)", guild_id, kwargs)
         guild_conf = self.get_guild(guild_id)
@@ -150,9 +131,7 @@ class ChatKudos:
         except ValueError:
             return "Usage: `kudo!max [N]` where N is a number."
         self.save_guild(str(message.guild.id), max=max_)
-        if max_ > 0:
-            return f"Max points set to {max_}"
-        return "Max points set to unlimited"
+        return f"Max points now: {max_}" if max_ > 0 else "Max points now: unlimited"
 
     def set_gain(self, message: Message) -> str:
         """ Update the gain message of a guild """
@@ -166,25 +145,17 @@ class ChatKudos:
 
     def _set_message(self, guild_id: str, key: str, content: Dict[str, str]) -> str:
         """ Sets and saves gain/loss messages """
-        if not content:
-            return ""
-        kwargs = {key: content}
-        self.save_guild(guild_id, **kwargs)
-        return "Message has been set."
+        if content:
+            self.save_guild(guild_id, **{key: content})
+            return "Message has been set."
+        return ""
 
     def set_lists(self, message: Message) -> str:
         """ Update user and role lists based on message mentions """
-        self.logger.debug(
-            "Set lists: %d mentions, %d role_mentions",
-            len(message.mentions),
-            len(message.role_mentions),
-        )
         changes: List[str] = self._set_users_list(message)
         changes.extend(self._set_roles_list(message))
 
-        if not changes:
-            return ""
-        return "Allow list changes: " + ", ".join(changes)
+        return "Allow list changes: " + ", ".join(changes) if changes else ""
 
     def _set_users_list(self, message: Message) -> List[str]:
         """ Process and user mentions in message, return changes """
@@ -221,9 +192,9 @@ class ChatKudos:
 
     def set_lock(self, message: Message) -> str:
         """ Toggle lock for guild """
-        guild_conf = self.get_guild(str(message.guild.id))
-        self.save_guild(str(message.guild.id), lock=not guild_conf.lock)
-        if not guild_conf.lock:
+        new_lock = not self.get_guild(str(message.guild.id)).lock
+        self.save_guild(str(message.guild.id), lock=new_lock)
+        if new_lock:
             return "ChatKudos is now locked. Only allowed users/roles can use it!"
         return "ChatKudos is now unlocked. **Everyone** can use it!"
 
