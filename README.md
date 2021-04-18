@@ -24,7 +24,7 @@ Currently under a re-write.
 1. **done** Shoulder Bird plug-in refactor
 1. **done** OnJoin module refactor
 1. *started* Convert to pytest framework for unit tests
-1. Kudos module refactor
+1. **done** Kudos module refactor
 1. Coverage to minimum 90% - all files
 1. Build a better roadmap
 ---
@@ -43,6 +43,7 @@ Currently under a re-write.
 
 - [ShoulderBird Module](docs/shoulderbird.md)
 - [JoinAction Module](docs/joinactions.md)
+- [ChatKudos Module](docs/chatkudos.md)
 
 
 

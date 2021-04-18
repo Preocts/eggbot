@@ -13,6 +13,15 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.8-alpha] - 2021.04.18
+
+### Added
+- ChatKudos refactor completed:
+  - `chatkudos` module updated
+  - Documentation completed
+  - Testing completed
+- ChatKudos loaded into event system (on message)
+
 ## [0.0.7-alpha] - 2021.04.17
 
 ### Added
@@ -25,7 +34,7 @@ Types of changes
 ### Changed
 - Typing hinting for event_sub `CALLBACKEVENT`, couldn't get `protocol` to overload politely
 
-### Fixed
+### Removed
 - Removed `error` logging lines which were glorified debug lines
 
 ## [0.0.6-alpha] - 2021.04.16
