@@ -57,9 +57,9 @@ The mention can be located anywhere in the chat mention. The "+" and "-" need to
 - Set the maximum number of points a single ChatKudos chat provides or removes
 - Set this to 0 or -1 to allow unlimited points
 
-### 'kudos!gain [message to display on gain]'
+### `kudos!gain [message to display on gain]`
 
-### `kudos!loss [message to display on loss]'
+### `kudos!loss [message to display on loss]`
 
 - Define a custom message for when a member gains or loses Kudos.
   - `[POINTS]` will be replaced with # of points
