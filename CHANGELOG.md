@@ -22,6 +22,9 @@ Types of changes
   - Testing completed
 - ChatKudos loaded into event system (on message)
 
+### Changed
+- ShoulderBird will send `clean_content` of the message to make mentions readable
+
 ## [0.0.7-alpha] - 2021.04.17
 
 ### Added

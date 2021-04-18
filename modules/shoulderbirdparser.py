@@ -126,7 +126,7 @@ class ShoulderBirdParser:
         msg = (
             f"ShoulderBird notification, **{message.author.display_name}** "
             f"mentioned you in **{message.channel.name}** saying:\n"
-            f"`{message.content}`\n{message.jump_url}"
+            f"`{message.clean_content}`\n{message.jump_url}"
         )
         await self.__send_dm(target, msg)
 
