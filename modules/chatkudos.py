@@ -316,6 +316,29 @@ class ChatKudos:
             return ""
         return result
 
+    def is_command_allowed(self, message: Message) -> bool:
+        """ Determine if author of message can run commands """
+        if str(message.author.id) == str(message.guild.owner.id):
+            return True
+
+        if str(message.author.id) in self.get_guild(str(message.guild.id)).users:
+            return True
+
+        return False
+
+    def is_kudos_allowed(self, message: Message) -> bool:
+        """ Determine if author can grant kudos """
+        allowed_roles = self.get_guild(str(message.guild.id)).roles
+
+        if not self.get_guild(str(message.guild.id)).lock:
+            return True
+
+        for role in message.author.roles:
+            if str(role.id) in allowed_roles:
+                return True
+
+        return self.is_command_allowed(message)
+
     async def onmessage(self, message: Message) -> None:
         """ On Message event hook for bot """
         if not message.content or str(message.channel.type) != "text":
@@ -324,14 +347,14 @@ class ChatKudos:
         tic = time.perf_counter()
         self.logger.debug("[START] onmessage - ChatKudos")
 
-        if message.content.startswith("kudos!"):
+        if message.content.startswith("kudos!") and self.is_command_allowed(message):
             response = self.parse_command(message)
             if response:
                 await message.channel.send(response)
                 self.config.save()
             return
 
-        if not message.mentions:
+        if not (message.mentions and self.is_kudos_allowed(message)):
             return
 
         kudos_list = self.find_kudos(message)

@@ -49,7 +49,7 @@ The mention can be located anywhere in the chat mention. The "+" and "-" need to
 ## Configuration Commands:
 
 - *Can only be run by members on the user allow list (locked or unlocked)*
-- *Server owner and bot owner always has access to these*
+- *Server owner always has access to these*
 - *Commands are typed into any channel the bot is in*
 
 ### `kudos!max [#]`
@@ -77,11 +77,11 @@ kudos!loss That one cost you [POINTS] points, [NAME]. That leaves you [TOTAL] in
 ### `kudos!role [@role_name (@role_name ...)]`
 - Add/Remove users and roles from the allow list
 - When locked (see below) these users and roles will be able to use ChatKudos
-- Guild owner and Bot owner, by default, always have access
+- Guild owner, by default, always have access
 - If a user or role is not on the list it will be added, otherwise it is removed
 - You can mix and match roles and users using either command
 
 ### `kudos!lock`
 - Toggles lock on or off
 - When Kudos is locked only allowed users/roles can use Kudos
-- Server owner and bot owner always has access to Kudos regardless of lock
+- Server owner always has access to Kudos regardless of lock

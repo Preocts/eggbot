@@ -15,6 +15,7 @@ from unittest.mock import AsyncMock
 from unittest.mock import patch
 from typing import List
 from typing import Generator
+from collections import namedtuple
 
 import pytest
 
@@ -51,6 +52,7 @@ def fixture_message() -> Mock:
     message.content = "kudos!help"
     message.guild.name = "Testing Guild"
     message.guild.id = 111
+    message.guild.owner.id = 333
     message.author.id = 111
     message.author.display_name = "Tester"
     message.channel.type = "text"
@@ -67,7 +69,8 @@ def fixture_async_message() -> AsyncMock:
     message.content = "<#!111> + <!222#> + Oh yeah baby!"
     message.guild.name = "Testing Guild"
     message.guild.id = 111
-    message.author.id = 111
+    message.guild.owner.id = 333
+    message.author.id = 222
     message.author.display_name = "Tester"
     message.channel.type = "text"
     message.mentions = [
@@ -310,3 +313,40 @@ async def test_onmessage_command(kudos: ChatKudos, async_message: AsyncMock) -> 
     await kudos.onmessage(async_message)
 
     async_message.channel.send.assert_called_once()
+
+
+def test_is_command_allowed(kudos: ChatKudos, message: Mock) -> None:
+    """ Case checks for accessing commands """
+    kudos.save_guild("111", lock=True)
+    # Server Owner
+    message.content = "kudos!help"
+    message.author.id = "333"
+    assert kudos.is_command_allowed(message)
+
+    # On User List
+    message.author.id = "111"
+    kudos.save_guild("111", users=["111"])
+    assert kudos.is_command_allowed(message)
+
+    # Not on User List
+    message.author.id = "999"
+    assert not kudos.is_command_allowed(message)
+
+
+def test_is_kudos_allowed(kudos: ChatKudos, message: Mock) -> None:
+    """ Case checks for accessing Kudos, only new test is role list """
+
+    # On Role List
+    Roles = namedtuple("Roles", ["id"])
+    message.author.roles = [Roles(112), Roles(113), Roles(114)]
+    message.content = "@Tester1 +++"
+    kudos.save_guild("111", users=[], roles=["114"])
+    assert kudos.is_kudos_allowed(message)
+
+    # Not allowed on lock
+    kudos.save_guild("111", roles=[])
+    assert not kudos.is_kudos_allowed(message)
+
+    # Unlock and pass
+    kudos.save_guild("111", lock=False)
+    assert kudos.is_kudos_allowed(message)
