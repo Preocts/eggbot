@@ -64,7 +64,7 @@ class EggBotCore:
         if message.author.bot:
             self.logger.info("on_message(), Bot chat, ignoring.")
             return False
-        if str(message.author.id) == self.core_config.read("owner"):
+        if str(message.author.id) == self.env_vars.get("BOT_OWNER"):
             if message.content == "egg!dc":
                 await self.discord_.close()
                 return False
@@ -75,7 +75,6 @@ class EggBotCore:
 
     async def on_ready(self) -> bool:
         """ Triggered when client has completed processing of data recieved """
-        # TODO (jcm) : What do we need to do here?
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.READY):
                 await subbed(None)
@@ -83,7 +82,6 @@ class EggBotCore:
 
     async def on_disconnect(self) -> bool:
         """ Triggered on disconnect. Does not indicate re-connect logic will fail """
-        # TODO (jcm) : What do we need to do here?
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.DISCONNECT):
                 await subbed(None)
