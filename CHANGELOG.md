@@ -13,6 +13,15 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.9] - 2021.04.21
+
+## Added
+- Documentation for `.env` file and setup config
+
+### Changed
+- Updated discord.Intents to be isolated to `members`, `guilds`, and `messages`
+- Move `BOT_OWNER` config to `.env` file
+
 ## [0.0.8-alpha] - 2021.04.18
 
 ### Added
