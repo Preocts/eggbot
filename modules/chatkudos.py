@@ -27,6 +27,7 @@ from discord import Message  # type: ignore
 
 from eggbot.configfile import ConfigFile
 
+AUTO_LOAD: str = "ChatKudos"
 MODULE_NAME: str = "ChatKudos"
 MODULE_VERSION: str = "1.0.0"
 DEFAULT_CONFIG: str = "configs/chatkudos.json"

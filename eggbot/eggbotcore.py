@@ -6,7 +6,11 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import sys
 import logging
+import importlib
+from typing import Dict
+from typing import List
 
 from eggbot.discordclient import DiscordClient
 from eggbot.configfile import ConfigFile
@@ -90,6 +94,7 @@ class EggBotCore:
     def launch_bot(self) -> int:
         """ Start the bot, blocking """
         self.__load_environment()
+        self.__load_modules()
         self.__register_events()
         self.discord_.run()
         return 0
@@ -104,16 +109,50 @@ class EggBotCore:
         self.discord_.set_secret(self.env_vars.get("DISCORD_SECRET"))
 
     def __register_events(self) -> None:
-        """
-        Link event handler methods to discord client
-
-        This replaces the @discord.client.event decorators as we want to
-        capture the instance method of these, not the unbound function.
-        """
+        """ Link event handler methods to discord client """
+        # This replaces the @discord.client.event decorators as we want to
+        # capture the instance method of these, not the unbound function.
         self.discord_.client.event(self.on_ready)
         self.discord_.client.event(self.on_disconnect)
         self.discord_.client.event(self.on_member_join)
         self.discord_.client.event(self.on_message)
+
+    def __load_modules(self) -> int:
+        """ Loads all modules from core config, return # loaded """
+        module_list: List[str] = self.core_config.read("load_modules")
+        count = 0
+        for module_name in module_list:
+            try:
+                module = importlib.import_module(f"modules.{module_name}")
+                self.__register_module_events(module, module_name)
+                count += 1
+            except ModuleNotFoundError as err:
+                self.logger.error("Module not found: modules.%s (%s)", module_name, err)
+        return count
+
+    def __register_module_events(self, module: object, module_name: str) -> None:
+        """ Initializes module class and registers identified event subscriptions """
+        event_map: Dict[str, EventType] = {
+            "onmessage": EventType.MESSAGE,
+            "onjoin": EventType.MEMBERJOIN,
+            "onready": EventType.READY,
+            "ondisconnect": EventType.DISCONNECT,
+        }
+        class_name = getattr(module, "AUTO_LOAD", None)
+        if class_name is None:
+            raise ModuleNotFoundError("Unable to find expected AUTO_LOAD attr")
+
+        class_attr = getattr(sys.modules[f"modules.{module_name}"], class_name, None)
+        if class_attr is None:
+            raise ModuleNotFoundError(f"Unable to find class name: {class_name}")
+
+        class_inst = class_attr()
+        for hook, eventtype in event_map.items():
+            callback = getattr(class_inst, hook, None)
+            if not callback:
+                continue
+            self.logger.info("Registering %s for %s", module_name, eventtype)
+            self.event_subs.add(eventtype, callback)
 
 
 # May Bartmoss have mercy on your data for running this bot.

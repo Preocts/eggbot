@@ -131,9 +131,7 @@ async def on_message(message):
 
     for mods in bot_classes:
         try:
-            await mods.onMessage(
-                chtype=channelType, message=message, client=dClient
-            )
+            await mods.onMessage(chtype=channelType, message=message, client=dClient)
         except AttributeError:
             continue
     return
@@ -147,8 +145,7 @@ def loadCore() -> None:
             configs = json.load(file)
         except json.decoder.JSONDecodeError:
             logger.critical(
-                "Configuration file empty or formatted "
-                "incorrectly, that's sad"
+                "Configuration file empty or formatted " "incorrectly, that's sad"
             )
             exit()
         except OSError:
@@ -191,9 +188,7 @@ def load_classes(module_list: tuple):
     for mod in module_list:
         try:
             logger.info(f"Loading initClass() for: {mod}...")
-            bot_classes.append(
-                sys.modules["eggbot.modules." + mod].initClass()
-            )  # noqa
+            bot_classes.append(sys.modules["eggbot.modules." + mod].initClass())  # noqa
             logger.info(f"Successfully loaded initClass() for: {mod}")
         except AttributeError:
             logger.info(f"No initClass() found for: {mod}")

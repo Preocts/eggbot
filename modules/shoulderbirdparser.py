@@ -28,6 +28,8 @@ from modules.shoulderbirdconfig import BirdMember
 from modules.shoulderbirdconfig import ShoulderBirdConfig
 from modules.shoulderbirdcli import ShoulderbirdCLI
 
+AUTO_LOAD: str = "ShoulderBirdParser"
+
 
 class ShoulderBirdParser:
     """ Point of entry object for ShoulderBird module """
