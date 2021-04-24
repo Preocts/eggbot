@@ -10,7 +10,6 @@ import os
 import sys
 import logging
 import importlib
-from typing import Dict
 from typing import List
 
 from eggbot.discordclient import DiscordClient
@@ -34,6 +33,7 @@ class EggBotCore:
         self.event_subs = EventSubs()
         self.core_config = ConfigFile()
         self.env_vars = LoadEnv()
+        self.loaded_modules: List[object] = []
 
     def load_config(self) -> bool:
         """ Load configuration """
@@ -119,16 +119,14 @@ class EggBotCore:
         self.discord_.client.event(self.on_member_join)
         self.discord_.client.event(self.on_message)
 
-    def __load_modules(self) -> int:
-        count = 0
+    def __load_modules(self) -> None:
+        """ Load the modules for the bot """
         for module_name in self.__get_module_files():
             try:
                 module = importlib.import_module(f"modules.{module_name}")
                 self.__register_module_events(module, module_name)
-                count += 1
             except ModuleNotFoundError as err:
                 self.logger.error("Module not loaded: '%s' (%s)", module_name, err)
-        return count
 
     def __get_module_files(self) -> List[str]:
         """ Returns list of ./modules/module*.py files """
@@ -140,12 +138,6 @@ class EggBotCore:
 
     def __register_module_events(self, module: object, module_name: str) -> None:
         """ Initializes module class and registers identified event subscriptions """
-        event_map: Dict[str, EventType] = {
-            "onmessage": EventType.ON_MESSAGE,
-            "onjoin": EventType.ON_MEMBER_JOIN,
-            "onready": EventType.ON_READY,
-            "ondisconnect": EventType.ON_DISCONNECT,
-        }
         class_name = getattr(module, "AUTO_LOAD", None)
         if class_name is None:
             raise ModuleNotFoundError("Unable to find expected AUTO_LOAD attr")
@@ -154,13 +146,14 @@ class EggBotCore:
         if class_attr is None:
             raise ModuleNotFoundError(f"Unable to find class name: {class_name}")
 
-        class_inst = class_attr()
-        for hook, eventtype in event_map.items():
-            callback = getattr(class_inst, hook, None)
+        self.loaded_modules.append(class_attr())
+
+        for event in EventType:
+            callback = getattr(self.loaded_modules[-1], event.name.lower(), None)
             if not callback:
                 continue
-            self.logger.info("Registering %s for %s", module_name, eventtype)
-            self.event_subs.add(eventtype, callback)
+            self.logger.info("Registering %s for %s", module_name, event.name.lower())
+            self.event_subs.add(event, callback)
 
 
 # May Bartmoss have mercy on your data for running this bot.

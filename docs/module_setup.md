@@ -1,25 +1,24 @@
 # Module Setup
 
-***WIP***
+Outline for a basic module boiler-plate.  Anything following this pattern that is placed in the `./modules` directory will be auto-loaded.
 
 ## Requirements
 
-1. Import EventType model
+1. Prefix the module filename with `module_`
 1. Global `str` constant named `AUTO_LOAD` assigned the name of the class to load
-1. Name of module file with no file extension in `.configs/eggbotcore.json` under the `load_modules` key.
 1. Ensure class has methods for the desired hooks
-   - MESSAGE: `onmessage`
+   - on_ready()
+   - on_disconnect()
+   - on_member_join(member: Discord.Member)
+   - on_message(message: Discord.Message)
 
 ---
 
 `sample_module.py`
 ```python
 """ Some good docstrings here """
-import foobar
-from typing import List
-
-from eggbot.models.eventtype import EventType
-
+from discord import Member
+from discord import Message
 ...
 
 AUTO_LOAD: str = "SampleModule"
@@ -30,8 +29,19 @@ class SampleModule:
     def __init__(self) -> None:
         """ Some code here """
 
-    def onmessage(self, message) -> None:
+    def on_message(self, message: Message) -> None:
         """ On message hook """
         ...
 
+    def on_member_join(self, member: Member) -> None:
+        """ On member hook """
+        ...
+
+    def on_ready(self) -> None:
+        """ On Ready hook """
+        ...
+
+    def on_disconnect(self) -> None:
+        """ On Disconnect hook """
+        ...
 ```
