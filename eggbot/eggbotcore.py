@@ -6,6 +6,7 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import os
 import sys
 import logging
 import importlib
@@ -18,11 +19,12 @@ from eggbot.eventsubs import EventSubs
 from eggbot.utils.loadenv import LoadEnv
 from eggbot.models.eventtype import EventType
 
-DEFAULT_CONFIG = "configs/eggbotcore.json"
-
 
 class EggBotCore:
     """ Main construct of bot """
+
+    DEFAULT_CONFIG = "configs/eggbotcore.json"
+    MODULE_PATH = "./modules"
 
     logger = logging.getLogger(__name__)
     discord_ = DiscordClient()
@@ -38,7 +40,7 @@ class EggBotCore:
         self.logger.info("Opening configuration...")
         if not self.core_config:
             raise Exception("Internal Object 'core_config' not initialized.")
-        if not self.core_config.load(DEFAULT_CONFIG):
+        if not self.core_config.load(self.DEFAULT_CONFIG):
             self.logger.warning("Configuration not found!")
             self.logger.warning("File used: %s", self.core_config.filename)
             return False
@@ -118,17 +120,23 @@ class EggBotCore:
         self.discord_.client.event(self.on_message)
 
     def __load_modules(self) -> int:
-        """ Loads all modules from core config, return # loaded """
-        module_list: List[str] = self.core_config.read("load_modules")
         count = 0
-        for module_name in module_list:
+        for module_name in self.__get_module_files():
             try:
                 module = importlib.import_module(f"modules.{module_name}")
                 self.__register_module_events(module, module_name)
                 count += 1
             except ModuleNotFoundError as err:
-                self.logger.error("Module not found: modules.%s (%s)", module_name, err)
+                self.logger.error("Module not loaded: '%s' (%s)", module_name, err)
         return count
+
+    def __get_module_files(self) -> List[str]:
+        """ Returns list of ./modules/module*.py files """
+        file_list: List[str] = []
+        for result in os.listdir(self.MODULE_PATH):
+            if result.startswith("module_") and result.endswith(".py"):
+                file_list.append(result[:-3])
+        return file_list
 
     def __register_module_events(self, module: object, module_name: str) -> None:
         """ Initializes module class and registers identified event subscriptions """

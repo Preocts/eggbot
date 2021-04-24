@@ -1,9 +1,4 @@
 {
     "version": "0.0.9",
-    "version_name": "Project Eggbot",
-    "load_modules": [
-        "chatkudos",
-        "joinactions",
-        "shoulderbirdparser"
-    ]
+    "version_name": "Project Eggbot"
 }

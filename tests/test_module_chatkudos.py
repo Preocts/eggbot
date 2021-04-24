@@ -19,11 +19,11 @@ from collections import namedtuple
 
 import pytest
 
-from modules.chatkudos import ChatKudos
-from modules.chatkudos import Kudos
-from modules.chatkudos import MODULE_NAME
-from modules.chatkudos import MODULE_VERSION
-from modules.chatkudos import COMMAND_CONFIG
+from modules.module_chatkudos import ChatKudos
+from modules.module_chatkudos import Kudos
+from modules.module_chatkudos import MODULE_NAME
+from modules.module_chatkudos import MODULE_VERSION
+from modules.module_chatkudos import COMMAND_CONFIG
 
 
 @pytest.fixture(scope="function", name="kudos")
