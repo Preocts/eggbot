@@ -58,7 +58,7 @@ class EggBotCore:
             self.logger.info("on_member_join(), Bot join detected, ignoring.")
             return False
         if self.event_subs:
-            for subbed in self.event_subs.get(EventType.MEMBERJOIN):
+            for subbed in self.event_subs.get(EventType.ON_MEMBER_JOIN):
                 await subbed(member)
         return True
 
@@ -75,21 +75,21 @@ class EggBotCore:
                 await self.discord_.close()
                 return False
         if self.event_subs:
-            for subbed in self.event_subs.get(EventType.MESSAGE):
+            for subbed in self.event_subs.get(EventType.ON_MESSAGE):
                 await subbed(message)
         return True
 
     async def on_ready(self) -> bool:
         """ Triggered when client has completed processing of data recieved """
         if self.event_subs:
-            for subbed in self.event_subs.get(EventType.READY):
+            for subbed in self.event_subs.get(EventType.ON_READY):
                 await subbed(None)
         return True
 
     async def on_disconnect(self) -> bool:
         """ Triggered on disconnect. Does not indicate re-connect logic will fail """
         if self.event_subs:
-            for subbed in self.event_subs.get(EventType.DISCONNECT):
+            for subbed in self.event_subs.get(EventType.ON_DISCONNECT):
                 await subbed(None)
         return True
 
@@ -141,10 +141,10 @@ class EggBotCore:
     def __register_module_events(self, module: object, module_name: str) -> None:
         """ Initializes module class and registers identified event subscriptions """
         event_map: Dict[str, EventType] = {
-            "onmessage": EventType.MESSAGE,
-            "onjoin": EventType.MEMBERJOIN,
-            "onready": EventType.READY,
-            "ondisconnect": EventType.DISCONNECT,
+            "onmessage": EventType.ON_MESSAGE,
+            "onjoin": EventType.ON_MEMBER_JOIN,
+            "onready": EventType.ON_READY,
+            "ondisconnect": EventType.ON_DISCONNECT,
         }
         class_name = getattr(module, "AUTO_LOAD", None)
         if class_name is None:

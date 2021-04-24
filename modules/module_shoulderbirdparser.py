@@ -81,7 +81,7 @@ class ShoulderBirdParser:
 
         return True
 
-    async def onmessage(self, message: Message) -> None:
+    async def on_message(self, message: Message) -> None:
         """ Hook for discord client, async coro """
         if not ShoulderBirdParser.__is_valid_message(message):
             return None
