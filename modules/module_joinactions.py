@@ -97,7 +97,7 @@ class JoinActions:
             return []
         return [JoinConfig.from_dict(action) for action in config]
 
-    async def onjoin(self, member: Member) -> None:
+    async def on_member_join(self, member: Member) -> None:
         """ OnJoin event hook for discord client """
         self.logger.info("On Join event: %s, %s", member.guild.name, member.name)
 

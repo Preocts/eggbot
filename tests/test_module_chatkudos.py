@@ -295,7 +295,7 @@ def test_format_message() -> None:
 @pytest.mark.asyncio
 async def test_onmessage_kudos(kudos: ChatKudos, async_message: AsyncMock) -> None:
     """ Give two Kudos. Config should update """
-    await kudos.onmessage(async_message)
+    await kudos.on_message(async_message)
 
     scores = kudos.get_guild("111").scores
     assert scores["111"] == -37
@@ -310,7 +310,7 @@ async def test_onmessage_command(kudos: ChatKudos, async_message: AsyncMock) -> 
     """ Give a command, ensure we hit the command path """
     async_message.content = "kudos!help"
 
-    await kudos.onmessage(async_message)
+    await kudos.on_message(async_message)
 
     async_message.channel.send.assert_called_once()
 
