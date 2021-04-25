@@ -122,6 +122,8 @@ class EggBotCore:
     def __load_modules(self) -> None:
         """ Load the modules for the bot """
         for module_name in self.__get_module_files():
+            if module_name in sys.modules:
+                continue
             try:
                 module = importlib.import_module(f"modules.{module_name}")
                 self.__register_module_events(module, module_name)
