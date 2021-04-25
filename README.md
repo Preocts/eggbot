@@ -66,15 +66,15 @@ $ python3 -m eggbot
 
 ## Roadmap
 
-1. Frame-work for plug-ins (modules) to be called on discord client events
-1. Auto-module loader with even registration
-1. Packaging scripts
 1. Logging configuration on launch
    - Rotating file output
    - Console output
+1. Convert to pytest framework for unit tests
 1. Coverage to minimum 90% - all files
+1. Packaging scripts
 1. Build a better roadmap
-1. *started* Convert to pytest framework for unit tests
+1. **done** Frame-work for plug-ins (modules) to be called on discord client events
+1. **done** Auto-module loader with even registration
 1. **done** Basic configuration loading
 1. **done** Secret loading
 1. **done** Connection to discord (doesn't do anything)
