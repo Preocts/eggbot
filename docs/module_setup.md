@@ -4,6 +4,7 @@ Outline for a basic module boiler-plate.  Anything following this pattern that i
 
 ## Requirements
 
+1. `.py` file placed in the `./modules` directory
 1. Prefix the module filename with `module_`
 1. Global `str` constant named `AUTO_LOAD` assigned the name of the class to load
 1. Ensure class has methods for the desired hooks
@@ -14,7 +15,7 @@ Outline for a basic module boiler-plate.  Anything following this pattern that i
 
 ---
 
-`sample_module.py`
+`module_sample.py`
 ```python
 """ Some good docstrings here """
 from discord import Member

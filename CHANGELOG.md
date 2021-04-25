@@ -13,6 +13,14 @@ Types of changes
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## [0.0.10] - 2021.04.24
+
+## Changed
+
+- Modules are now auto-loaded from `eggbotcore` (removing loading from `handler`)
+- Point of entry for module must be prefixed with `module_` to be seen by loader
+- `EventTypes` names renamed to match associated method (e.g. `ONJOIN` -> `ON_MEMBER_JOIN`)
+
 ## [0.0.9] - 2021.04.21
 
 ## Added
