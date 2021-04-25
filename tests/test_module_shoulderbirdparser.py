@@ -12,7 +12,7 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import pytest
 
-from modules.shoulderbirdparser import ShoulderBirdParser
+from modules.module_shoulderbirdparser import ShoulderBirdParser
 
 
 @pytest.fixture(scope="function", name="parser")

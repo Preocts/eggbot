@@ -19,11 +19,11 @@ from collections import namedtuple
 
 import pytest
 
-from modules.chatkudos import ChatKudos
-from modules.chatkudos import Kudos
-from modules.chatkudos import MODULE_NAME
-from modules.chatkudos import MODULE_VERSION
-from modules.chatkudos import COMMAND_CONFIG
+from modules.module_chatkudos import ChatKudos
+from modules.module_chatkudos import Kudos
+from modules.module_chatkudos import MODULE_NAME
+from modules.module_chatkudos import MODULE_VERSION
+from modules.module_chatkudos import COMMAND_CONFIG
 
 
 @pytest.fixture(scope="function", name="kudos")
@@ -295,7 +295,7 @@ def test_format_message() -> None:
 @pytest.mark.asyncio
 async def test_onmessage_kudos(kudos: ChatKudos, async_message: AsyncMock) -> None:
     """ Give two Kudos. Config should update """
-    await kudos.onmessage(async_message)
+    await kudos.on_message(async_message)
 
     scores = kudos.get_guild("111").scores
     assert scores["111"] == -37
@@ -310,7 +310,7 @@ async def test_onmessage_command(kudos: ChatKudos, async_message: AsyncMock) -> 
     """ Give a command, ensure we hit the command path """
     async_message.content = "kudos!help"
 
-    await kudos.onmessage(async_message)
+    await kudos.on_message(async_message)
 
     async_message.channel.send.assert_called_once()
 

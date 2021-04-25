@@ -16,10 +16,10 @@ from unittest.mock import patch
 
 import pytest
 
-from modules.joinactions import JoinActions
-from modules.joinactions import MODULE_NAME
-from modules.joinactions import MODULE_VERSION
-from modules.joinactions import METADATA
+from modules.module_joinactions import JoinActions
+from modules.module_joinactions import MODULE_NAME
+from modules.module_joinactions import MODULE_VERSION
+from modules.module_joinactions import METADATA
 
 
 @pytest.fixture(scope="function", name="member")
@@ -81,7 +81,7 @@ async def test_on_join_with_actions_success(join: JoinActions, member: Mock) -> 
     send_dm = AsyncMock()
     send_channel = AsyncMock()
     with patch.multiple(join, _send_dm=send_dm, _send_channel=send_channel):
-        await join.onjoin(member)
+        await join.on_member_join(member)
         send_channel.assert_called_once()
         send_dm.assert_called_once()
 
@@ -94,6 +94,6 @@ async def test_on_join_with_no_actions(join: JoinActions, member: Mock) -> None:
     send_dm = AsyncMock()
     send_channel = AsyncMock()
     with patch.multiple(join, _send_dm=send_dm, _send_channel=send_channel):
-        await join.onjoin(member)
+        await join.on_member_join(member)
         send_channel.assert_not_called()
         send_dm.assert_not_called()

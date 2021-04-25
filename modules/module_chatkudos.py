@@ -27,6 +27,7 @@ from discord import Message  # type: ignore
 
 from eggbot.configfile import ConfigFile
 
+AUTO_LOAD: str = "ChatKudos"
 MODULE_NAME: str = "ChatKudos"
 MODULE_VERSION: str = "1.0.0"
 DEFAULT_CONFIG: str = "configs/chatkudos.json"
@@ -310,7 +311,7 @@ class ChatKudos:
 
         return self.is_command_allowed(message)
 
-    async def onmessage(self, message: Message) -> None:
+    async def on_message(self, message: Message) -> None:
         """ On Message event hook for bot """
         if not message.content or str(message.channel.type) != "text":
             return

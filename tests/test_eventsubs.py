@@ -19,17 +19,21 @@ class TestEventSub(unittest.TestCase):
         events_client = EventSubs()
         mockclass = MockClass()
 
-        events_client.add(EventType.MEMBERJOIN, mockclass.method01)
-        events_client.add(EventType.DISCONNECT, mockclass.method02)
-        events_client.add(EventType.MESSAGE, mockfunc)
+        events_client.add(EventType.ON_MEMBER_JOIN, mockclass.method01)
+        events_client.add(EventType.ON_DISCONNECT, mockclass.method02)
+        events_client.add(EventType.ON_MESSAGE, mockfunc)
 
         self.assertEqual(
-            type(events_client.get(EventType.MEMBERJOIN)[0]), type(mockclass.method01)
+            type(events_client.get(EventType.ON_MEMBER_JOIN)[0]),
+            type(mockclass.method01),
         )
         self.assertEqual(
-            type(events_client.get(EventType.DISCONNECT)[0]), type(mockclass.method02)
+            type(events_client.get(EventType.ON_DISCONNECT)[0]),
+            type(mockclass.method02),
         )
-        self.assertEqual(type(events_client.get(EventType.MESSAGE)[0]), type(mockfunc))
+        self.assertEqual(
+            type(events_client.get(EventType.ON_MESSAGE)[0]), type(mockfunc)
+        )
 
 
 class MockClass:

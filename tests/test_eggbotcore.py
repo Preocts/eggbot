@@ -100,8 +100,8 @@ class TestEggbotCore(unittest.TestCase):
         eggbot = EggBotCore()
         _join_sub_01 = unittest.mock.AsyncMock()
         _join_sub_02 = unittest.mock.AsyncMock()
-        eggbot.event_subs.add(EventType.MEMBERJOIN, _join_sub_01)
-        eggbot.event_subs.add(EventType.MEMBERJOIN, _join_sub_02)
+        eggbot.event_subs.add(EventType.ON_MEMBER_JOIN, _join_sub_01)
+        eggbot.event_subs.add(EventType.ON_MEMBER_JOIN, _join_sub_02)
 
         mock_member = unittest.mock.Mock()
         mock_member.id = "987654321"
@@ -119,8 +119,8 @@ class TestEggbotCore(unittest.TestCase):
         eggbot = EggBotCore()
         message_sub_01 = unittest.mock.AsyncMock()
         message_sub_02 = unittest.mock.AsyncMock()
-        eggbot.event_subs.add(EventType.MESSAGE, message_sub_01)
-        eggbot.event_subs.add(EventType.MESSAGE, message_sub_02)
+        eggbot.event_subs.add(EventType.ON_MESSAGE, message_sub_01)
+        eggbot.event_subs.add(EventType.ON_MESSAGE, message_sub_02)
 
         mock_message = unittest.mock.Mock()
         mock_message.author.id = "987654321"

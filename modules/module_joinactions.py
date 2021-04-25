@@ -24,6 +24,7 @@ from discord import Guild  # type: ignore
 
 from eggbot.configfile import ConfigFile
 
+AUTO_LOAD: str = "JoinActions"
 MODULE_NAME: str = "JoinActions"
 MODULE_VERSION: str = "1.0.0"
 DEFAULT_CONFIG: str = "configs/joinactions.json"
@@ -96,7 +97,7 @@ class JoinActions:
             return []
         return [JoinConfig.from_dict(action) for action in config]
 
-    async def onjoin(self, member: Member) -> None:
+    async def on_member_join(self, member: Member) -> None:
         """ OnJoin event hook for discord client """
         self.logger.info("On Join event: %s, %s", member.guild.name, member.name)
 

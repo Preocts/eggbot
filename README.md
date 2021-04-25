@@ -6,6 +6,7 @@ Check the [road-map](README.md#Roadmap) for an idea on where the current re-writ
 
 ## Module Documentation
 
+- [Creating a Module](docs/module_setup.md) - How to create a module that will auto-load
 - [ShoulderBird Module](docs/shoulderbird.md) - Get a direct-message notification on keywords
 - [JoinAction Module](docs/joinactions.md) - Say hello to new joiners
 - [ChatKudos Module](docs/chatkudos.md) - Nothing spells discord like an arbitrary point system!

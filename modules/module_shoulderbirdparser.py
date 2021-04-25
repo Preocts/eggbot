@@ -28,6 +28,8 @@ from modules.shoulderbirdconfig import BirdMember
 from modules.shoulderbirdconfig import ShoulderBirdConfig
 from modules.shoulderbirdcli import ShoulderbirdCLI
 
+AUTO_LOAD: str = "ShoulderBirdParser"
+
 
 class ShoulderBirdParser:
     """ Point of entry object for ShoulderBird module """
@@ -79,7 +81,7 @@ class ShoulderBirdParser:
 
         return True
 
-    async def onmessage(self, message: Message) -> None:
+    async def on_message(self, message: Message) -> None:
         """ Hook for discord client, async coro """
         if not ShoulderBirdParser.__is_valid_message(message):
             return None
