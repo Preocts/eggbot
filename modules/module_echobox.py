@@ -36,45 +36,51 @@ class EchoBox:
     def __init__(self) -> None:
         """ Create instance and load configuration file """
         self.logger.info("Initializing EchoBox module")
+
         self.discord = DiscordClient()
-        self.target_channel: Optional[TextChannel] = None
+        self.owner_id: str = os.getenv("BOT_OWNER", "")
         self.owner: Optional[User] = None
-        self.disabled: bool = False
 
-    def __get_user(self, member_id: str) -> Optional[User]:
-        """ Looks up a user by ID, returns None if not found """
-        try:
-            print(f"rooJade Looking for {member_id}")
-            return self.discord.client.get_user(int(member_id))
-        except ValueError:
-            print("rooD NOT A NUMBER")
-            return None
+        # TODO: Implement these
+        self.target_channel: Optional[TextChannel] = None
+        self.target_use_mark: float = 0.0
 
-    async def __send_to_owner(self, content: str) -> None:
-        """ Sends a DM to the registered bot owner """
-        if not self.owner:
+        if not self.owner_id:
             self.logger.warning("BOT_OWNER not set in '.env'. EchoBox disabled.")
-            self.disabled = True
+
+    def __populate_owner(self) -> None:
+        """ Looks up owner by ID, returns None if not found """
+        if self.owner is not None or not self.owner_id:
             return
 
-        if not self.owner.dm_channel:
-            await self.owner.create_dm()
+        try:
+            self.owner = self.discord.client.get_user(int(self.owner_id))
+        except ValueError:
+            self.owner_id = ""
 
-        if not self.owner.dm_channel:
-            self.logger.error("Unable to open DM to owner. Deactivating EchoBox.")
+    async def __send_to_user(self, user: User, author: str, content: str) -> None:
+        """ Sends a DM to the provided discord.User """
+        self.logger.debug("Prepping DM to '%s'", user.name)
+        if user.dm_channel:
+            await user.create_dm()
+
+        if not user.dm_channel:
+            self.logger.error("Cannot open DM for %s. Deactivating EchoBox.", user.name)
+            self.owner_id = ""
             self.owner = None
         else:
-            await self.owner.send(f"EchoBox: DM to bot\n```{content}```")
+            await user.send(f"EchoBox: DM to bot from {author}\n```{content}```")
+            self.logger.info("DM send.")
 
     async def on_message(self, message: Message) -> None:
         """ ON MESSAGE event hook """
-        if str(message.channel.type) != "private" and not self.disabled:
+        if str(message.channel.type) != "private" or not self.owner_id:
             return
         self.logger.debug("Got message: %s", message)
+        self.__populate_owner()
 
         if message.content.startswith("echo!"):
             # TODO handle command
             pass
-        else:
-            self.owner = self.__get_user(os.getenv("BOT_OWNER", ""))
-            await self.__send_to_owner(message.content)
+        elif self.owner is not None:
+            await self.__send_to_user(self.owner, message.author.name, message.content)
