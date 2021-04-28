@@ -11,6 +11,7 @@ import os
 import logging
 from typing import Dict
 from typing import Optional
+from typing import NamedTuple
 
 from discord import Message  # type: ignore
 from discord import TextChannel  # type: ignore
@@ -19,18 +20,25 @@ from discord import User  # type: ignore
 from eggbot.discordclient import DiscordClient
 
 AUTO_LOAD: str = "EchoBox"
-MODULE_NAME: str = "EchoBox"
-MODULE_VERSION: str = "1.0.0"
-COMMAND_CONFIG: Dict[str, str] = {
-    "echo!set": "set_connection",
-    "echo!start": "start_echo",
-    "echo!stop": "stop_echo",
-}
+
+
+class ReturnMessage(NamedTuple):
+    """ Data model for return values of parse command """
+
+    channel: str = ""
+    owner: str = ""
 
 
 class EchoBox:
     """ Talk to a chennel through the bot """
 
+    MODULE_NAME: str = "EchoBox"
+    MODULE_VERSION: str = "1.0.0"
+    COMMAND_CONFIG: Dict[str, str] = {
+        "echo!set": "set_connection",
+        "echo!start": "start_echo",
+        "echo!stop": "stop_echo",
+    }
     logger = logging.getLogger(__name__)
 
     def __init__(self) -> None:
@@ -72,6 +80,18 @@ class EchoBox:
             await user.send(f"EchoBox: DM to bot from {author}\n```{content}```")
             self.logger.info("DM send.")
 
+    def parse_command(self, message: Message) -> ReturnMessage:
+        """ Runs commands, returns messages to send """
+        command = message.content.split()[0]
+        responses = ReturnMessage()
+        try:
+            responses = getattr(self, self.COMMAND_CONFIG[command])(message)
+        except KeyError:
+            self.logger.info("Unknown command passed: %s", command)
+        except AttributeError:
+            self.logger.error("Attribute not defined for command: %s", command)
+        return responses
+
     async def on_message(self, message: Message) -> None:
         """ ON MESSAGE event hook """
         if str(message.channel.type) != "private" or not self.owner_id:
@@ -80,7 +100,7 @@ class EchoBox:
         self.__populate_owner()
 
         if message.content.startswith("echo!"):
-            # TODO handle command
-            pass
+            result = self.parse_command(message)
+            self.logger.info("Results: %s", result)
         elif self.owner is not None:
             await self.__send_to_user(self.owner, message.author.name, message.content)
