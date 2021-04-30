@@ -152,19 +152,19 @@ class EchoBox:
         self.target_use_mark = 0.0
         return ReturnMessage("", "Echo target cleared.")
 
-    async def on_message(self, message: Message) -> None:
+    async def on_message(self, msg: Message) -> None:
         """ ON MESSAGE event hook """
-        if str(message.channel.type) != "private" or not self.owner_id:
+        if str(msg.channel.type) != "private" or not self.owner_id:
             return
-        self.logger.debug("Got message: %s", message)
+        self.logger.debug("Got message: %s", msg)
         self.__populate_owner()
 
-        if message.content.startswith("echo!"):
-            result = self.parse_command(message)
+        if msg.content.startswith("echo!") and (str(msg.author.id) == self.owner_id):
+            result = self.parse_command(msg)
             await self.__send_to_channel(result.channel)
             await self.__send_to_owner(result.owner)
             self.logger.info("Results: %s", result)
 
         elif self.owner is not None:
-            msg = f"EchoBox: DM to bot from {message.author}\n```{message.content}```"
+            msg = f"EchoBox: DM to bot from {msg.author}\n```{msg.content}```"
             await self.__send_to_owner(msg)
