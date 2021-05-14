@@ -10,10 +10,12 @@ install: init # install run-time requirements
 lock:  # generate new hashes for requirement files
 	pip-compile --generate-hashes --output-file requirements.txt requirements.in
 	pip-compile --generate-hashes --output-file requirements-dev.txt requirements-dev.in
+	pip-compile --generate-hashes --output-file requirements-test.txt requirements-test.in
 
 update: # update dependancies
 	pip-compile --upgrade --generate-hashes --output-file requirements.txt requirements.in
 	pip-compile --upgrade --generate-hashes --output-file requirements-dev.txt requirements-dev.in
+	pip-compile --upgrade --generate-hashes --output-file requirements-test.txt requirements-test.in
 	pip install --upgrade -r requirements.txt -r requirements-dev.txt
 
 install-dev:  # Install development requirements
