@@ -1,7 +1,4 @@
 pre-commit
-pytest
-pytest-asyncio
-coverage
 black
 pylint
 mypy
