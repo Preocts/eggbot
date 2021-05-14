@@ -1,4 +1,4 @@
-.PHONY: init install lock install-dev clean-pyc clean-install clean update
+.PHONY: init install lock update clean tests
 
 init:
 	pip install --upgrade pip setuptools wheel
@@ -21,6 +21,16 @@ update: # update dependancies
 install-dev:  # Install development requirements
 	pip install -r requirements-dev.txt
 
+install-test: # Install test requirements
+	pip install -r requirement-test.txt
+
+tests: # Run pytests and coverage report
+	coverage erase
+	coverage run -m pytest -v ./tests
+	coverage report
+	coverage xml
+	coverage html
+
 clean-pyc: ## Remove python artifacts.
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
@@ -28,7 +38,13 @@ clean-pyc: ## Remove python artifacts.
 	find . -name '__pycache__' -exec rm -rf {} +
 	find . -name '.mypy_cache' -exec rm -rf {} +
 
+clean-tests: ## Remove pytest and coverage artifacts
+	find . -name '.pytest_cache' -exec rm -rf {} +
+	find . -name '.coverage' -exec rm -f {} +
+	find . -name 'coverage.xml' -exec rm -f {} +
+	find . -name 'coverage_html_report' -exec rm -rf {} +
+
 clean-install: ## Remove build artifacts.
 	find . -name '*.egg-info' -exec rm -rf {} +
 
-clean: clean-pyc clean-install
+clean: clean-pyc clean-install clean-tests
