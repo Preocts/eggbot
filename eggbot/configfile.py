@@ -7,7 +7,6 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
-
 from typing import Any
 from typing import Optional
 

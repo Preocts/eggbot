@@ -7,6 +7,7 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 from __future__ import annotations
+
 from typing import List
 from typing import Optional
 

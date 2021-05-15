@@ -14,19 +14,19 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import logging
 import re
 import time
-import logging
 from typing import List
 
-from discord import Message  # type: ignore
 from discord import Guild  # type: ignore
 from discord import Member  # type: ignore
+from discord import Message  # type: ignore
 
-from modules.shoulderbirdconfig import DEFAULT_CONFIG
-from modules.shoulderbirdconfig import BirdMember
-from modules.shoulderbirdconfig import ShoulderBirdConfig
 from modules.shoulderbirdcli import ShoulderbirdCLI
+from modules.shoulderbirdconfig import BirdMember
+from modules.shoulderbirdconfig import DEFAULT_CONFIG
+from modules.shoulderbirdconfig import ShoulderBirdConfig
 
 AUTO_LOAD: str = "ShoulderBirdParser"
 

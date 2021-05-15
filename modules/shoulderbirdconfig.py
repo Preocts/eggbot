@@ -13,8 +13,8 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
-from typing import Set
 from typing import List
+from typing import Set
 
 from eggbot.configfile import ConfigFile
 

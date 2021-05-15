@@ -6,8 +6,8 @@ Author  : Preocts, preocts@preocts.com
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-import sys
 import logging
+import sys
 
 from eggbot.eggbotcore import EggBotCore
 

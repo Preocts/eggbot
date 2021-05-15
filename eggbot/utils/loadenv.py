@@ -12,11 +12,10 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-import os
 import logging
-
-from typing import Optional
+import os
 from typing import Dict
+from typing import Optional
 
 
 class LoadEnv:

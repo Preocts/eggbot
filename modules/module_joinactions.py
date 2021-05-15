@@ -19,8 +19,8 @@ from typing import Dict
 from typing import List
 from typing import NamedTuple
 
-from discord import Member  # type: ignore
 from discord import Guild  # type: ignore
+from discord import Member  # type: ignore
 
 from eggbot.configfile import ConfigFile
 
