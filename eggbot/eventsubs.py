@@ -19,26 +19,26 @@ EVENTCALLBACK = Callable[[Any], Coroutine[Any, Any, None]]
 
 
 class EventAction(NamedTuple):
-    """ Event Action Object """
+    """Event Action Object"""
 
     event: EventType
     target: EVENTCALLBACK
 
 
 class EventSubs:
-    """ Hold all subscriptions to events from bot addon modules """
+    """Hold all subscriptions to events from bot addon modules"""
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.__pubsub: List[EventAction] = []
 
     def add(self, event: EventType, target: EVENTCALLBACK) -> None:
-        """ Add new event to event subscriptions """
+        """Add new event to event subscriptions"""
         self.__pubsub.append(EventAction(event, target))
 
     def get(self, event: EventType) -> List[EVENTCALLBACK]:
-        """ Returns a list of callable targets by event type, can be empty """
+        """Returns a list of callable targets by event type, can be empty"""
         result: List[EVENTCALLBACK] = []
         for sub in self.__pubsub:
             if sub.event == event:

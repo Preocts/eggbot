@@ -8,13 +8,14 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
 from typing import Any
+from typing import Dict
 from typing import Optional
 
 from eggbot.utils.configio import ConfigIO
 
 
 class ConfigFile:
-    """ Core configuration handler """
+    """Core configuration handler"""
 
     configClient: ConfigIO = ConfigIO()
     logger = logging.getLogger(__name__)
@@ -29,36 +30,36 @@ class ConfigFile:
             filename : Path and name of the JSON config file
         """
         self.filename: Optional[str] = filename
-        self.__config: dict = {}
+        self.__config: Dict[str, Any] = {}
 
     @property
-    def config(self) -> dict:
-        """ Return copy of configuration dictionary """
+    def config(self) -> Dict[str, Any]:
+        """Return copy of configuration dictionary"""
         return dict(self.__config)
 
     def unload(self) -> None:
-        """ Unloads config without saving """
+        """Unloads config without saving"""
         self.__config = {}
 
     def load(self, filename: Optional[str] = None) -> bool:
-        """ Load config. Uses prior loaded file if none provided """
+        """Load config. Uses prior loaded file if none provided"""
         if filename:
             self.filename = filename
         self.__config = self.configClient.load(self.filename)
         return bool(self.__config)
 
     def save(self, filename: Optional[str] = None) -> bool:
-        """ Save config. Uses prior loaded file if none provided """
+        """Save config. Uses prior loaded file if none provided"""
         if filename:
             self.filename = filename
         return self.configClient.save(self.__config, self.filename)
 
     def read(self, key: str) -> Any:
-        """ Reads values by key from config. Returns None if not exists """
+        """Reads values by key from config. Returns None if not exists"""
         return self.__config.get(key)
 
     def create(self, key: str, value: Any = None) -> bool:
-        """ Creates a key/value pair in the configuration """
+        """Creates a key/value pair in the configuration"""
         if not isinstance(key, str):
             self.logger.error(".create() key not string. Given a %s", str(type(key)))
             return False
@@ -69,7 +70,7 @@ class ConfigFile:
         return True
 
     def update(self, key: str, value: Any = None) -> bool:
-        """ Updates key/value pair in the configuration """
+        """Updates key/value pair in the configuration"""
         if key not in self.__config.keys():
             self.logger.error(".update() key not found, use .create()")
             return False
@@ -77,7 +78,7 @@ class ConfigFile:
         return True
 
     def delete(self, key: str) -> bool:
-        """ Deletes key from configuration """
+        """Deletes key from configuration"""
         if key not in self.__config.keys():
             self.logger.error(".delete() key not found.")
             return False

@@ -11,17 +11,17 @@ from eggbot.models.eventtype import EventType
 
 
 def run_loop(func, *args, **kwargs):
-    """ Hack to test async functions """
+    """Hack to test async functions"""
     loop = asyncio.get_event_loop()
     result = loop.run_until_complete(func(*args, **kwargs))
     return result
 
 
 class TestEggbotCore(unittest.TestCase):
-    """ Testing suite """
+    """Testing suite"""
 
     def test_attributes(self):
-        """ These need to exist """
+        """These need to exist"""
         eggbot = EggBotCore()
         self.assertIsInstance(eggbot.discord_, ec.DiscordClient)
         self.assertIsInstance(eggbot.event_subs, ec.EventSubs)
@@ -29,17 +29,17 @@ class TestEggbotCore(unittest.TestCase):
         self.assertIsInstance(eggbot.env_vars, ec.LoadEnv)
 
     def test_config_load(self):
-        """ Pass fail on config load """
+        """Pass fail on config load"""
         eggbot = EggBotCore()
         self.assertTrue(eggbot.load_config())
         with patch.object(eggbot.core_config, "load", return_value=False):
             self.assertFalse(eggbot.load_config())
-        eggbot.core_config = None
+        eggbot.core_config = None  # type: ignore
         with self.assertRaises(Exception):
             eggbot.load_config()
 
     def test_launch_bot(self):
-        """ Should exit clean after doing things """
+        """Should exit clean after doing things"""
         eggbot = EggBotCore()
         with patch.object(eggbot.discord_, "run") as mock_client:
             self.assertEqual(eggbot.launch_bot(), 0)
@@ -49,12 +49,12 @@ class TestEggbotCore(unittest.TestCase):
             with self.assertRaises(Exception):
                 eggbot.launch_bot()
 
-        eggbot.env_vars = None
+        eggbot.env_vars = None  # type: ignore
         with self.assertRaises(Exception):
             eggbot.launch_bot()
 
     def test_join_ignore_me(self):
-        """ On Joins should ignore bot actions """
+        """On Joins should ignore bot actions"""
         eggbot = EggBotCore()
         with patch.object(eggbot.discord_, "client") as mock_client:
             mock_client.user.id = "123456789"
@@ -75,7 +75,7 @@ class TestEggbotCore(unittest.TestCase):
             self.assertFalse(run_loop(eggbot.on_member_join, mock_member))
 
     def test_message_ignore_me(self):
-        """ Message events should ignore bot chatter """
+        """Message events should ignore bot chatter"""
         eggbot = EggBotCore()
         with patch.object(eggbot.discord_, "client") as mock_client:
             mock_client.user.id = "123456789"
@@ -96,7 +96,7 @@ class TestEggbotCore(unittest.TestCase):
             self.assertFalse(run_loop(eggbot.on_message, mock_message))
 
     def test_join_pub_events(self):
-        """ Make sure join calls the "on_join" sub list """
+        """Make sure join calls the "on_join" sub list"""
         eggbot = EggBotCore()
         _join_sub_01 = unittest.mock.AsyncMock()
         _join_sub_02 = unittest.mock.AsyncMock()
@@ -115,7 +115,7 @@ class TestEggbotCore(unittest.TestCase):
         _join_sub_02.assert_called_with(mock_member)
 
     def test_message_pub_events(self):
-        """ Make sure messages call the "on_message" sub list """
+        """Make sure messages call the "on_message" sub list"""
         eggbot = EggBotCore()
         message_sub_01 = unittest.mock.AsyncMock()
         message_sub_02 = unittest.mock.AsyncMock()

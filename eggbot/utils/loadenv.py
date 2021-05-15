@@ -19,28 +19,28 @@ from typing import Optional
 
 
 class LoadEnv:
-    """ Load a local .env file into environment """
+    """Load a local .env file into environment"""
 
     logger = logging.getLogger(__name__)
 
     @staticmethod
     def get(key: str) -> str:
-        """ Get a value from environ """
+        """Get a value from environ"""
         return os.environ.get(key, "")
 
     def __init__(self) -> None:
-        """ Provide a path to .env if not located in working directory """
+        """Provide a path to .env if not located in working directory"""
         self.filepath: Optional[str] = None
         self.env_values: Dict[str, str] = {}
 
-    def __del__(self):
-        """ Destructor """
+    def __del__(self) -> None:
+        """Destructor"""
         if self.env_values:
             for key in self.env_values:
                 del os.environ[key]
 
     def load(self, filepath: Optional[str] = None) -> None:
-        """ Loads local .env or from path if provided """
+        """Loads local .env or from path if provided"""
         path = filepath if filepath else "./"
         if not os.path.isfile(os.path.join(path, ".env")):
             return
@@ -51,7 +51,7 @@ class LoadEnv:
             self.__load_to_environ()
 
     def __parse_env(self, input_file: str) -> None:
-        """ Parses env file into key-pair values """
+        """Parses env file into key-pair values"""
         for line in input_file.split("\n"):
             if not line or line.strip().startswith("#") or len(line.split("=", 1)) != 2:
                 # Blank line | Comment line | Unhealthy line
@@ -60,6 +60,6 @@ class LoadEnv:
             self.env_values[key.strip()] = value.strip()
 
     def __load_to_environ(self) -> None:
-        """ Loads values to local environ """
+        """Loads values to local environ"""
         for key, value in self.env_values.items():
             os.environ[key] = value

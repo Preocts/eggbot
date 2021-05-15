@@ -8,17 +8,19 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import json
 import logging
+from typing import Any
+from typing import Dict
 from typing import Optional
 
 
 class ConfigIO:
-    """ Input and output abstract layer for JSON configs """
+    """Input and output abstract layer for JSON configs"""
 
     logger = logging.getLogger(__name__)
 
-    def load(self, filename: Optional[str] = None) -> dict:
-        """ Loads a config json, dumps loaded config with no prompt """
-        loaded_config: dict = {}
+    def load(self, filename: Optional[str] = None) -> Dict[str, Any]:
+        """Loads a config json, dumps loaded config with no prompt"""
+        loaded_config: Dict[str, Any] = {}
         if not filename:
             self.logger.error("No filename provided to load, aborting.")
             return loaded_config
@@ -37,8 +39,8 @@ class ConfigIO:
             self.logger.error("", exc_info=True)
         return loaded_config
 
-    def save(self, config: dict, filename: Optional[str] = None) -> bool:
-        """ Saves a config json, overwrites existing file with no prompt """
+    def save(self, config: Dict[str, Any], filename: Optional[str] = None) -> bool:
+        """Saves a config json, overwrites existing file with no prompt"""
         if not filename:
             self.logger.error("No filename provided to save, aborting.")
             return False

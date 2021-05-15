@@ -32,24 +32,24 @@ AUTO_LOAD: str = "ShoulderBirdParser"
 
 
 class ShoulderBirdParser:
-    """ Point of entry object for ShoulderBird module """
+    """Point of entry object for ShoulderBird module"""
 
     logger = logging.getLogger(__name__)
 
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
-        """ Loads config """
+        """Loads config"""
         self.__config = ShoulderBirdConfig(config_file)
         self.cli = ShoulderbirdCLI(self.__config)
 
-    def close(self):
-        """ Saves config state, breaks all references """
+    def close(self) -> None:
+        """Saves config state, breaks all references"""
         self.__config.save_config()
         del self.__config
 
     def get_matches(
         self, guild_id: str, user_id: str, clean_message: str
     ) -> List[BirdMember]:
-        """ Returns a list of BirdMembers whos searches match clean_message """
+        """Returns a list of BirdMembers whos searches match clean_message"""
         self.logger.debug(
             "get_matches: '%s', '%s', '%s'", guild_id, user_id, clean_message
         )
@@ -66,7 +66,7 @@ class ShoulderBirdParser:
 
     @classmethod
     def __is_valid_message(cls, message: Message) -> bool:
-        """ Tests for valid message to process """
+        """Tests for valid message to process"""
         if not isinstance(message, Message):
             cls.logger.error("Unknown arg type: %s", type(message))
             return False
@@ -82,7 +82,7 @@ class ShoulderBirdParser:
         return True
 
     async def on_message(self, message: Message) -> None:
-        """ Hook for discord client, async coro """
+        """Hook for discord client, async coro"""
         if not ShoulderBirdParser.__is_valid_message(message):
             return None
 
@@ -118,7 +118,7 @@ class ShoulderBirdParser:
     async def __send_match_dm(
         self, member: BirdMember, message: Message, guild: Guild
     ) -> None:
-        """ Private - send DM message to match. To be replaced with actions queue """
+        """Private - send DM message to match. To be replaced with actions queue"""
         try:
             target: Member = guild.get_member(int(member.member_id))
         except ValueError:
@@ -134,7 +134,7 @@ class ShoulderBirdParser:
 
     @staticmethod
     async def __send_dm(target: Member, content: str) -> None:
-        """ Private, sends a DM to target """
+        """Private, sends a DM to target"""
         if target.dm_channel is None:
             await target.create_dm()
         if target.dm_channel:
