@@ -12,16 +12,16 @@ from eggbot.models.eventtype import EventType
 
 
 class TestEventSub(unittest.TestCase):
-    """ Test Suite """
+    """Test Suite"""
 
     def test_create_and_get_events(self):
-        """ Manual add and get """
+        """Manual add and get"""
         events_client = EventSubs()
         mockclass = MockClass()
 
-        events_client.add(EventType.ON_MEMBER_JOIN, mockclass.method01)
-        events_client.add(EventType.ON_DISCONNECT, mockclass.method02)
-        events_client.add(EventType.ON_MESSAGE, mockfunc)
+        events_client.add(EventType.ON_MEMBER_JOIN, mockclass.method01)  # type: ignore
+        events_client.add(EventType.ON_DISCONNECT, mockclass.method02)  # type: ignore
+        events_client.add(EventType.ON_MESSAGE, mockfunc)  # type: ignore
 
         self.assertEqual(
             type(events_client.get(EventType.ON_MEMBER_JOIN)[0]),
@@ -37,22 +37,20 @@ class TestEventSub(unittest.TestCase):
 
 
 class MockClass:
-    """ Mock class for mock test """
+    """Mock class for mock test"""
 
     def __init__(self) -> None:
-        """ Mock """
+        """Mock"""
         self.ran = False
 
     def method01(self) -> None:
-        """ Mock """
+        """Mock"""
         self.ran = True
 
-    def method02(self, arg1: str, arg2: dict) -> bool:
-        """ Mock """
+    def method02(self) -> None:
+        """Mock"""
         self.ran = True
-        return arg1 in arg2
 
 
-def mockfunc(arg1: str, arg2: dict) -> bool:
-    """ Mock """
-    return arg1 not in arg2
+def mockfunc() -> None:
+    """Mock"""

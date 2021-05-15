@@ -13,6 +13,8 @@ Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Set
 
@@ -24,19 +26,19 @@ DEFAULT_CONFIG = "configs/shoulderbird.json"
 
 
 class BirdMember:
-    """ Model class for member level config values """
+    """Model class for member level config values"""
 
     # pylint: disable=too-few-public-methods
 
-    def __init__(self, guild_id: str, member_id: str, **kwargs) -> None:
+    def __init__(self, guild_id: str, member_id: str, **kwargs: Any) -> None:
         self.guild_id = guild_id
         self.member_id = member_id
         self.regex: str = kwargs.get("regex", "")
         self.toggle: bool = kwargs.get("toggle", True)
         self.ignore: Set[str] = set(kwargs.get("ignore", []))
 
-    def to_dict(self) -> dict:
-        """ Converts values to dict for use in JSON """
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts values to dict for use in JSON"""
         return {
             "guild_id": self.guild_id,
             "member_id": self.member_id,
@@ -47,12 +49,12 @@ class BirdMember:
 
 
 class ShoulderBirdConfig:
-    """ Shoulder Bird Config class, CRUD config operations """
+    """Shoulder Bird Config class, CRUD config operations"""
 
     logger = logging.getLogger(__name__)
 
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
-        """ Init and load config """
+        """Init and load config"""
         self.logger.info("Initializing Shoulder Bird Parser")
         self.__configclient = ConfigFile()
         self.__configclient.load(config_file)
@@ -60,29 +62,29 @@ class ShoulderBirdConfig:
             self.__configclient.create("module", MODULE_NAME)
             self.__configclient.create("version", MODULE_VERSION)
 
-    def __load_guild(self, guild_id: str) -> dict:
-        """ Load a specific guild from config. Will create guild if not found """
+    def __load_guild(self, guild_id: str) -> Dict[str, Any]:
+        """Load a specific guild from config. Will create guild if not found"""
         self.logger.debug("load_guild: '%s'", guild_id)
         if guild_id not in self.__configclient.config:
             self.__configclient.create(guild_id, {})
         return self.__configclient.read(guild_id)
 
     def __save_member_to_guild(self, guild_id: str, member: BirdMember) -> None:
-        """ Save a specific member to a guild. Creates new or overwrites existing """
+        """Save a specific member to a guild. Creates new or overwrites existing"""
         guild_config = self.__load_guild(guild_id)
         guild_config[member.member_id] = member.to_dict()
         self.__configclient.update(guild_id, guild_config)
 
     def reload_config(self) -> bool:
-        """ Reloads current config file without saving """
+        """Reloads current config file without saving"""
         return self.__configclient.load()
 
     def save_config(self) -> bool:
-        """ Saves current config to file """
+        """Saves current config to file"""
         return self.__configclient.save()
 
     def member_list_all(self, member_id: str) -> List[BirdMember]:
-        """ Returns all configs for member across guilds, can return empty list """
+        """Returns all configs for member across guilds, can return empty list"""
         self.logger.debug("member_list_all: '%s'", member_id)
         config_list = []
         for guild in self.__configclient.config.values():
@@ -91,7 +93,7 @@ class ShoulderBirdConfig:
         return config_list
 
     def guild_list_all(self, guild_id: str) -> List[BirdMember]:
-        """ Returns all configs within a single guild, can return empty list """
+        """Returns all configs within a single guild, can return empty list"""
         self.logger.debug("guild_list_all: '%s'", guild_id)
         config_list = []
         for member in self.__load_guild(guild_id).values():
@@ -99,12 +101,12 @@ class ShoulderBirdConfig:
         return config_list
 
     def load_member(self, guild_id: str, member_id: str) -> BirdMember:
-        """ Load a member from a guild. Will return empty member if not found """
+        """Load a member from a guild. Will return empty member if not found"""
         self.logger.debug("load_member: '%s', '%s'", guild_id, member_id)
         member = self.__load_guild(guild_id).get(member_id)
         return BirdMember(**member) if member else BirdMember(guild_id, member_id)
 
-    def save_member(self, guild_id: str, member_id: str, **kwargs) -> BirdMember:
+    def save_member(self, guild_id: str, member_id: str, **kwargs: Any) -> BirdMember:
         """Save (creating or updating) a member to a guild
 
         Keyword Args:
@@ -121,7 +123,7 @@ class ShoulderBirdConfig:
         return member_config
 
     def delete_member(self, guild_id: str, member_id: str) -> bool:
-        """ Deletes member from specific guild, returns false if not found """
+        """Deletes member from specific guild, returns false if not found"""
         self.logger.debug("delete_member: '%s', '%s'", guild_id, member_id)
         guild_config = self.__load_guild(guild_id)
         deleted_value = guild_config.pop(member_id, None)

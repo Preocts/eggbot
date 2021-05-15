@@ -7,16 +7,16 @@ from eggbot.configfile import ConfigFile
 
 
 class TestCoreConfig(unittest.TestCase):
-    """ Test suite """
+    """Test suite"""
 
     def test_properties(self):
-        """ Unit Test """
+        """Unit Test"""
         config = ConfigFile("./tests/fixtures/mock_config.json")
         config.load()
         self.assertIsInstance(config.config, dict)
 
     def test_load(self):
-        """ Unit Test """
+        """Unit Test"""
         config = ConfigFile("./tests/fixtures/mock_config.json")
         # Missing file
         config.load("invalid.file")
@@ -31,14 +31,14 @@ class TestCoreConfig(unittest.TestCase):
         self.assertFalse(config.config)
 
     def test_config_crud(self):
-        """ Unit Test """
+        """Unit Test"""
         random.seed()
         key = f"unitTest{random.randint(1000,10000)}"  # nosec
         config = ConfigFile("./tests/fixtures/mock_config.json")
 
         self.assertTrue(config.create(key, "Test Value"))
         self.assertIn(key, config.config.keys())
-        self.assertFalse(config.create(12345, "Test Value"))
+        self.assertFalse(config.create(12345, "Test Value"))  # type: ignore
         self.assertNotIn(12345, config.config.keys())
         self.assertFalse(config.create(key, "Test Value"))
 
@@ -55,7 +55,7 @@ class TestCoreConfig(unittest.TestCase):
         self.assertFalse(config.delete(key))
 
     def test_save(self):
-        """ Unit Test """
+        """Unit Test"""
         random.seed()
         key = f"unitTest{random.randint(1000,10000)}"  # nosec
 
@@ -75,7 +75,7 @@ class TestCoreConfig(unittest.TestCase):
         self.assertTrue(config.config)
 
     def test_unload(self):
-        """ Empty current config, reload from same file """
+        """Empty current config, reload from same file"""
         config = ConfigFile("./tests/fixtures/mock_config.json")
         config.load()
         self.assertTrue(config.config)

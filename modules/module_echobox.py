@@ -24,14 +24,14 @@ AUTO_LOAD: str = "EchoBox"
 
 
 class ReturnMessage(NamedTuple):
-    """ Data model for return values of parse command """
+    """Data model for return values of parse command"""
 
     channel: str = ""
     owner: str = ""
 
 
 class EchoBox:
-    """ Talk to a chennel through the bot """
+    """Talk to a chennel through the bot"""
 
     MODULE_NAME: str = "EchoBox"
     MODULE_VERSION: str = "1.0.0"
@@ -43,7 +43,7 @@ class EchoBox:
     logger = logging.getLogger(__name__)
 
     def __init__(self) -> None:
-        """ Create instance and load configuration file """
+        """Create instance and load configuration file"""
         self.logger.info("Initializing EchoBox module")
 
         self.discord = DiscordClient()
@@ -58,7 +58,7 @@ class EchoBox:
             self.logger.warning("BOT_OWNER not set in '.env'. EchoBox disabled.")
 
     def __populate_owner(self) -> None:
-        """ Looks up owner by ID, returns None if not found """
+        """Looks up owner by ID, returns None if not found"""
         if self.owner is not None or not self.owner_id:
             return
 
@@ -68,7 +68,7 @@ class EchoBox:
             self.owner_id = ""
 
     async def __send_to_owner(self, content: str) -> None:
-        """ Sends a DM to the provided discord.User """
+        """Sends a DM to the provided discord.User"""
         if not self.owner or not content:
             return
 
@@ -86,7 +86,7 @@ class EchoBox:
             self.logger.info("DM sent.")
 
     async def __send_to_channel(self, content: str) -> None:
-        """ Send a message to the provided channel """
+        """Send a message to the provided channel"""
         if not self.target_channel or not content:
             return
 
@@ -95,7 +95,7 @@ class EchoBox:
         await self.target_channel.send(content)
 
     def parse_command(self, message: Message) -> ReturnMessage:
-        """ Runs commands, returns messages to send """
+        """Runs commands, returns messages to send"""
         command = message.content.split()[0]
         responses = ReturnMessage()
         try:
@@ -107,7 +107,7 @@ class EchoBox:
         return responses
 
     def set_connection(self, message: Message) -> ReturnMessage:
-        """ Sets echo connection to given channel ID if found """
+        """Sets echo connection to given channel ID if found"""
         try:
             channel_id = int(message.content.split()[1])
         except ValueError:
@@ -128,7 +128,7 @@ class EchoBox:
         )
 
     def send_echo(self, message: Message) -> ReturnMessage:
-        """ Ensure we have a target channel that isn't expired """
+        """Ensure we have a target channel that isn't expired"""
         if not self.target_channel:
             return ReturnMessage(
                 "", "Use `echo!set [channel ID]` to set a target channel first"
@@ -146,14 +146,14 @@ class EchoBox:
             f"Message echo'ed to: {self.target_channel.name}",
         )
 
-    def stop_echo(self, _) -> ReturnMessage:
-        """ Removes target channel """
+    def stop_echo(self, _: Message) -> ReturnMessage:
+        """Removes target channel"""
         self.target_channel = None
         self.target_use_mark = 0.0
         return ReturnMessage("", "Echo target cleared.")
 
     async def on_message(self, msg: Message) -> None:
-        """ ON MESSAGE event hook """
+        """ON MESSAGE event hook"""
         if str(msg.channel.type) != "private" or not self.owner_id:
             return
         self.logger.debug("Got message: %s", msg)
