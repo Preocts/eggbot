@@ -22,7 +22,7 @@ install-dev:  # Install development requirements
 	pip install -r requirements-dev.txt
 
 install-test: # Install test requirements
-	pip install -r requirement-test.txt
+	pip install -r requirements-test.txt
 
 tests: # Run pytests and coverage report
 	coverage erase

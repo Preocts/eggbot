@@ -10,20 +10,20 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-from unittest.mock import Mock
-from unittest.mock import AsyncMock
-from unittest.mock import patch
-from typing import List
-from typing import Generator
 from collections import namedtuple
+from typing import Generator
+from typing import List
+from unittest.mock import AsyncMock
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import pytest
 
 from modules.module_chatkudos import ChatKudos
+from modules.module_chatkudos import COMMAND_CONFIG
 from modules.module_chatkudos import Kudos
 from modules.module_chatkudos import MODULE_NAME
 from modules.module_chatkudos import MODULE_VERSION
-from modules.module_chatkudos import COMMAND_CONFIG
 
 
 @pytest.fixture(scope="function", name="kudos")

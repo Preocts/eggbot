@@ -8,7 +8,6 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import json
 import logging
-
 from typing import Optional
 
 

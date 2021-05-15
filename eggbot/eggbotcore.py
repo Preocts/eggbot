@@ -6,17 +6,17 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import importlib
+import logging
 import os
 import sys
-import logging
-import importlib
 from typing import List
 
-from eggbot.discordclient import DiscordClient
 from eggbot.configfile import ConfigFile
+from eggbot.discordclient import DiscordClient
 from eggbot.eventsubs import EventSubs
-from eggbot.utils.loadenv import LoadEnv
 from eggbot.models.eventtype import EventType
+from eggbot.utils.loadenv import LoadEnv
 
 
 class EggBotCore:

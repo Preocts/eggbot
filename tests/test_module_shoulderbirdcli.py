@@ -16,9 +16,9 @@ from unittest.mock import patch
 
 import pytest
 
-from modules.shoulderbirdconfig import ShoulderBirdConfig
-from modules.shoulderbirdcli import ShoulderbirdCLI
 from modules.shoulderbirdcli import COMMAND_CONFIG
+from modules.shoulderbirdcli import ShoulderbirdCLI
+from modules.shoulderbirdconfig import ShoulderBirdConfig
 
 
 @pytest.fixture(scope="function", name="cli")

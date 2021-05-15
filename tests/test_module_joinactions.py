@@ -10,16 +10,16 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-from unittest.mock import Mock
 from unittest.mock import AsyncMock
+from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
 
 from modules.module_joinactions import JoinActions
+from modules.module_joinactions import METADATA
 from modules.module_joinactions import MODULE_NAME
 from modules.module_joinactions import MODULE_VERSION
-from modules.module_joinactions import METADATA
 
 
 @pytest.fixture(scope="function", name="member")

@@ -20,9 +20,11 @@ Outline for a basic module boiler-plate.  Anything following this pattern that i
 """ Some good docstrings here """
 from discord import Member
 from discord import Message
+
 ...
 
 AUTO_LOAD: str = "SampleModule"
+
 
 class SampleModule:
     """ My sample class that does things with messages """

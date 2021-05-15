@@ -7,12 +7,12 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import logging
 import os
 import time
-import logging
 from typing import Dict
-from typing import Optional
 from typing import NamedTuple
+from typing import Optional
 
 from discord import Message  # type: ignore
 from discord import TextChannel  # type: ignore

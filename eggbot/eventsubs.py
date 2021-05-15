@@ -8,9 +8,9 @@ Git Repo: https://github.com/Preocts/Egg_Bot
 """
 import logging
 from typing import Any
-from typing import List
 from typing import Callable
 from typing import Coroutine
+from typing import List
 from typing import NamedTuple
 
 from eggbot.models.eventtype import EventType
