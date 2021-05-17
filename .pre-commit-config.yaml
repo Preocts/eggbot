@@ -4,7 +4,7 @@ exclude: ^pending_rebuild/
 repos:
 # Batch of helpful formatters and patterns
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: 'v3.4.0'
+  rev: 'v4.0.1'
   hooks:
   - id: check-json
   - id: check-yaml
