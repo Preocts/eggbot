@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Echo box, makes the bot echo a DM to a given guild and channel
 

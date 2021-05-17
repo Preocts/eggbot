@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # -*- condig: utf-8 -*-
 """ Unit tests for makeenv.py
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Load a local .env file into environment
 
     Reads, parses, and inserts environmental variables from a .env

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Unit Tests
 
 Author  : Preocts, preocts@preocts.com

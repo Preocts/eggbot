@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Abstract for supported event types
 
 Author  : Preocts <preocts@preocts.com>

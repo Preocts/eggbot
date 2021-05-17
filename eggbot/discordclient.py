@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Abstract layer for discord client library
 
 Author  : Preocts <preocts@preocts.com>

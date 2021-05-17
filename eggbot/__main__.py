@@ -1,5 +1,4 @@
 #!/usr/bin/env python3.8
-# -*- coding: utf-8 -*-
 """ Primary point of entry for Egg_Bot
 
 Author  : Preocts, preocts@preocts.com

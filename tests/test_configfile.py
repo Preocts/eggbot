@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Test core entity objects """
 import random
 import unittest

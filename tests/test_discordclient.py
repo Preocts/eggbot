@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Testing suite """
 import unittest
 from unittest.mock import patch
