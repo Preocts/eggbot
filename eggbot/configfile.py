@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Entity objects for the core bot
 
 Author  : Preocts <preocts@preocts.com>

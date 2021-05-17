@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Shoulder Bird is a bot plugin that pings a user when a defined keyword is read in chat
 

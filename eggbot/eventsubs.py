@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Hold all subscriptions to events from bot addon modules
 
 Author  : Preocts <preocts@preocts.com>

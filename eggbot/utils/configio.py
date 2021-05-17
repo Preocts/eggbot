@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ JSON Config input and output
 
 Author  : Preocts <preocts@preocts.com>
