@@ -74,11 +74,11 @@ class Audit:
         """Prints help"""
         help_msg: List[str] = [
             "`audit!here [Start Message ID] (End Message ID)`\n",
-            "Will audit all messages in current channel from start message",
-            "to option end message. If end message ID not provided audit",
+            "Will audit all messages in current channel from start message ",
+            "to option end message. If end message ID not provided audit ",
             "will include all messages since start message ID.\n\n",
             "`audit!channel [Channel ID] [Start Message ID] (End Message ID)`\n",
-            "Will run the audit on the given channel ID and post result in",
+            "Will run the audit on the given channel ID and post result in ",
             "current channel. Channel ID must be in the same guild.",
         ]
 
@@ -166,7 +166,9 @@ class Audit:
 
         async for past_message in history_cor:
             counter += 1
-            name_set.add(f"{past_message.author} ({past_message.author.id})")
+            name_set.add(
+                f"{past_message.author.display_name},{past_message.author},{past_message.author.id}"  # noqa
+            )
 
         return AuditResults(
             counter=counter,
