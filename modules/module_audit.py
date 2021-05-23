@@ -56,6 +56,7 @@ class Audit:
     COMMAND_CONFIG: Dict[str, str] = {
         "audit!here": "audit_here",
         "audit!channel": "audit_channel",
+        "audit!help": "print_help",
     }
 
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
@@ -68,6 +69,20 @@ class Audit:
         if not self.config.config:
             self.config.create("module", self.MODULE_NAME)
             self.config.create("version", self.MODULE_VERSION)
+
+    async def print_help(self, message: Message) -> None:
+        """Prints help"""
+        help_msg: List[str] = [
+            "`audit!here [Start Message ID] (End Message ID)`\n",
+            "Will audit all messages in current channel from start message",
+            "to option end message. If end message ID not provided audit",
+            "will include all messages since start message ID.\n\n",
+            "`audit!channel [Channel ID] [Start Message ID] (End Message ID)`\n",
+            "Will run the audit on the given channel ID and post result in",
+            "current channel. Channel ID must be in the same guild.",
+        ]
+
+        await message.channel.send("".join(help_msg))
 
     async def audit_channel(self, message: Message) -> Optional[AuditResults]:
         """Run audit against given channel, return output or None"""
