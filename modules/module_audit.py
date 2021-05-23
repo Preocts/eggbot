@@ -7,35 +7,56 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
-import os
 import logging
+import os
+from datetime import datetime
+from typing import Any
+from typing import Coroutine
 from typing import Dict
 from typing import List
-from typing import Optional
 from typing import MutableSet
+from typing import NamedTuple
+from typing import Optional
 
-from discord import Message  # type: ignore
+from discord import Message
+from discord import TextChannel
+from discord.errors import Forbidden
+from discord.errors import HTTPException
+from discord.errors import NotFound
 
 from eggbot.configfile import ConfigFile
 
 AUTO_LOAD: str = "Audit"
 
 
-class Audit:
-    """ Kudos points brought to Discord """
+class AuditResults(NamedTuple):
+    """Data class for audit results"""
 
-    # pylint: disable=too-many-locals
+    counter: int
+    authors: MutableSet[str]
+    start: datetime
+    end: Optional[datetime] = None
+
+
+# Protocols
+msg_datetime = Coroutine[Any, Any, Optional[datetime]]
+audit_results = Coroutine[Any, Any, Optional[AuditResults]]
+
+
+class Audit:
+    """Kudos points brought to Discord"""
 
     logger = logging.getLogger(__name__)
     MODULE_NAME: str = "Audit"
     MODULE_VERSION: str = "1.0.0"
     DEFAULT_CONFIG: str = "configs/audit.json"
     COMMAND_CONFIG: Dict[str, str] = {
-        "audit!list": "audi_max",
+        "audit!here": "audit_here",
+        "audit!channel": "audit_channel",
     }
 
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
-        """ Create instance and load configuration file """
+        """Create instance and load configuration file"""
         self.logger.info("Initializing Audit module")
         self.owner = os.getenv("BOT_OWNER", "")
         self.config = ConfigFile()
@@ -45,8 +66,70 @@ class Audit:
             self.config.create("module", self.MODULE_NAME)
             self.config.create("version", self.MODULE_VERSION)
 
+    async def audit_here(self, message: Message) -> Optional[AuditResults]:
+        """Run audit in current channel, return output or empty string"""
+        start_msg_id = self.pull_msg_arg(message.content, 1)
+        end_msg_id = self.pull_msg_arg(message.content, 2)
+
+        if start_msg_id is None:
+            return None
+
+        return await self.run_audit(message.channel, start_msg_id, end_msg_id)
+
+    async def run_audit(
+        self,
+        channel: TextChannel,
+        start_msg_id: int,
+        end_msg_id: Optional[int],
+    ) -> Optional[AuditResults]:
+        """Runs audit on given channel, starting point and ending point"""
+        start_time = await self._get_timestamp(channel, start_msg_id)
+        audit: Optional[AuditResults] = None
+
+        if start_time and not end_msg_id:
+            audit = await self._get_auditresults(channel, start_time)
+        elif start_time and end_msg_id:
+            end_time = await self._get_timestamp(channel, end_msg_id)
+            audit = await self._get_auditresults(channel, start_time, end_time)
+
+        return audit
+
+    async def _get_timestamp(
+        self,
+        channel: TextChannel,
+        msg_id: int,
+    ) -> Optional[datetime]:
+        """Pull the datetime of a message ID, returns None if not found"""
+        msg: Optional[Message] = None
+        try:
+            msg = await channel.fetch_message(msg_id)
+        except (NotFound, Forbidden, HTTPException) as err:
+            self.logger.error("Error fetching message: %s", err)
+
+        return msg if msg is None else msg.created_at
+
+    async def _get_auditresults(
+        self,
+        channel: TextChannel,
+        start: datetime,
+        end: Optional[datetime] = None,
+    ) -> AuditResults:
+        """Returns AuditResults from starttime to current, or end if provided"""
+        counter: int = 0
+        name_set: MutableSet[str] = set()
+        if end is None:
+            history_cor = channel.history(after=start)
+        else:
+            history_cor = channel.history(after=start, before=end)
+
+        async for past_message in history_cor:
+            counter += 1
+            name_set.add(f"{past_message.author} ({past_message.author.id})")
+
+        return AuditResults(counter, name_set, start, end)
+
     async def on_message(self, message: Message) -> None:
-        """ ON MESSAGE event hook """
+        """ON MESSAGE event hook"""
         if str(message.channel.type) != "text":
             self.logger.debug("Not text channel")
             return
@@ -55,48 +138,31 @@ class Audit:
             self.logger.debug("Not the mama")
             return
 
-        if not message.content.startswith("audit!list"):
+        if not message.content.startswith("audit!"):
             self.logger.debug("Not the magic words")
             return
 
-        anchor_id = self.pull_anchor(message.content)
-        stop_id = self.pull_anchor(message.content, 2)
+        audit_result: Optional[AuditResults] = None
 
-        if anchor_id is None:
-            self.logger.debug("Invalid anchor id")
-            return
+        try:
+            command = getattr(self, self.COMMAND_CONFIG[message.content.split()[0]])
+            audit_result = await command(message)
 
-        # TODO: Refactor and wrap in Try NotFound, Forbidden, HTTPException
-        anchor_msg: Message = await message.channel.fetch_message(anchor_id)
-        if stop_id:
-            stop_msg: Optional[Message] = await message.channel.fetch_message(stop_id)
-        else:
-            stop_msg = None
+        except (KeyError, AttributeError):
+            pass
 
-        anchor_dt = anchor_msg.created_at
-        stop_dt = stop_msg.created_at if stop_msg else None
+        if audit_result is not None:
 
-        counter: int = 0
-        name_set: MutableSet[str] = set()
-        if stop_dt is not None:
-            history_cor = message.channel.history(after=anchor_dt, before=stop_dt)
-        else:
-            history_cor = message.channel.history(after=anchor_dt)
+            output_names = "\n".join(audit_result.authors)
+            output_header = f"Start: {audit_result.start} - End: {audit_result.end}\n"
+            output_desc = f"Of {audit_result.counter} messages the unique names are:\n"
+            output_msg = f"{output_header}{output_desc}```{output_names}```"
 
-        async for past_message in history_cor:
-            counter += 1
-            name_set.add(f"{past_message.author} ({past_message.author.id})")
-
-        output_names = "\n".join(name_set)
-        output_header = f"Start: {anchor_dt} - End: {stop_dt}\n"
-        output_desc = f"Of {counter} messages the unique names are:\n"
-        output_msg = f"{output_header}{output_desc}```{output_names}```"
-
-        await message.channel.send(output_msg)
+            await message.channel.send(output_msg)
 
     @staticmethod
-    def pull_anchor(msg: str, pos: int = 1) -> Optional[int]:
-        """ Pulls the message ID aurgument, validate, and returns. None if invalid """
+    def pull_msg_arg(msg: str, pos: int = 1) -> Optional[int]:
+        """Pulls the message ID aurgument, validate, and returns. None if invalid"""
         if len(msg.split()) >= 2:
             try:
                 return int(msg.split()[pos])
