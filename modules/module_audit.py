@@ -18,6 +18,7 @@ from typing import MutableSet
 from typing import NamedTuple
 from typing import Optional
 
+from discord import Guild
 from discord import Message
 from discord import TextChannel
 from discord.errors import Forbidden
@@ -33,6 +34,8 @@ class AuditResults(NamedTuple):
     """Data class for audit results"""
 
     counter: int
+    channel: str
+    channel_id: int
     authors: MutableSet[str]
     start: datetime
     end: Optional[datetime] = None
@@ -66,8 +69,24 @@ class Audit:
             self.config.create("module", self.MODULE_NAME)
             self.config.create("version", self.MODULE_VERSION)
 
+    async def audit_channel(self, message: Message) -> Optional[AuditResults]:
+        """Run audit against given channel, return output or None"""
+        channel_id = self.pull_msg_arg(message.content, 1)
+        start_msg_id = self.pull_msg_arg(message.content, 2)
+        end_msg_id = self.pull_msg_arg(message.content, 3)
+
+        if channel_id is None or start_msg_id is None:
+            return None
+
+        channel = self._get_text_channel(message.guild, channel_id)
+
+        if channel is None:
+            return None
+
+        return await self.run_audit(channel, start_msg_id, end_msg_id)
+
     async def audit_here(self, message: Message) -> Optional[AuditResults]:
-        """Run audit in current channel, return output or empty string"""
+        """Run audit in current channel, return output or None"""
         start_msg_id = self.pull_msg_arg(message.content, 1)
         end_msg_id = self.pull_msg_arg(message.content, 2)
 
@@ -94,17 +113,25 @@ class Audit:
 
         return audit
 
+    def _get_text_channel(
+        self,
+        guild: Guild,
+        channel_id: int,
+    ) -> Optional[TextChannel]:
+        """Fetches text channel, if exists, from guild"""
+        return guild.get_channel(channel_id)
+
     async def _get_timestamp(
         self,
         channel: TextChannel,
         msg_id: int,
     ) -> Optional[datetime]:
         """Pull the datetime of a message ID, returns None if not found"""
-        msg: Optional[Message] = None
         try:
             msg = await channel.fetch_message(msg_id)
         except (NotFound, Forbidden, HTTPException) as err:
             self.logger.error("Error fetching message: %s", err)
+            msg = None
 
         return msg if msg is None else msg.created_at
 
@@ -126,7 +153,14 @@ class Audit:
             counter += 1
             name_set.add(f"{past_message.author} ({past_message.author.id})")
 
-        return AuditResults(counter, name_set, start, end)
+        return AuditResults(
+            counter=counter,
+            channel=channel.name,
+            channel_id=channel.id,
+            authors=name_set,
+            start=start,
+            end=end,
+        )
 
     async def on_message(self, message: Message) -> None:
         """ON MESSAGE event hook"""
@@ -154,9 +188,10 @@ class Audit:
         if audit_result is not None:
 
             output_names = "\n".join(audit_result.authors)
-            output_header = f"Start: {audit_result.start} - End: {audit_result.end}\n"
+            output_top = f"Audit: {audit_result.channel} ({audit_result.channel_id})\n"
+            output_range = f"Start: {audit_result.start} - End: {audit_result.end}\n"
             output_desc = f"Of {audit_result.counter} messages the unique names are:\n"
-            output_msg = f"{output_header}{output_desc}```{output_names}```"
+            output_msg = f"{output_top}{output_range}{output_desc}```{output_names}```"
 
             await message.channel.send(output_msg)
 
