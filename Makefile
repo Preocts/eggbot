@@ -1,50 +1,30 @@
-.PHONY: init install lock update clean tests
+.PHONY: init dev-install update clean-pyc clean-tests
 
 init:
-	pip install --upgrade pip setuptools wheel
-	pip install pip-tools
+	pip install --upgrade pip setuptools wheel pip-tools
 
-install: init # install run-time requirements
+dev-install:  # install development requirements
 	pip install -r requirements.txt
-
-lock:  # generate new hashes for requirement files
-	pip-compile --generate-hashes --output-file requirements.txt requirements.in
-	pip-compile --generate-hashes --output-file requirements-dev.txt requirements-dev.in
-	pip-compile --generate-hashes --output-file requirements-test.txt requirements-test.in
-
-update: # update dependancies
-	pip-compile --upgrade --generate-hashes --output-file requirements.txt requirements.in
-	pip-compile --upgrade --generate-hashes --output-file requirements-dev.txt requirements-dev.in
-	pip-compile --upgrade --generate-hashes --output-file requirements-test.txt requirements-test.in
-	pip install --upgrade -r requirements.txt -r requirements-dev.txt
-
-install-dev:  # Install development requirements
 	pip install -r requirements-dev.txt
+	pre-commit install
 
-install-test: # Install test requirements
-	pip install -r requirements-test.txt
+update: clean-pyc clean-tests init update-deps dev-install
 
-tests: # Run pytests and coverage report
-	coverage erase
-	coverage run -m pytest -v ./tests
-	coverage report
-	coverage xml
-	coverage html
+update-deps: # update dependancies
+	pip-compile --upgrade --output-file requirements.txt requirements.in
+	pip-compile --upgrade --output-file requirements-dev.txt requirements-dev.in
 
-clean-pyc: ## Remove python artifacts.
+clean-pyc: ## Remove python/mypy artifacts
+	find . -name '*.egg-info' -exec rm -rf {} +
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f  {} +
 	find . -name '__pycache__' -exec rm -rf {} +
 	find . -name '.mypy_cache' -exec rm -rf {} +
 
-clean-tests: ## Remove pytest and coverage artifacts
+clean-tests: ## Removes tox, coverage, and pytest artifacts
+	rm -f coverage.xml
+	rm -rf .tox
+	rm -rf coverage_html_report
+	rm -rf .coverage
 	find . -name '.pytest_cache' -exec rm -rf {} +
-	find . -name '.coverage' -exec rm -f {} +
-	find . -name 'coverage.xml' -exec rm -f {} +
-	find . -name 'coverage_html_report' -exec rm -rf {} +
-
-clean-install: ## Remove build artifacts.
-	find . -name '*.egg-info' -exec rm -rf {} +
-
-clean: clean-pyc clean-install clean-tests

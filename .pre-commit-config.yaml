@@ -1,6 +1,3 @@
-# Exclude the code we are completely replacing, we'll never fix it
-exclude: ^pending_rebuild/
-
 repos:
 # Batch of helpful formatters and patterns
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -50,6 +47,6 @@ repos:
 
 # Type enforcement for Python
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v0.902
+  rev: v0.910
   hooks:
   - id: mypy

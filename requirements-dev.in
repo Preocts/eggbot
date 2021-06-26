@@ -2,3 +2,7 @@ pre-commit
 black
 mypy
 flake8
+pytest
+pytest-asyncio
+coverage
+tox
