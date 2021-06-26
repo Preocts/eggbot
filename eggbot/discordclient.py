@@ -11,7 +11,7 @@ from typing import Any
 from typing import List
 from typing import Optional
 
-import discord  # type: ignore
+import discord
 
 
 class SingleClient(type):

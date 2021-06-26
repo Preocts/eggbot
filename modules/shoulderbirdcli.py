@@ -17,7 +17,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from discord import Message  # type: ignore
+from discord import Message
 
 from eggbot.discordclient import DiscordClient
 from modules.shoulderbirdconfig import ShoulderBirdConfig
@@ -57,17 +57,17 @@ COMMAND_CONFIG: Dict[str, Dict[str, str]] = {
 
 
 class ShoulderbirdCLI:
-    """ Shoulderbird command line via direct messages """
+    """Shoulderbird command line via direct messages"""
 
     logger = logging.getLogger(__name__)
 
     def __init__(self, config: ShoulderBirdConfig) -> None:
-        """ Initialize to loaded config """
+        """Initialize to loaded config"""
         self.config = config
         self.discord = DiscordClient()  # Guild list lookup
 
     def parse_command(self, message: Message) -> Optional[str]:
-        """ Parse incoming command, return any response to message """
+        """Parse incoming command, return any response to message"""
         return_value: Optional[str] = None
         if not message.clean_content.startswith("sb!"):
             self.logger.debug("Not a command.")
@@ -87,7 +87,7 @@ class ShoulderbirdCLI:
         return return_value
 
     def set_search(self, message: Message) -> str:
-        """ Set a search """
+        """Set a search"""
         self.logger.debug("Set search, '%s'", message.clean_content)
         segments: List[str] = message.clean_content.replace("sb!set ", "").split("=", 1)
         if len(segments) != 2 or not segments[1].strip():
@@ -103,17 +103,17 @@ class ShoulderbirdCLI:
         return f"Search set: {clean_search}"
 
     def ignore(self, message: Message) -> str:
-        """ Add a user to the ignore across all guilds """
+        """Add a user to the ignore across all guilds"""
         target: str = message.clean_content.replace("sb!ignore", "").strip()
         return self.__ignore_toggle(message, target, True)
 
     def unignore(self, message: Message) -> str:
-        """ Remove a user from ignore across all guilds """
+        """Remove a user from ignore across all guilds"""
         target: str = message.clean_content.replace("sb!unignore", "").strip()
         return self.__ignore_toggle(message, target, False)
 
     def __ignore_toggle(self, message: Message, target: str, switch: bool) -> str:
-        """ Private method to handle lookup up and changing ignores """
+        """Private method to handle lookup up and changing ignores"""
         self.logger.debug("Ignore to %s, '%s'", switch, message.clean_content)
         verb = "added to" if switch else "removed from"
         if not target:
@@ -141,15 +141,15 @@ class ShoulderbirdCLI:
         return f"'{target}' {verb} ignore list."
 
     def toggle_on(self, message: Message) -> str:
-        """ Toggle ShoulderBird on for message author """
+        """Toggle ShoulderBird on for message author"""
         return self.__toggle(str(message.author.id), True)
 
     def toggle_off(self, message: Message) -> str:
-        """ Toggle ShoulderBird off for message author """
+        """Toggle ShoulderBird off for message author"""
         return self.__toggle(str(message.author.id), False)
 
     def __toggle(self, member_id: str, switch: bool) -> str:
-        """ Private method to handle looking up and changing toggles """
+        """Private method to handle looking up and changing toggles"""
         self.logger.debug("Toggle '%s' to '%s'", member_id, switch)
         verb = "on" if switch else "off"
         member_list = self.config.member_list_all(member_id)
@@ -162,7 +162,7 @@ class ShoulderbirdCLI:
         return "No searches found, use `sb!help set` to get started."
 
     def __find_guild(self, search: str) -> Optional[str]:
-        """ Find guild by ID or name, return None if not found """
+        """Find guild by ID or name, return None if not found"""
         found_id: Optional[str] = None
         for guild in self.discord.guilds:
             if search == str(guild.id) or search == guild.name:
@@ -171,7 +171,7 @@ class ShoulderbirdCLI:
         return found_id
 
     def __find_user(self, search: str) -> Optional[str]:
-        """ Find member by ID or name, return None if not found """
+        """Find member by ID or name, return None if not found"""
         found_id: Optional[str] = None
         for user in self.discord.users:
             if search == str(user.id) or search == user.name:
@@ -180,7 +180,7 @@ class ShoulderbirdCLI:
         return found_id
 
     def help_msg(self, message: Message) -> str:
-        """ Helpful help is always helpful """
+        """Helpful help is always helpful"""
         self.logger.debug("Help: %s", message.clean_content)
         target = "sb!" + message.clean_content.replace("sb!help", "").strip()
         if target not in COMMAND_CONFIG:
@@ -195,7 +195,7 @@ class ShoulderbirdCLI:
 
     @staticmethod
     def sanitize_search(search: str) -> str:
-        """ Remove the risk of expensive regex calls """
+        """Remove the risk of expensive regex calls"""
         disallowed = ["*", ".", "?", ":", "\\", "}", "{", "+"]
         clean_search: List[str] = []
         for char in search:

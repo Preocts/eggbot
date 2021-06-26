@@ -23,7 +23,7 @@ from typing import List
 from typing import NamedTuple
 from typing import Optional
 
-from discord import Message  # type: ignore
+from discord import Message
 
 from eggbot.configfile import ConfigFile
 
@@ -44,7 +44,7 @@ COMMAND_CONFIG: Dict[str, str] = {
 
 
 class KudosConfig(NamedTuple):
-    """ Config model for a guild in ChatKudos """
+    """Config model for a guild in ChatKudos"""
 
     roles: List[str] = []
     users: List[str] = []
@@ -56,16 +56,16 @@ class KudosConfig(NamedTuple):
 
     @classmethod
     def from_dict(cls, config: Dict[str, Any]) -> KudosConfig:
-        """ Create model from loaded config segment """
+        """Create model from loaded config segment"""
         return cls(**config)
 
     def as_dict(self) -> Dict[str, Any]:
-        """ Returns NamedTuple as Dict """
+        """Returns NamedTuple as Dict"""
         return self._asdict()  # pylint: disable=E1101
 
 
 class Kudos(NamedTuple):
-    """ Model for a Kudos """
+    """Model for a Kudos"""
 
     user_id: str
     display_name: str
@@ -74,12 +74,12 @@ class Kudos(NamedTuple):
 
 
 class ChatKudos:
-    """ Kudos points brought to Discord """
+    """Kudos points brought to Discord"""
 
     logger = logging.getLogger(__name__)
 
     def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
-        """ Create instance and load configuration file """
+        """Create instance and load configuration file"""
         self.logger.info("Initializing ChatKudos module")
         self.config = ConfigFile()
         self.config.load(config_file)
@@ -88,7 +88,7 @@ class ChatKudos:
             self.config.create("version", MODULE_VERSION)
 
     def get_guild(self, guild_id: str) -> KudosConfig:
-        """ Load a guild from the config, return defaults if empty """
+        """Load a guild from the config, return defaults if empty"""
         self.logger.debug("Get guild '%s'", guild_id)
         guild_conf = self.config.read(guild_id)
         if not guild_conf:
@@ -125,7 +125,7 @@ class ChatKudos:
             self.config.update(guild_id, new_conf.as_dict())
 
     def set_max(self, message: Message) -> str:
-        """ Set max number of points to be gained in one line """
+        """Set max number of points to be gained in one line"""
         self.logger.debug("Set %s max: %s", message.guild.name, message.content)
         try:
             max_ = int(message.content.replace("kudos!max", ""))
@@ -135,31 +135,31 @@ class ChatKudos:
         return f"Max points now: {max_}" if max_ > 0 else "Max points now: unlimited"
 
     def set_gain(self, message: Message) -> str:
-        """ Update the gain message of a guild """
+        """Update the gain message of a guild"""
         content = message.content.replace("kudos!gain", "").strip()
         return self._set_message(str(message.guild.id), "gain_message", content)
 
     def set_loss(self, message: Message) -> str:
-        """ Update the loss message of a guild """
+        """Update the loss message of a guild"""
         content = message.content.replace("kudos!loss", "").strip()
         return self._set_message(str(message.guild.id), "loss_message", content)
 
     def _set_message(self, guild_id: str, key: str, content: Dict[str, str]) -> str:
-        """ Sets and saves gain/loss messages """
+        """Sets and saves gain/loss messages"""
         if content:
             self.save_guild(guild_id, **{key: content})
             return "Message has been set."
         return ""
 
     def set_lists(self, message: Message) -> str:
-        """ Update user and role lists based on message mentions """
+        """Update user and role lists based on message mentions"""
         changes: List[str] = self._set_users_list(message)
         changes.extend(self._set_roles_list(message))
 
         return "Allow list changes: " + ", ".join(changes) if changes else ""
 
     def _set_users_list(self, message: Message) -> List[str]:
-        """ Process and user mentions in message, return changes """
+        """Process and user mentions in message, return changes"""
         changes: List[str] = []
         users = set(self.get_guild(str(message.guild.id)).users)
 
@@ -176,7 +176,7 @@ class ChatKudos:
         return changes
 
     def _set_roles_list(self, message: Message) -> List[str]:
-        """ Process all role mentions in message, return changes """
+        """Process all role mentions in message, return changes"""
         changes: List[str] = []
         roles = set(self.get_guild(str(message.guild.id)).roles)
 
@@ -192,7 +192,7 @@ class ChatKudos:
         return changes
 
     def set_lock(self, message: Message) -> str:
-        """ Toggle lock for guild """
+        """Toggle lock for guild"""
         new_lock = not self.get_guild(str(message.guild.id)).lock
         self.save_guild(str(message.guild.id), lock=new_lock)
         if new_lock:
@@ -200,7 +200,7 @@ class ChatKudos:
         return "ChatKudos is now unlocked. **Everyone** can use it!"
 
     def show_help(self, message: Message) -> str:
-        """ Help and self-plug, yay! """
+        """Help and self-plug, yay!"""
         self.logger.debug("Help: %s", message.author.name)
         return (
             "Detailed use instructions here: "
@@ -208,7 +208,7 @@ class ChatKudos:
         )
 
     def generate_board(self, message: Message) -> str:
-        """ Create scoreboard """
+        """Create scoreboard"""
         self.logger.debug("Scoreboard: %s", message.content)
         try:
             count = int(message.content.replace("kudos!board", ""))
@@ -230,7 +230,7 @@ class ChatKudos:
         return "\n".join(score_list)
 
     def find_kudos(self, message: Message) -> List[Kudos]:
-        """ Process a chat-line for Kudos """
+        """Process a chat-line for Kudos"""
         kudos_list: List[Kudos] = []
 
         for mention in message.mentions:
@@ -247,7 +247,7 @@ class ChatKudos:
         return kudos_list
 
     def _calc_kudos(self, message: Message, mention_id: str) -> Optional[int]:
-        """ Calculate the number of kudos given to a mention """
+        """Calculate the number of kudos given to a mention"""
         max_ = self.get_guild(str(message.guild.id)).max
 
         for idx, word in enumerate(message.content.split()):
@@ -270,7 +270,7 @@ class ChatKudos:
         return None
 
     def apply_kudos(self, guild_id: str, kudos_list: List[Kudos]) -> None:
-        """ Update scores in config """
+        """Update scores in config"""
         scores = self.get_guild(guild_id).scores
         for kudos in kudos_list:
             scores[kudos.user_id] = scores.get(kudos.user_id, 0) + kudos.amount
@@ -278,7 +278,7 @@ class ChatKudos:
         self.save_guild(guild_id, scores=scores)
 
     def parse_command(self, message: Message) -> str:
-        """ Process all commands prefixed with 'kudos!' """
+        """Process all commands prefixed with 'kudos!'"""
         self.logger.debug("Parsing command: %s", message.content)
         command = message.content.split()[0]
         try:
@@ -289,7 +289,7 @@ class ChatKudos:
         return result
 
     def is_command_allowed(self, message: Message) -> bool:
-        """ Determine if author of message can run commands """
+        """Determine if author of message can run commands"""
         if str(message.author.id) == str(message.guild.owner.id):
             return True
 
@@ -299,7 +299,7 @@ class ChatKudos:
         return False
 
     def is_kudos_allowed(self, message: Message) -> bool:
-        """ Determine if author can grant kudos """
+        """Determine if author can grant kudos"""
         allowed_roles = self.get_guild(str(message.guild.id)).roles
 
         if not self.get_guild(str(message.guild.id)).lock:
@@ -312,7 +312,7 @@ class ChatKudos:
         return self.is_command_allowed(message)
 
     async def on_message(self, message: Message) -> None:
-        """ On Message event hook for bot """
+        """On Message event hook for bot"""
         if not message.content or str(message.channel.type) != "text":
             return
 
@@ -338,7 +338,7 @@ class ChatKudos:
         self.logger.debug("[FINISH] onmessage: %f ms", round(toc - tic, 2))
 
     async def _announce_kudos(self, message: Message, kudos_list: List[Kudos]) -> None:
-        """ Send any Kudos to the chat """
+        """Send any Kudos to the chat"""
         for kudos in kudos_list:
             if kudos.amount < 0:
                 msg = self.get_guild(str(message.guild.id)).loss_message
@@ -349,7 +349,7 @@ class ChatKudos:
 
     @staticmethod
     def _format_message(content: str, kudos: Kudos) -> str:
-        """ Apply metadata replacements """
+        """Apply metadata replacements"""
         new_total = kudos.current + kudos.amount
 
         formatted_msg = content.replace("[POINTS]", str(kudos.amount))

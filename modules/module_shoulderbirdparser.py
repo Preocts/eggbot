@@ -18,9 +18,9 @@ import re
 import time
 from typing import List
 
-from discord import Guild  # type: ignore
-from discord import Member  # type: ignore
-from discord import Message  # type: ignore
+from discord import Guild
+from discord import Member
+from discord import Message
 
 from modules.shoulderbirdcli import ShoulderbirdCLI
 from modules.shoulderbirdconfig import BirdMember

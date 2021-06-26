@@ -13,9 +13,9 @@ from typing import Dict
 from typing import NamedTuple
 from typing import Optional
 
-from discord import Message  # type: ignore
-from discord import TextChannel  # type: ignore
-from discord import User  # type: ignore
+from discord import Message
+from discord import TextChannel
+from discord import User
 
 from eggbot.discordclient import DiscordClient
 
