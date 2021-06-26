@@ -13,11 +13,10 @@ from typing import Dict
 from typing import NamedTuple
 from typing import Optional
 
+from discord import Client
 from discord import Message
 from discord import TextChannel
 from discord import User
-
-from eggbot.discordclient import DiscordClient
 
 AUTO_LOAD: str = "EchoBox"
 
@@ -41,11 +40,11 @@ class EchoBox:
     }
     logger = logging.getLogger(__name__)
 
-    def __init__(self) -> None:
+    def __init__(self, client: Client) -> None:
         """Create instance and load configuration file"""
         self.logger.info("Initializing EchoBox module")
 
-        self.discord = DiscordClient()
+        self.client = client
         self.owner_id: str = os.getenv("BOT_OWNER", "")
         self.owner: Optional[User] = None
 
@@ -62,7 +61,7 @@ class EchoBox:
             return
 
         try:
-            self.owner = self.discord.client.get_user(int(self.owner_id))
+            self.owner = self.client.client.get_user(int(self.owner_id))
         except ValueError:
             self.owner_id = ""
 
@@ -112,7 +111,7 @@ class EchoBox:
         except ValueError:
             return ReturnMessage("", "Invalid channel ID provided")
 
-        self.target_channel = self.discord.client.get_channel(channel_id)
+        self.target_channel = self.client.client.get_channel(channel_id)
         self.target_use_mark = time.perf_counter()
 
         if not self.target_channel or str(self.target_channel.type) != "text":

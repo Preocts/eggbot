@@ -32,12 +32,6 @@ class LoadEnv:
         self.filepath: Optional[str] = None
         self.env_values: Dict[str, str] = {}
 
-    def __del__(self) -> None:
-        """Destructor"""
-        if self.env_values:
-            for key in self.env_values:
-                del os.environ[key]
-
     def load(self, filepath: Optional[str] = None) -> None:
         """Loads local .env or from path if provided"""
         path = filepath if filepath else "./"

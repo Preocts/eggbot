@@ -18,6 +18,7 @@ import re
 import time
 from typing import List
 
+from discord import Client
 from discord import Guild
 from discord import Member
 from discord import Message
@@ -35,10 +36,11 @@ class ShoulderBirdParser:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
+    def __init__(self, client: Client, config_file: str = DEFAULT_CONFIG) -> None:
         """Loads config"""
         self.__config = ShoulderBirdConfig(config_file)
-        self.cli = ShoulderbirdCLI(self.__config)
+        self.cli = ShoulderbirdCLI(self.__config, client)
+        self.client = client
 
     def close(self) -> None:
         """Saves config state, breaks all references"""

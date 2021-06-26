@@ -22,7 +22,6 @@ class TestEggbotCore(unittest.TestCase):
     def test_attributes(self):
         """These need to exist"""
         eggbot = EggBotCore()
-        self.assertIsInstance(eggbot.discord_, ec.DiscordClient)
         self.assertIsInstance(eggbot.event_subs, ec.EventSubs)
         self.assertIsInstance(eggbot.core_config, ec.ConfigFile)
         self.assertIsInstance(eggbot.env_vars, ec.LoadEnv)
@@ -40,7 +39,7 @@ class TestEggbotCore(unittest.TestCase):
     def test_launch_bot(self):
         """Should exit clean after doing things"""
         eggbot = EggBotCore()
-        with patch.object(eggbot.discord_, "run") as mock_client:
+        with patch.object(eggbot.client, "run") as mock_client:
             self.assertEqual(eggbot.launch_bot(), 0)
             mock_client.assert_called()
 
@@ -55,7 +54,7 @@ class TestEggbotCore(unittest.TestCase):
     def test_join_ignore_me(self):
         """On Joins should ignore bot actions"""
         eggbot = EggBotCore()
-        with patch.object(eggbot.discord_, "client") as mock_client:
+        with patch.object(eggbot, "client") as mock_client:
             mock_client.user.id = "123456789"
             # Create mocked member
             mock_member = unittest.mock.Mock()
@@ -76,7 +75,7 @@ class TestEggbotCore(unittest.TestCase):
     def test_message_ignore_me(self):
         """Message events should ignore bot chatter"""
         eggbot = EggBotCore()
-        with patch.object(eggbot.discord_, "client") as mock_client:
+        with patch.object(eggbot, "client") as mock_client:
             mock_client.user.id = "123456789"
             # Create mocked message
             mock_message = unittest.mock.Mock()
@@ -106,7 +105,7 @@ class TestEggbotCore(unittest.TestCase):
         mock_member.id = "987654321"
         mock_member.bot = False
 
-        with patch.object(eggbot.discord_, "client") as mock_client:
+        with patch.object(eggbot, "client") as mock_client:
             mock_client.user.id = "123456789"
             self.assertTrue(run_loop(eggbot.on_member_join, mock_member))
 
@@ -125,7 +124,7 @@ class TestEggbotCore(unittest.TestCase):
         mock_message.author.id = "987654321"
         mock_message.author.bot = False
 
-        with patch.object(eggbot.discord_, "client") as mock_client:
+        with patch.object(eggbot, "client") as mock_client:
             mock_client.userid = "123456789"
             self.assertTrue(run_loop(eggbot.on_message, mock_message))
 

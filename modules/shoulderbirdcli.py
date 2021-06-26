@@ -17,9 +17,9 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from discord import Client
 from discord import Message
 
-from eggbot.discordclient import DiscordClient
 from modules.shoulderbirdconfig import ShoulderBirdConfig
 
 COMMAND_CONFIG: Dict[str, Dict[str, str]] = {
@@ -61,10 +61,10 @@ class ShoulderbirdCLI:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, config: ShoulderBirdConfig) -> None:
+    def __init__(self, config: ShoulderBirdConfig, client: Client) -> None:
         """Initialize to loaded config"""
         self.config = config
-        self.discord = DiscordClient()  # Guild list lookup
+        self.client = client
 
     def parse_command(self, message: Message) -> Optional[str]:
         """Parse incoming command, return any response to message"""
@@ -164,7 +164,7 @@ class ShoulderbirdCLI:
     def __find_guild(self, search: str) -> Optional[str]:
         """Find guild by ID or name, return None if not found"""
         found_id: Optional[str] = None
-        for guild in self.discord.guilds:
+        for guild in self.client.guilds:
             if search == str(guild.id) or search == guild.name:
                 found_id = str(guild.id)
                 break
@@ -173,7 +173,7 @@ class ShoulderbirdCLI:
     def __find_user(self, search: str) -> Optional[str]:
         """Find member by ID or name, return None if not found"""
         found_id: Optional[str] = None
-        for user in self.discord.users:
+        for user in self.client.users:
             if search == str(user.id) or search == user.name:
                 found_id = str(user.id)
                 break

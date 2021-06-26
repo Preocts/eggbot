@@ -18,6 +18,7 @@ from typing import MutableSet
 from typing import NamedTuple
 from typing import Optional
 
+from discord import Client
 from discord import Guild
 from discord import Message
 from discord import TextChannel
@@ -59,7 +60,7 @@ class Audit:
         "audit!help": "print_help",
     }
 
-    def __init__(self, config_file: str = DEFAULT_CONFIG) -> None:
+    def __init__(self, client: Client, config_file: str = DEFAULT_CONFIG) -> None:
         """Create instance and load configuration file"""
         self.logger.info("Initializing Audit module")
         self.owner = os.getenv("BOT_OWNER", "")

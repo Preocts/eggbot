@@ -9,6 +9,7 @@ Author  : Preocts <preocts@preocts.com>
 Discord : Preocts#8196
 Git Repo: https://github.com/Preocts/Egg_Bot
 """
+import discord
 import pytest
 
 from modules.module_shoulderbirdparser import ShoulderBirdParser
@@ -17,7 +18,9 @@ from modules.module_shoulderbirdparser import ShoulderBirdParser
 @pytest.fixture(scope="function", name="parser")
 def fixture_parser() -> ShoulderBirdParser:
     """fixture"""
-    return ShoulderBirdParser("./tests/fixtures/mock_shoulderbirdparser.json")
+    return ShoulderBirdParser(
+        discord.Client(), "./tests/fixtures/mock_shoulderbirdparser.json"
+    )
 
 
 def test_positive_match_simple(parser: ShoulderBirdParser) -> None:

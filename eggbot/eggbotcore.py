@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ Egg Bot, Discord Modular Bot
 
 Author  : Preocts <preocts@preocts.com>
@@ -11,11 +10,11 @@ import os
 import sys
 from typing import List
 
+import discord
 from discord import Member
 from discord import Message
 
 from eggbot.configfile import ConfigFile
-from eggbot.discordclient import DiscordClient
 from eggbot.eventsubs import EventSubs
 from eggbot.models.eventtype import EventType
 from eggbot.utils.loadenv import LoadEnv
@@ -28,10 +27,12 @@ class EggBotCore:
     MODULE_PATH = "./modules"
 
     logger = logging.getLogger(__name__)
-    discord_ = DiscordClient()
+    intents = discord.Intents(messages=True, guilds=True, members=True)
+    client = discord.Client(status="online", intents=intents)
 
     def __init__(self) -> None:
         """Declare class objects"""
+        self.__discord_secret = ""
         self.event_subs = EventSubs()
         self.core_config = ConfigFile()
         self.env_vars = LoadEnv()
@@ -53,7 +54,7 @@ class EggBotCore:
 
     async def on_member_join(self, member: Member) -> bool:
         """Triggered on all join events"""
-        if member.id == self.discord_.client.user.id:
+        if member.id == self.client.user.id:
             self.logger.warning("on_member_join(), Saw ourselves join, that's weird.")
             return False
         if member.bot:
@@ -66,7 +67,7 @@ class EggBotCore:
 
     async def on_message(self, message: Message) -> bool:
         """Triggered on all message events"""
-        if message.author.id == self.discord_.client.user.id:
+        if message.author.id == self.client.user.id:
             self.logger.debug("on_message(), Ignoring ourselves.")
             return False
         if message.author.bot:
@@ -74,7 +75,7 @@ class EggBotCore:
             return False
         if str(message.author.id) == self.env_vars.get("BOT_OWNER"):
             if message.content == "egg!dc":
-                await self.discord_.close()
+                await self.client.close()
                 return False
         if self.event_subs:
             for subbed in self.event_subs.get(EventType.ON_MESSAGE):
@@ -100,7 +101,7 @@ class EggBotCore:
         self.__load_environment()
         self.__load_modules()
         self.__register_events()
-        self.discord_.run()
+        self.client.run(self.__discord_secret)
         return 0
 
     def __load_environment(self) -> None:
@@ -110,16 +111,16 @@ class EggBotCore:
         if not self.load_config():
             raise Exception("Unable to load core_configuration.")
         self.env_vars.load()
-        self.discord_.set_secret(self.env_vars.get("DISCORD_SECRET"))
+        self.__discord_secret = self.env_vars.get("DISCORD_SECRET")
 
     def __register_events(self) -> None:
         """Link event handler methods to discord client"""
         # This replaces the @discord.client.event decorators as we want to
         # capture the instance method of these, not the unbound function.
-        self.discord_.client.event(self.on_ready)
-        self.discord_.client.event(self.on_disconnect)
-        self.discord_.client.event(self.on_member_join)
-        self.discord_.client.event(self.on_message)
+        self.client.event(self.on_ready)
+        self.client.event(self.on_disconnect)
+        self.client.event(self.on_member_join)
+        self.client.event(self.on_message)
 
     def __load_modules(self) -> None:
         """Load the modules for the bot"""
@@ -150,7 +151,7 @@ class EggBotCore:
         if class_attr is None:
             raise ModuleNotFoundError(f"Unable to find class name: {class_name}")
 
-        self.loaded_modules.append(class_attr())
+        self.loaded_modules.append(class_attr(client=self.client))
 
         for event in EventType:
             callback = getattr(self.loaded_modules[-1], event.name.lower(), None)

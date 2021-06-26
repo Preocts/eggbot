@@ -13,6 +13,7 @@ from unittest.mock import AsyncMock
 from unittest.mock import Mock
 from unittest.mock import patch
 
+import discord
 import pytest
 
 from modules.module_joinactions import JoinActions
@@ -23,7 +24,7 @@ from modules.module_joinactions import MODULE_VERSION
 
 @pytest.fixture(scope="function", name="member")
 def fixture_member() -> Mock:
-    """ Fixture """
+    """Fixture"""
     member = Mock()
     member.guild.id = 111
     member.guild.name = "Test Guild"
@@ -35,24 +36,24 @@ def fixture_member() -> Mock:
 
 @pytest.fixture(scope="function", name="join")
 def fixture_join() -> JoinActions:
-    """ Fixture """
-    return JoinActions("./tests/fixtures/mock_joinactions.json")
+    """Fixture"""
+    return JoinActions(discord.Client(), "./tests/fixtures/mock_joinactions.json")
 
 
 def test_does_fixture_need_updating(join: JoinActions) -> None:
-    """ Confirm version and module names match, sanity check """
+    """Confirm version and module names match, sanity check"""
     assert join.config.read("module") == MODULE_NAME
     assert join.config.read("version") == MODULE_VERSION
 
 
 def test_read_actions_guild_not_found(join: JoinActions) -> None:
-    """ Attempt to get actions for a guild not in config """
+    """Attempt to get actions for a guild not in config"""
     result = join.get_actions("999")
     assert not result
 
 
 def test_read_actions_guild_found(join: JoinActions) -> None:
-    """ Attempt to get actions for a guild, ensure expected exist """
+    """Attempt to get actions for a guild, ensure expected exist"""
     expected_names = ["test01", "test02", "test03"]
     result = join.get_actions("111")
     assert len(result) == 3
@@ -61,21 +62,21 @@ def test_read_actions_guild_found(join: JoinActions) -> None:
 
 
 def test_message_formatter(join: JoinActions, member: Mock) -> None:
-    """ Ensure we create metavalues correctly """
+    """Ensure we create metavalues correctly"""
 
     msg = "-[USERNAME]- has joined [GUILDNAME]"
     assert join.format_content(msg, member) == "-Tester01- has joined Test Guild"
 
 
 def test_all_metadata(join: JoinActions, member: Mock) -> None:
-    """ Step through all metadata config, ensure everything works """
+    """Step through all metadata config, ensure everything works"""
     for key in METADATA:
         assert join.format_content(key, member)
 
 
 @pytest.mark.asyncio
 async def test_on_join_with_actions_success(join: JoinActions, member: Mock) -> None:
-    """ On Join event with two actions (channel and DM) """
+    """On Join event with two actions (channel and DM)"""
 
     send_dm = AsyncMock()
     send_channel = AsyncMock()
@@ -87,7 +88,7 @@ async def test_on_join_with_actions_success(join: JoinActions, member: Mock) -> 
 
 @pytest.mark.asyncio
 async def test_on_join_with_no_actions(join: JoinActions, member: Mock) -> None:
-    """ On Join event with no actions """
+    """On Join event with no actions"""
     member.guild.id = 999
 
     send_dm = AsyncMock()

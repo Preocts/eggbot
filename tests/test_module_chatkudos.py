@@ -16,6 +16,7 @@ from unittest.mock import AsyncMock
 from unittest.mock import Mock
 from unittest.mock import patch
 
+import discord
 import pytest
 
 from modules.module_chatkudos import ChatKudos
@@ -28,7 +29,7 @@ from modules.module_chatkudos import MODULE_VERSION
 @pytest.fixture(scope="function", name="kudos")
 def fixture_kudos() -> Generator[ChatKudos, None, None]:
     """Fixture"""
-    kudos = ChatKudos("./tests/fixtures/mock_chatkudos.json")
+    kudos = ChatKudos(discord.Client(), "./tests/fixtures/mock_chatkudos.json")
     # disable writing to the fixture file
     with patch.object(kudos.config, "save"):
         yield kudos
