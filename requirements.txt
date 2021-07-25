@@ -20,6 +20,8 @@ multidict==5.1.0
     # via
     #   aiohttp
     #   yarl
+secretbox==1.3.2
+    # via -r requirements.in
 typing-extensions==3.10.0.0
     # via aiohttp
 yarl==1.6.3
