@@ -7,6 +7,9 @@ dev-install:  # install development requirements
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
 	pre-commit install
+	pre-commit autoupdate
+
+install: clean-pyc clean-tests init dev-install
 
 update: clean-pyc clean-tests init update-deps dev-install
 
