@@ -1,23 +1,24 @@
-#!/usr/bin/env python3.8
-""" Primary point of entry for Egg_Bot
+"""
+Primary point of entry for eggbot, used to configure logging and invoke bot
 
-Author  : Preocts, preocts@preocts.com
+Author  : Preocts
 Discord : Preocts#8196
-Git Repo: https://github.com/Preocts/Egg_Bot
+Git Repo: https://github.com/Preocts/eggbot
 """
 import logging
 import sys
 
-from eggbot.eggbotcore import EggBotCore
+from eggbot import constants
+from eggbot.eggbotcore import eggbot
 
 
 def main() -> int:
-    """ Main entry point """
+    """Main entry point"""
     logging.basicConfig(level="INFO")
 
-    eggbot = EggBotCore()
+    # eggbot.load_extension("eggbot.exts.testing")
 
-    eggbot.launch_bot()
+    eggbot.run(constants.secretbox.get("EGGBOT_TOKEN"))
 
     return 0
 
