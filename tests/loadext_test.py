@@ -26,7 +26,8 @@ def test_get_files() -> None:
     """Use pathlib to get all .py files"""
     result = loadext.get_files(MOCK_EXT)
 
-    assert result == EXPECTED_FILES
+    for expected in EXPECTED_FILES:
+        assert expected in result
 
 
 def test_convert_to_module_path() -> None:
