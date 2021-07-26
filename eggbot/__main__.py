@@ -10,15 +10,14 @@ import sys
 
 from eggbot import constants
 from eggbot.eggbotcore import eggbot
+from eggbot.utils import loadext
 
 
 def main() -> int:
     """Main entry point"""
     logging.basicConfig(level="INFO")
-
-    # TODO: extension loader
-    # eggbot.load_extension("eggbot.exts.temp_testing")
-
+    for ext in loadext.load_ext(constants.FilePaths.exts):
+        eggbot.load_extension(ext)
     eggbot.run(constants.secretbox.get("EGGBOT_TOKEN"))
 
     return 0
