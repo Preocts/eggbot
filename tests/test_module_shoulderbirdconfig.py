@@ -23,12 +23,12 @@ MOCK_MEMBER_ID = "0123456789"
 
 
 class TestShoulderBirdConfig:
-    """ Test suite """
+    """Test suite"""
 
     parser: Optional[ShoulderBirdConfig] = None
 
     def test_empty_config(self) -> None:
-        """ Start with non-existing config """
+        """Start with non-existing config"""
         if os.path.isfile(MOCK_CONFIG):
             os.remove(MOCK_CONFIG)
         assert not os.path.isfile(MOCK_CONFIG)
@@ -38,7 +38,7 @@ class TestShoulderBirdConfig:
         assert os.path.isfile(MOCK_CONFIG)
 
     def test_save_new_and_load(self) -> None:
-        """ Ensure we save a new member and recall info after unload """
+        """Ensure we save a new member and recall info after unload"""
         assert self.parser is not None
         self.parser.save_member(MOCK_GUILD_ID, MOCK_MEMBER_ID, toggle=False)
         assert self.parser.save_config()
@@ -48,7 +48,7 @@ class TestShoulderBirdConfig:
         assert not member.toggle
 
     def test_reload_without_save(self) -> None:
-        """ Forced reload should loose all changes """
+        """Forced reload should loose all changes"""
         assert self.parser is not None
         before_reload = self.parser.load_member(MOCK_GUILD_ID, MOCK_MEMBER_ID)
         self.parser.save_member(
@@ -60,7 +60,7 @@ class TestShoulderBirdConfig:
         assert before_reload.toggle is after_reload.toggle
 
     def test_modify_existing(self) -> None:
-        """ Ensure we modify a save while preserving existing values """
+        """Ensure we modify a save while preserving existing values"""
         assert self.parser is not None
         prior_member = self.parser.load_member(MOCK_GUILD_ID, MOCK_MEMBER_ID)
         self.parser.save_member(MOCK_GUILD_ID, MOCK_MEMBER_ID, regex="test")
@@ -71,14 +71,14 @@ class TestShoulderBirdConfig:
         assert self.parser.save_config()
 
     def test_delete_member(self) -> None:
-        """ Ensure we delete correctly """
+        """Ensure we delete correctly"""
         assert self.parser is not None
         assert self.parser.delete_member(MOCK_GUILD_ID, MOCK_MEMBER_ID)
         assert not self.parser.delete_member(MOCK_GUILD_ID, MOCK_MEMBER_ID)
         assert self.parser.save_config()
 
     def test_mutli_guilds(self) -> None:
-        """ Can we get all the guilds of a single member """
+        """Can we get all the guilds of a single member"""
         assert self.parser is not None
         guild_ids = ["123", "1234", "12345", "123456"]
         for ids in guild_ids:
@@ -90,7 +90,7 @@ class TestShoulderBirdConfig:
         self.parser.reload_config()
 
     def test_multi_members(self) -> None:
-        """ Create and read multi-members in one guild """
+        """Create and read multi-members in one guild"""
         assert self.parser is not None
         member_ids = ["123", "1234", "12345", "123456"]
         for ids in member_ids:

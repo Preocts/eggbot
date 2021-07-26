@@ -12,6 +12,6 @@ class EggbotClient:
 
     name: str = "eggbot"
     desc: str = "eggbot: A bot made by an egg"
-    prefix: str = secretbox.get("EGGBOT_PREFIX", "!")
+    prefix: str = "!"
     token: str = secretbox.get("EGGBOT_TOKEN")
     owner: str = secretbox.get("EGGBOT_OWNER", "123151368885239809")

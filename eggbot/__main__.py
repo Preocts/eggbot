@@ -1,5 +1,5 @@
 """
-Primary point of entry for eggbot, used to configure logging and invoke bot
+Primary point of entry to start bot, load cogs, and config logging
 
 Author  : Preocts
 Discord : Preocts#8196
@@ -16,7 +16,8 @@ def main() -> int:
     """Main entry point"""
     logging.basicConfig(level="INFO")
 
-    # eggbot.load_extension("eggbot.exts.testing")
+    # TODO: extension loader
+    # eggbot.load_extension("eggbot.exts.temp_testing")
 
     eggbot.run(constants.secretbox.get("EGGBOT_TOKEN"))
 

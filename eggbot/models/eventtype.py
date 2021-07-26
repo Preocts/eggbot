@@ -9,7 +9,7 @@ from enum import Enum
 
 
 class EventType(Enum):
-    """ Abstract for supported event types """
+    """Abstract for supported event types"""
 
     ON_READY = 0
     ON_DISCONNECT = 1
