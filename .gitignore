@@ -1,5 +1,5 @@
 # Custom
-preocts_*
+temp_*
 .vscode/
 configs/
 !configs/eggbotcore.json
