@@ -10,8 +10,15 @@ secretbox = SecretBox(auto_load=True)
 class EggbotClient:
     """Client data"""
 
-    name: str = "eggbot"
-    desc: str = "eggbot: A bot made by an egg"
-    prefix: str = "!"
-    token: str = secretbox.get("EGGBOT_TOKEN")
-    owner: str = secretbox.get("EGGBOT_OWNER", "123151368885239809")
+    name = "eggbot"
+    desc = "eggbot: A bot made by an egg"
+    prefix = "!"
+    token = secretbox.get("EGGBOT_TOKEN")
+    owner = secretbox.get("EGGBOT_OWNER", "123151368885239809")
+
+
+@dataclasses.dataclass
+class FilePaths:
+    """Where are things located"""
+
+    exts = "eggbot/exts"
