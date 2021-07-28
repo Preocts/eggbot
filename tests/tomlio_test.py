@@ -37,7 +37,8 @@ def fixture_toml_load() -> Generator[str, None, None]:
 def fixture_toml_save() -> Generator[str, None, None]:
     """Creates a file to save into"""
     try:
-        _, path = tempfile.mkstemp()
+        file_desc, path = tempfile.mkstemp()
+        os.close(file_desc)
         yield path
     finally:
         os.remove(path)
