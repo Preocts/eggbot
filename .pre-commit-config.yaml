@@ -51,6 +51,8 @@ repos:
     rev: v0.910
     hooks:
       - id: mypy
+        additional_dependencies:
+          - "types-toml"
 
   # Format code.
   - repo: https://github.com/psf/black
