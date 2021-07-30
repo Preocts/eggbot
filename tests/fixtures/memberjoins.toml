@@ -1,0 +1,17 @@
+[[111]]
+name = "test01"
+channel = "123"
+message = "Total mock message"
+active = true
+
+[[111]]
+name = "test02"
+channel = ""
+message = "Total mock DM message"
+active = true
+
+[[111]]
+name = "test03"
+channel = "123"
+message = "Total mock message disabled"
+active = false
