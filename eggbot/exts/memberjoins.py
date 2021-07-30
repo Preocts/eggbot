@@ -21,6 +21,7 @@ from discord import Guild
 from discord import Member
 from discord.ext.commands import Cog
 
+from eggbot.eggbotcore import EggbotCore
 from eggbot.utils import tomlio
 
 
@@ -59,9 +60,9 @@ class MemberJoins(Cog):
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self) -> None:
+    def __init__(self, *args: Any, **kwargs: Dict[str, Any]) -> None:
         self.logger.info("Loading MemberJoins...")
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.config = tomlio.load(self.DEFAULT_CONFIG)
 
     @Cog.listener()
@@ -121,3 +122,8 @@ class MemberJoins(Cog):
             self.logger.info("DM to '%s' not allowed.", member.name)
         else:
             await member.dm_channel.send(content)
+
+
+def setup(eggbot: EggbotCore) -> None:
+    """Load the cog"""
+    eggbot.add_cog(MemberJoins(eggbot))
