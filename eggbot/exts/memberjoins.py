@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
 """
-Respond to a member joining a guild
+Process a member joining the server
 
 Offers a simple configuration driven event handler for when a member
 joins a Discord guild. With room to expand, this offer a great starter
 module. Schedule a viewing before it is gone!
 
-Author  : Preocts <preocts@preocts.com>
+Author  : Preocts
 Discord : Preocts#8196
-Git Repo: https://github.com/Preocts/Egg_Bot
+Git Repo: https://github.com/Preocts/eggbot
 """
 from __future__ import annotations
 
@@ -18,23 +17,11 @@ from typing import Dict
 from typing import List
 from typing import NamedTuple
 
-from discord import Client
 from discord import Guild
 from discord import Member
+from discord.ext.commands import Cog
 
-from eggbot.configfile import ConfigFile
-
-AUTO_LOAD: str = "JoinActions"
-MODULE_NAME: str = "JoinActions"
-MODULE_VERSION: str = "1.0.0"
-DEFAULT_CONFIG: str = "configs/joinactions.json"
-
-# Define by [TAG]: ["attr", "attr", ...]
-METADATA: Dict[str, List[str]] = {
-    "[GUILDNAME]": ["guild", "name"],
-    "[USERNAME]": ["name"],
-    "[MENTION]": ["mention"],
-}
+from eggbot.utils import tomlio
 
 
 class JoinConfig(NamedTuple):
@@ -44,10 +31,6 @@ class JoinConfig(NamedTuple):
     channel: str
     message: str
     active: bool
-
-    def __str__(self) -> str:
-        """Clean print of contents"""
-        return f"{self.name}, {self.channel}, {self.active}"
 
     @classmethod
     def from_dict(cls, config: Dict[str, Any]) -> JoinConfig:
@@ -60,43 +43,28 @@ class JoinConfig(NamedTuple):
         )
 
 
-class JoinActions:
-    """Respond to an 'on join' event from Discord"""
+class MemberJoins(Cog):
+    """Process members joining server"""
+
+    EXTENSION_NAME: str = "JoinActions"
+    EXTENSION_VERSION: str = "1.0.0"
+    DEFAULT_CONFIG: str = "configs/memberjoins.toml"
+
+    # Define by [TAG]: ["attr", "attr", ...]
+    METADATA: Dict[str, List[str]] = {
+        "[GUILDNAME]": ["guild", "name"],
+        "[USERNAME]": ["name"],
+        "[MENTION]": ["mention"],
+    }
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, client: Client, config_file: str = DEFAULT_CONFIG) -> None:
-        """Create instance and load configuration file"""
-        self.logger.info("Initializing JoinAction module")
-        self.config = ConfigFile()
-        self.config.load(config_file)
-        if not self.config.config:
-            self.config.create("module", MODULE_NAME)
-            self.config.create("version", MODULE_VERSION)
-        else:
-            if self.config.read("module") != MODULE_NAME:
-                self.logger.warning("JoinAction config module name mismatch!")
-            if self.config.read("version") != MODULE_VERSION:
-                self.logger.warning("JoinAction config version mismatch!")
+    def __init__(self) -> None:
+        self.logger.info("Loading MemberJoins...")
+        super().__init__()
+        self.config = tomlio.load(self.DEFAULT_CONFIG)
 
-    @staticmethod
-    def format_content(content: str, member: Member) -> str:
-        """Replaced metadata tags in content, returns new string"""
-        new_content = content
-        for metatag, attribs in METADATA.items():
-            replace: Any = ""
-            for attr in attribs:
-                replace = getattr(replace, attr) if replace else getattr(member, attr)
-            new_content = new_content.replace(metatag, replace)
-        return new_content
-
-    def get_actions(self, guild_id: str) -> List[JoinConfig]:
-        """Return a list of JoinConfig for a guild. Will be empty if not found"""
-        config = self.config.read(guild_id)
-        if not config:
-            return []
-        return [JoinConfig.from_dict(action) for action in config]
-
+    @Cog.listener()
     async def on_member_join(self, member: Member) -> None:
         """OnJoin event hook for discord client"""
         self.logger.info("On Join event: %s, %s", member.guild.name, member.name)
@@ -119,12 +87,30 @@ class JoinActions:
             else:
                 await self._send_dm(content, member)
 
+    def format_content(self, content: str, member: Member) -> str:
+        """Replaced metadata tags in content, returns new string"""
+        new_content = content
+        for metatag, attribs in self.METADATA.items():
+            replace: Any = ""
+            for attr in attribs:
+                replace = getattr(replace, attr) if replace else getattr(member, attr)
+            new_content = new_content.replace(metatag, replace)
+        return new_content
+
+    def get_actions(self, guild_id: str) -> List[JoinConfig]:
+        """Return a list of JoinConfig for a guild. Will be empty if not found"""
+        config = self.config.get(guild_id)
+        if config is None:
+            return []
+        return [JoinConfig.from_dict(action) for action in config]
+
     async def _send_channel(self, content: str, channel_id: str, guild: Guild) -> None:
         """Send a message to a specific channel within guild"""
         channel = guild.get_channel(int(channel_id))
-        if not channel:
+        if channel is None:
             self.logger.warning("'%s' channel not found in %s", channel, guild.name)
         else:
+            self.logger.info("Join message sent to '%s' in '%s'", channel, guild.name)
             await channel.send(content)
 
     async def _send_dm(self, content: str, member: Member) -> None:
